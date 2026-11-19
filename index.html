@@ -1,0 +1,1862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Breach Protocol — Network Recovery Mission</title>
+<style>
+  :root{
+    --bg-deep:#05060D;
+    --bg-panel:#0B0E1C;
+    --bg-panel-2:#10142A;
+    --line:#232B4A;
+    --blue:#00E5FF;
+    --blue-dim:#0A6E86;
+    --red:#FF2145;
+    --red-dim:#7A1030;
+    --text:#E7F6FF;
+    --text-dim:#6E7DA3;
+    --ok:#39FF88;
+    --violet:#B45CFF;
+    --mono: ui-monospace, 'SF Mono', 'Cascadia Code', Consolas, 'Roboto Mono', monospace;
+    --sans: -apple-system, 'Segoe UI', system-ui, Roboto, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      repeating-linear-gradient(0deg, rgba(0,229,255,0.025) 0px, rgba(0,229,255,0.025) 1px, transparent 1px, transparent 34px),
+      repeating-linear-gradient(90deg, rgba(0,229,255,0.02) 0px, rgba(0,229,255,0.02) 1px, transparent 1px, transparent 34px),
+      radial-gradient(circle at 12% 0%, rgba(0,229,255,0.10), transparent 42%),
+      radial-gradient(circle at 88% 100%, rgba(255,33,69,0.10), transparent 42%),
+      var(--bg-deep);
+    color:var(--text);
+    font-family:var(--sans);
+    min-height:100vh;
+    line-height:1.5;
+  }
+  ::selection{ background:var(--blue); color:#00131A; }
+
+  /* ---------- shell ---------- */
+  .shell{ max-width:920px; margin:0 auto; padding:20px 18px 60px; }
+
+  header.topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:16px; padding:14px 20px; margin-bottom:22px;
+    background:var(--bg-panel); border:1px solid var(--line); border-radius:4px;
+    box-shadow: 0 0 0 1px rgba(0,229,255,0.06), 0 0 24px rgba(0,229,255,0.06);
+  }
+  .brand{ display:flex; flex-direction:column; gap:2px; }
+  .brand .eyebrow{
+    font-family:var(--mono); font-size:11px; letter-spacing:.18em;
+    color:var(--red); text-transform:uppercase;
+  }
+  .brand h1{
+    margin:0; font-family:var(--mono); font-size:20px; font-weight:700;
+    letter-spacing:.04em; color:var(--text);
+    text-shadow: 1px 0 var(--red), -1px 0 var(--blue);
+  }
+  .brand h1{ user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; touch-action:manipulation; -webkit-tap-highlight-color:transparent; cursor:default; }
+  .brand h1 .glitch{ color:var(--blue); text-shadow:0 0 8px var(--blue); animation: blink 1.6s steps(2) infinite; }
+  @keyframes blink{ 50%{ opacity:0.2; } }
+
+  .status{ display:flex; align-items:center; gap:18px; }
+  .clock{
+    font-family:var(--mono); font-size:15px; color:var(--blue);
+    background:#04141A; border:1px solid var(--blue-dim); padding:6px 12px; border-radius:4px;
+    min-width:74px; text-align:center; text-shadow:0 0 6px rgba(0,229,255,0.6);
+  }
+  .restart-btn{
+    font-family:var(--mono); font-size:11px; letter-spacing:.06em;
+    background:transparent; color:var(--text-dim); border:1px solid var(--line);
+    border-radius:4px; padding:7px 10px; cursor:pointer; text-transform:uppercase;
+  }
+  .restart-btn:hover{ color:var(--red); border-color:var(--red); box-shadow:0 0 10px rgba(255,33,69,0.35); }
+
+  /* ---------- progress trace ---------- */
+  .trace{ display:flex; align-items:center; margin-bottom:26px; padding:0 6px; }
+  .node{
+    width:34px; height:34px; flex:0 0 auto;
+    background:var(--bg-panel); border:2px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--mono); font-size:13px; font-weight:700; color:var(--text-dim);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    transition: all .4s ease;
+  }
+  .node.done{ background:var(--blue); border-color:var(--blue); color:#00131A; box-shadow:0 0 12px rgba(0,229,255,0.6); }
+  .node.active{ border-color:var(--red); color:var(--red); box-shadow:0 0 0 4px rgba(255,33,69,0.15), 0 0 10px rgba(255,33,69,0.4); }
+  .wire{ flex:1 1 auto; height:2px; background:var(--line); position:relative; margin:0 2px; }
+  .wire .fill{ position:absolute; inset:0; background:var(--blue); width:0%; transition:width .5s ease; box-shadow:0 0 8px rgba(0,229,255,0.7); }
+
+  /* ---------- panel ---------- */
+  .panel{
+    background:var(--bg-panel); border:1px solid var(--line); border-radius:4px;
+    padding:28px 26px; position:relative; overflow:hidden;
+  }
+  .panel::before{
+    content:""; position:absolute; top:0; left:0; right:0; height:3px;
+    background:linear-gradient(90deg, var(--blue), var(--red));
+  }
+  .panel::after{
+    content:""; position:absolute; inset:0; pointer-events:none;
+    border:1px solid transparent;
+    box-shadow:
+      inset 18px 0 0 -17px var(--blue), inset 0 18px 0 -17px var(--blue),
+      inset -18px 0 0 -17px var(--red), inset 0 -18px 0 -17px var(--red);
+    opacity:0.55;
+  }
+  .stage-eyebrow{
+    font-family:var(--mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--red); margin:0 0 6px;
+  }
+  .stage-title{ margin:0 0 14px; font-size:24px; font-weight:800; color:var(--text); text-shadow:0 0 14px rgba(0,229,255,0.18); }
+  .briefing{ color:var(--text-dim); font-size:15px; margin-bottom:18px; }
+  .briefing strong{ color:var(--text); }
+
+  .explainer{
+    background:var(--bg-panel-2); border:1px solid var(--line); border-left:3px solid var(--red);
+    border-radius:4px; padding:14px 16px; font-size:14px; color:var(--text); margin-bottom:20px;
+  }
+  .explainer b{ color:var(--blue); }
+
+  .cipher-box{
+    background:#04060E; border:1px solid var(--blue-dim); border-radius:4px;
+    padding:20px; text-align:center; margin-bottom:18px;
+    box-shadow: inset 0 0 30px rgba(0,229,255,0.05);
+  }
+  .cipher-text{
+    font-family:var(--mono); font-size:26px; letter-spacing:.12em; color:var(--blue);
+    word-break:break-word; text-shadow:0 0 12px rgba(0,229,255,0.5);
+  }
+  .cipher-sub{ font-family:var(--mono); font-size:12px; color:var(--text-dim); margin-top:8px; }
+
+  .tool-row{ margin-bottom:18px; }
+  .shift-tool{ background:#04060E; border:1px solid var(--line); border-radius:4px; padding:16px; margin-bottom:18px; }
+  .shift-tool label{ font-family:var(--mono); font-size:12px; color:var(--text-dim); display:block; margin-bottom:8px; }
+  .shift-tool input[type=range]{ width:100%; accent-color:var(--blue); }
+  .shift-preview{ font-family:var(--mono); font-size:19px; color:var(--blue); text-align:center; margin-top:10px; min-height:28px; letter-spacing:.08em; }
+
+  .morse-flash-wrap{ display:flex; align-items:center; gap:14px; margin-bottom:16px; }
+  .morse-light{
+    width:22px; height:22px; border-radius:50%; background:#1a1f2b; border:1px solid var(--line);
+    transition: background .05s, box-shadow .05s;
+  }
+  .morse-light.on{ background:var(--red); box-shadow:0 0 18px 5px rgba(255,33,69,.7); }
+  .play-btn{
+    font-family:var(--mono); font-size:12px; letter-spacing:.05em; text-transform:uppercase;
+    background:var(--bg-panel-2); color:var(--blue); border:1px solid var(--blue);
+    padding:9px 14px; border-radius:4px; cursor:pointer;
+  }
+  .play-btn:hover{ background:rgba(0,229,255,.1); box-shadow:0 0 10px rgba(0,229,255,.3); }
+  .play-btn:disabled{ opacity:.4; cursor:default; }
+
+  .morse-ref{
+    background:#04060E; border:1px solid var(--line); border-radius:4px; padding:14px 16px; margin-bottom:18px;
+  }
+  .morse-ref-title{ font-family:var(--mono); font-size:11px; letter-spacing:.1em; color:var(--red); text-transform:uppercase; margin-bottom:10px; }
+  .morse-grid{ display:flex; flex-wrap:wrap; gap:8px 14px; }
+  .morse-chip{ font-family:var(--mono); font-size:12px; color:var(--text-dim); white-space:nowrap; }
+  .morse-chip b{ color:var(--blue); }
+
+  .recap{ background:#04060E; border:1px solid var(--line); border-radius:4px; padding:16px; margin-bottom:18px; }
+  .recap-row{ display:flex; justify-content:space-between; font-family:var(--mono); font-size:14px; padding:5px 0; border-bottom:1px dashed var(--line); }
+  .recap-row:last-child{ border-bottom:none; }
+  .recap-row span:first-child{ color:var(--text-dim); }
+  .recap-row span:last-child{ color:var(--blue); letter-spacing:.08em; }
+
+  .answer-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px; }
+  .answer-row input[type=text]{
+    flex:1 1 220px; background:#04060E; border:1px solid var(--line); border-radius:4px;
+    padding:13px 14px; color:var(--text); font-family:var(--mono); font-size:15px; letter-spacing:.05em;
+  }
+  .answer-row input[type=text]:focus{ outline:none; border-color:var(--blue); box-shadow:0 0 0 2px rgba(0,229,255,.15); }
+  .btn{
+    font-family:var(--mono); font-size:14px; font-weight:700; letter-spacing:.03em;
+    background:var(--blue); color:#00131A; border:none; border-radius:4px;
+    padding:13px 20px; cursor:pointer; text-transform:uppercase;
+    box-shadow:0 0 14px rgba(0,229,255,0.25);
+  }
+  .btn:hover{ filter:brightness(1.1); box-shadow:0 0 20px rgba(0,229,255,0.45); }
+  .btn.ghost{
+    background:transparent; color:var(--text-dim); border:1px solid var(--line); text-transform:none; font-weight:600;
+    box-shadow:none;
+  }
+  .btn.ghost:hover{ color:var(--red); border-color:var(--red); box-shadow:0 0 10px rgba(255,33,69,0.25); }
+  .btn.danger{ background:var(--red); color:#1A0006; box-shadow:0 0 14px rgba(255,33,69,0.3); }
+  .btn.danger:hover{ box-shadow:0 0 20px rgba(255,33,69,0.5); }
+  .btn.start{ width:100%; padding:16px; font-size:15px; }
+  .btn:disabled{ opacity:.5; cursor:default; filter:none; box-shadow:none; }
+
+  .feedback{ font-family:var(--mono); font-size:13px; margin-top:6px; min-height:18px; }
+  .feedback.err{ color:var(--red); }
+  .feedback.ok{ color:var(--blue); }
+
+  .aux-row{ display:flex; justify-content:space-between; align-items:center; margin-top:16px; gap:10px; flex-wrap:wrap; }
+  .hint-area{ font-size:13px; color:var(--red); font-family:var(--mono); margin-top:10px; }
+
+  /* modal (toolkit) */
+  .modal-backdrop{
+    position:fixed; inset:0; background:rgba(2,3,8,.8); display:none;
+    align-items:center; justify-content:center; z-index:50; padding:20px;
+  }
+  .modal-backdrop.show{ display:flex; }
+  .modal{
+    background:var(--bg-panel); border:1px solid var(--blue-dim); border-radius:4px;
+    max-width:560px; width:100%; max-height:80vh; overflow-y:auto; padding:22px;
+    box-shadow:0 0 30px rgba(0,229,255,0.12);
+  }
+  .modal h3{ margin:0 0 12px; font-family:var(--mono); color:var(--blue); font-size:16px; }
+  .modal table{ width:100%; border-collapse:collapse; font-family:var(--mono); font-size:12px; }
+  .modal td,.modal th{ border:1px solid var(--line); padding:4px 6px; text-align:center; color:var(--text-dim); }
+  .modal th{ color:var(--red); }
+  .modal-close{ margin-top:14px; }
+  .dialog-text{ font-size:14px; color:var(--text); margin:0 0 14px; }
+  .dialog-label{ display:block; font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-dim); margin-bottom:8px; }
+  .dialog-input{
+    width:100%; background:#04060E; border:1px solid var(--line); border-radius:4px;
+    padding:12px 14px; color:var(--text); font-family:var(--mono); font-size:16px; letter-spacing:.08em; margin-bottom:14px;
+  }
+  .dialog-input:focus{ outline:none; border-color:var(--red); box-shadow:0 0 0 2px rgba(255,33,69,.15); }
+  .dialog-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+  .btn.view-lb{ width:100%; margin-top:10px; padding:13px; }
+  .export-box{ margin-top:14px; padding:14px; background:#04060E; border:1px dashed var(--line); border-radius:4px; }
+  .export-title{ font-family:var(--mono); font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--violet); margin-bottom:6px; }
+  .export-help{ font-size:13px; color:var(--text-dim); margin:0 0 10px; }
+  .export-code{
+    width:100%; resize:vertical; min-height:64px; background:var(--bg-panel); color:var(--blue);
+    border:1px solid var(--line); border-radius:4px; padding:10px; font-family:var(--mono); font-size:12px;
+    line-height:1.4; word-break:break-all;
+  }
+  .export-code:focus{ outline:none; border-color:var(--blue); }
+  .export-actions{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:8px; }
+  .export-status{ font-family:var(--mono); font-size:12px; }
+  .export-status.ok{ color:var(--ok); }
+  .export-status.err{ color:var(--red); }
+  .import-input{ resize:vertical; min-height:90px; font-size:13px; letter-spacing:0; word-break:break-all; line-height:1.4; }
+  .fac-divider{ border-top:1px solid var(--line); margin:16px 0 14px; }
+  .lb-gap{ text-align:center; color:var(--text-dim); font-family:var(--mono); font-size:12px; padding:2px 0; }
+
+  /* briefing / final screens */
+  .center-icon{ text-align:center; font-size:44px; margin-bottom:6px; filter:drop-shadow(0 0 10px rgba(0,229,255,.4)); }
+  ul.rules{ color:var(--text-dim); font-size:14px; padding-left:20px; }
+  ul.rules li{ margin-bottom:6px; }
+  .name-row{ margin-bottom:18px; }
+  .name-row label{ font-family:var(--mono); font-size:11px; letter-spacing:.1em; color:var(--text-dim); text-transform:uppercase; display:block; margin-bottom:8px; }
+  .name-row input[type=text]{
+    width:100%; background:#04060E; border:1px solid var(--line); border-radius:4px;
+    padding:13px 14px; color:var(--text); font-family:var(--mono); font-size:15px;
+  }
+  .name-row input[type=text]:focus{ outline:none; border-color:var(--blue); }
+
+  .final-time{ font-family:var(--mono); font-size:44px; color:var(--blue); text-align:center; margin:14px 0; text-shadow:0 0 16px rgba(0,229,255,.5); }
+  .confetti-wrap{ position:relative; height:0; }
+  .confetti{
+    position:absolute; top:-10px; width:8px; height:14px; opacity:0.9;
+    animation: fall linear forwards;
+  }
+  @keyframes fall{ to{ transform: translateY(420px) rotate(340deg); opacity:0; } }
+
+  .leaderboard{ margin-top:22px; }
+  .leaderboard-title{ font-family:var(--mono); font-size:13px; letter-spacing:.1em; color:var(--red); text-transform:uppercase; margin-bottom:10px; }
+  .lb-row{
+    display:grid; grid-template-columns:26px 1fr 40px 58px 64px; gap:8px; align-items:center;
+    font-family:var(--mono); font-size:13px; padding:8px 10px; border-bottom:1px solid var(--line);
+  }
+  .lb-row.head{ color:var(--text-dim); font-size:11px; text-transform:uppercase; letter-spacing:.06em; }
+  .lb-row.me{ background:rgba(0,229,255,0.08); border-left:2px solid var(--blue); }
+  .lb-rank{ color:var(--red); font-weight:700; }
+  .lb-name{ color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .lb-time{ color:var(--blue); text-align:right; }
+  .lb-hints{ color:var(--text-dim); text-align:right; }
+  .lb-note{ font-size:12px; color:var(--text-dim); margin-top:10px; }
+  .lb-status{ font-family:var(--mono); font-size:13px; color:var(--text-dim); margin-top:8px; }
+
+
+  /* ---------- live points (top bar) ---------- */
+  .points-live{
+    font-family:var(--mono); font-size:12px; color:var(--text-dim);
+    background:#14040A; border:1px solid var(--red-dim); padding:6px 10px; border-radius:4px;
+    min-width:96px; text-align:center; white-space:nowrap;
+  }
+  .points-live b{ color:var(--red); font-size:15px; text-shadow:0 0 6px rgba(255,33,69,0.55); }
+
+  /* ---------- level picker ---------- */
+  .level-pick{ margin-bottom:18px; }
+  .level-pick-label{ font-family:var(--mono); font-size:11px; letter-spacing:.1em; color:var(--text-dim); text-transform:uppercase; margin:0 0 8px; }
+  .level-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; }
+  .level-card{
+    display:flex; flex-direction:column; gap:4px; text-align:left; cursor:pointer;
+    background:var(--bg-panel-2); color:var(--text); border:1px solid var(--line); border-radius:4px;
+    padding:14px 14px 12px; font-family:var(--sans);
+    transition:border-color .2s, box-shadow .2s;
+  }
+  .level-card:hover{ border-color:var(--blue-dim); }
+  .level-card:focus-visible{ outline:2px solid var(--blue); outline-offset:2px; }
+  .level-card.selected{ border-color:var(--blue); box-shadow:0 0 0 1px var(--blue), 0 0 16px rgba(0,229,255,0.25); }
+  .level-card.lvl-ult.selected{ border-color:var(--red); box-shadow:0 0 0 1px var(--red), 0 0 16px rgba(255,33,69,0.3); }
+  .level-name{ font-family:var(--mono); font-weight:700; font-size:15px; }
+  .level-ages{ font-size:12px; color:var(--text-dim); }
+  .level-blurb{ font-size:13px; color:var(--text-dim); line-height:1.4; flex:1; margin-top:4px; }
+  .level-mult{ font-family:var(--mono); font-size:13px; font-weight:700; color:var(--blue); margin-top:6px; }
+  .level-card.lvl-ult .level-mult{ color:var(--red); }
+
+  /* ---------- Caesar test-a-shift wheel (Ultimate) ---------- */
+  .wheel-wrap{ overflow-x:auto; margin-top:10px; }
+  .wheel{ border-collapse:collapse; font-family:var(--mono); font-size:12px; }
+  .wheel th, .wheel td{ border:1px solid var(--line); padding:3px 5px; text-align:center; }
+  .wheel th{ color:var(--red); font-weight:600; text-align:left; padding-right:8px; }
+  .wheel td{ color:var(--text-dim); }
+  .wheel tr:last-child td{ color:var(--blue); }
+
+  /* ---------- final score card ---------- */
+  .score-card{
+    background:#04060E; border:1px solid var(--blue-dim); border-radius:4px;
+    padding:18px 18px 8px; margin:18px 0; box-shadow: inset 0 0 30px rgba(0,229,255,0.05);
+  }
+  .score-head{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+  .score-team{ font-family:var(--mono); font-size:16px; font-weight:700; color:var(--text); letter-spacing:.06em; word-break:break-all; }
+  .score-level{ font-family:var(--mono); font-size:12px; padding:3px 8px; border-radius:3px; border:1px solid var(--blue); color:var(--blue); }
+  .score-level.lvl-ult{ border-color:var(--red); color:var(--red); }
+  .score-total{ text-align:center; margin:14px 0 10px; }
+  .score-total-num{
+    display:block; font-family:var(--mono); font-size:56px; font-weight:700; line-height:1.05;
+    color:var(--blue); text-shadow:0 0 18px rgba(0,229,255,.5);
+  }
+  .score-total-unit{ font-family:var(--mono); font-size:13px; color:var(--text-dim); }
+  .score-line{ display:flex; justify-content:space-between; gap:12px; font-family:var(--mono); font-size:14px; padding:7px 0; border-bottom:1px dashed var(--line); }
+  .score-line span:first-child{ color:var(--text-dim); }
+  .score-line span:last-child{ color:var(--text); white-space:nowrap; }
+  .score-line.minus span:last-child{ color:var(--red); }
+  .score-line.sub{ border-bottom:1px solid var(--line); }
+  .score-line.sub span:last-child{ color:var(--blue); }
+  .score-line.grand{ border-bottom:none; font-size:17px; font-weight:700; padding-top:10px; }
+  .score-line.grand span{ color:var(--blue) !important; }
+
+  details.answers{ margin-top:16px; }
+  details.answers summary{ font-family:var(--mono); font-size:13px; color:var(--text-dim); cursor:pointer; margin-bottom:10px; }
+  details.answers summary:hover{ color:var(--blue); }
+
+  .lb-level{ font-size:11px; color:var(--blue); }
+  .lb-level.lvl-ult{ color:var(--red); }
+  .lb-score{ color:var(--text); font-weight:700; text-align:right; }
+
+  /* ---------- event strip ---------- */
+  .event-strip{
+    margin-top:22px; text-align:center; font-family:var(--mono); font-size:12px; letter-spacing:.04em;
+    color:var(--violet);
+  }
+  .event-strip b{ color:var(--text); font-weight:700; }
+
+  @media (prefers-reduced-motion: reduce){
+    .node, .wire .fill, .morse-light, .confetti, .glitch, .level-card{ transition:none !important; animation:none !important; }
+  }
+
+  @media (max-width:560px){
+    .stage-title{ font-size:20px; }
+    .cipher-text{ font-size:20px; }
+    .node{ width:26px; height:26px; font-size:11px; }
+    .panel{ padding:20px 16px; }
+    header.topbar{ flex-wrap:wrap; padding:12px 14px; }
+    .status{ gap:8px; flex-wrap:wrap; }
+    .level-grid{ grid-template-columns:1fr; }
+    .score-total-num{ font-size:44px; }
+    .lb-row{ grid-template-columns:20px 1fr 38px 48px 54px; gap:6px; font-size:12px; padding:8px 6px; }
+    .lb-row.head{ font-size:10px; letter-spacing:0; }
+  }
+  @media (max-width:400px){
+    .trace{ padding:0; }
+    .node{ width:22px; height:22px; font-size:10px; }
+    .wire{ margin:0 1px; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="topbar">
+    <div class="brand">
+      <span class="eyebrow">School Network Recovery</span>
+      <h1 id="brandTitle">BREACH<span class="glitch">_</span>PROTOCOL</h1>
+    </div>
+    <div class="status">
+      <div class="clock" id="clock" aria-label="Mission time">00:00</div>
+      <div class="points-live" id="livePoints" aria-label="Points if you finished now" title="Points if you finished now"><b>—</b> pts</div>
+      <button class="restart-btn" id="restartBtn">Restart</button>
+    </div>
+  </header>
+
+  <div class="trace" id="trace"></div>
+
+  <div class="panel" id="panel"></div>
+
+  <footer class="event-strip">Made for the <b>Cyber Switchup 2026</b> final at Leeds Trinity University</footer>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<script>
+/* ============ DATA ============ */
+/* ---------- KEY STAGE 3 (ages 11–14): 7 ciphers + acrostic finale ---------- */
+const KS3_STAGES = [
+  {
+    key:'caesar', name:'Caesar Shift', category:'Substitution', difficulty:'Warm-Up',
+    title:'The Shifted Alphabet',
+    briefing:"The intruder left a note stuck to a monitor. Every letter has been pushed forward in the alphabet. Slide it back to read it.",
+    explainer:"A <b>Caesar cipher</b> moves every letter forward by the same number of places. With a shift of 3, A becomes D, B becomes E, and so on. To decode it, move each letter back by the same amount. Use the slider to try different shifts.",
+    cipher:'SLAHO',
+    answer:'PIXEL',
+    hints:[
+      "Move the slider slowly and watch the letters change. Stop when they spell a real word.",
+      "The shift is 3. S → P, L → I, A → X... keep going."
+    ],
+    tool:'caesarSlider'
+  },
+  {
+    key:'atbash', name:'Mirror Cipher', category:'Substitution', difficulty:'Easy',
+    title:'The Mirrored Message',
+    briefing:"A second note is hidden under the keyboard. This one doesn't shift the alphabet. It flips it.",
+    explainer:"An <b>Atbash cipher</b> turns the alphabet back to front: A swaps with Z, B swaps with Y, C swaps with X, and so on. Open the toolkit to see the full mirror table.",
+    cipher:'ILYLG',
+    answer:'ROBOT',
+    hints:[
+      "Open the toolkit and find each letter in the left column. Its mirror partner is next to it.",
+      "I mirrors to R, L mirrors to O, Y mirrors to B. The word is 5 letters long."
+    ],
+    tool:'atbashTable'
+  },
+  {
+    key:'morse', name:'Morse Signal', category:'Encoding', difficulty:'Easy',
+    title:'The Blinking Light',
+    briefing:"A light in the server room is blinking on and off. Someone is sending a signal.",
+    explainer:"<b>Morse code</b> turns each letter into short signals (dots) and long signals (dashes). Press play to watch and hear the message, then use the chart below to turn each group back into a letter.",
+    cipher:'--- -. .-.. .. -. .',
+    answer:'ONLINE',
+    hints:[
+      "Each group separated by a space is one letter. There are 6 letters.",
+      "--- = O, -. = N, .-.. = L, .. = I, -. = N, . = E"
+    ],
+    tool:'morsePlayer'
+  },
+  {
+    key:'railfence', name:'Rail Fence Cipher', category:'Transposition', difficulty:'Easy',
+    title:'The Zigzag Message',
+    briefing:"This note uses the right letters, just in the wrong order. They were written in a zigzag and read back row by row.",
+    explainer:"A <b>rail fence cipher</b> writes a message in a zigzag across a number of rows, called rails. This one uses <b>2 rails</b>, so the letters go top, bottom, top, bottom. The top row was read first, then the bottom row. Open the toolkit to see the zigzag.",
+    cipher:'TBEALT',
+    keyword:'2 rails',
+    keywordLabel:'Pattern',
+    rails:2,
+    answer:'TABLET',
+    hints:[
+      "Split the ciphertext in half: TBE is the top row and ALT is the bottom row.",
+      "Take one letter from each row in turn: T (top), A (bottom), B (top), L (bottom)... keep going."
+    ],
+    tool:'railFenceDiagram'
+  },
+  {
+    key:'binary', name:'Binary Code', category:'Computer Encoding', difficulty:'Medium',
+    title:'The Binary String',
+    briefing:"A laptop screen is frozen on a row of 1s and 0s. This is how computers store letters.",
+    explainer:"Computers store each letter as an 8-digit <b>binary (ASCII)</b> code. Each group of 8 digits is one letter. Open the toolkit and match each group to its letter.",
+    cipher:'01000101 01001101 01000001 01001001 01001100',
+    answer:'EMAIL',
+    hints:[
+      "Find 01000101 in the Binary column of the toolkit chart. The letter in the same row is your first letter.",
+      "01000101 = E, 01001101 = M, 01000001 = A, 01001001 = I, 01001100 = L"
+    ],
+    tool:'binaryTable'
+  },
+  {
+    key:'polybius', name:'Keyed Polybius Square', category:'Coordinate Cipher', difficulty:'Medium',
+    title:'The Grid Coordinates',
+    briefing:"A grid of letters is drawn on the whiteboard. Each pair of numbers points to one square in it.",
+    explainer:"A <b>Polybius square</b> puts the alphabet into a 5×5 grid (I and J share a square). Each letter becomes two numbers: the row, then the column. This grid uses your last answer, <b>EMAIL</b>, as its keyword, so those letters fill the grid first. Open the toolkit to see the grid.",
+    cipher:'22 15 34 45 23',
+    keyword:'EMAIL',
+    answer:'CLOUD',
+    hints:[
+      "The first number is the row and the second is the column. 22 means row 2, column 2.",
+      "22 = C, 15 = L, 34 = O... the answer is where people store files online."
+    ],
+    tool:'polybiusTable'
+  },
+  {
+    key:'keyword', name:'Keyword Cipher', category:'Keyed Substitution', difficulty:'Medium–Hard',
+    title:'The Password-Built Alphabet',
+    briefing:"The last lock builds a brand new alphabet from your previous answer.",
+    explainer:"A <b>keyword cipher</b> makes a new alphabet by writing the keyword first (skipping repeated letters), then the rest of the alphabet in order. Your keyword is <b>CLOUD</b>. Open the toolkit to see which plain letter each cipher letter stands for.",
+    cipher:'SQMGCK',
+    keyword:'CLOUD',
+    answer:'TROJAN',
+    hints:[
+      "The new alphabet starts C L O U D, then A B E F G H I J K M N P Q R S T V W X Y Z.",
+      "S decodes to T and Q decodes to R. The answer is a sneaky kind of malware named after a wooden horse."
+    ],
+    tool:'keywordCipherTable'
+  },
+  {
+    key:'final', name:'Final Synthesis', category:'Mission Assembly', difficulty:'Final Challenge',
+    title:'Restore the Network',
+    briefing:"One word left. No cipher this time. It's hiding in the answers you've already found.",
+    explainer:"Take the <b>first letter</b> of each answer, from stage 1 to stage 7, in order. Together they spell the 7-letter password that puts the network back online.",
+    cipher:'',
+    answer:'PROTECT',
+    hints:[
+      "Look at the recap panel. Read down the first letter of each answer.",
+      "P (Pixel) R (Robot) O (Online) T (Tablet) E (Email) C (Cloud) T (Trojan) → PROTECT"
+    ],
+    tool:'recap'
+  }
+];
+
+/* ---------- ULTIMATE: same 10 techniques, harder settings ---------- */
+const ULTIMATE_STAGES = [
+  {
+    key:'caesar', name:'Caesar Shift', category:'Substitution', difficulty:'Tricky',
+    title:'The Unknown Shift',
+    briefing:"The intruder is back, and this time they've hidden the shift. No live preview to help you.",
+    explainer:"A <b>Caesar cipher</b> moves every letter by the same number of places. You don't know the shift. The slider shows what each letter would become at that shift, but it won't decode the message for you. Test shifts on the first few letters until a word starts to appear.",
+    cipher:'TYECFOPC',
+    answer:'INTRUDER',
+    hints:[
+      "The answer is someone who gets into a system without permission. If it starts with I, how far is T from I?",
+      "The shift is 11. T → I, Y → N, E → T..."
+    ],
+    tool:'caesarSlider',
+    preview:false
+  },
+  {
+    key:'atbash', name:'Mirror Cipher', category:'Substitution', difficulty:'Tricky',
+    title:'The Mirrored Message',
+    briefing:"Another mirrored note. Quicker this time.",
+    explainer:"An <b>Atbash cipher</b> swaps every letter with its mirror: A ↔ Z, B ↔ Y, C ↔ X. Tip: a letter and its mirror always add up to 27 if A = 1 and Z = 26.",
+    cipher:'NZODZIV',
+    answer:'MALWARE',
+    hints:[
+      "N is letter 14, so its mirror is letter 27 − 14 = 13, which is M.",
+      "The answer is a general word for harmful software. 7 letters."
+    ],
+    tool:'atbashTable'
+  },
+  {
+    key:'morse', name:'Morse Signal', category:'Encoding', difficulty:'Tricky',
+    title:'The Faster Signal',
+    briefing:"The signal is faster now, and the chart isn't pinned to the wall any more.",
+    explainer:"<b>Morse code</b> turns each letter into dots and dashes. Press play to watch and hear the signal. The Morse chart is in the toolkit, not on the page.",
+    cipher:'.--. .... .. ... .... .. -. --.',
+    answer:'PHISHING',
+    morseUnit:110,
+    inlineChart:false,
+    hints:[
+      "There are 8 letters. .... (four dots) appears twice and is H.",
+      "The answer is a trick email that tries to get you to hand over your password."
+    ],
+    tool:'morsePlayer'
+  },
+  {
+    key:'railfence', name:'Rail Fence Cipher', category:'Transposition', difficulty:'Hard',
+    title:'The Deep Zigzag',
+    briefing:"The zigzag now runs across four rails. Same idea, more rows.",
+    explainer:"A <b>rail fence cipher</b> writes the message in a zigzag across several rails, then reads each rail left to right. This one uses <b>4 rails</b>. Open the toolkit to see which positions land on each rail.",
+    cipher:'BOAORCDK',
+    keyword:'4 rails',
+    keywordLabel:'Pattern',
+    rails:4,
+    answer:'BACKDOOR',
+    hints:[
+      "With 8 letters and 4 rails: rail 1 holds positions 1 and 7, rail 2 holds 2, 6 and 8, rail 3 holds 3 and 5, rail 4 holds 4.",
+      "So B and O are on rail 1, A O R on rail 2, C D on rail 3, K on rail 4. It's a secret way into a system."
+    ],
+    tool:'railFenceDiagram'
+  },
+  {
+    key:'binary', name:'Binary Code', category:'Computer Encoding', difficulty:'Hard',
+    title:'The Binary String',
+    briefing:"Another frozen screen full of 1s and 0s.",
+    explainer:"Each group of 8 <b>binary</b> digits is one letter. Convert each group to a decimal number (the place values are 128, 64, 32, 16, 8, 4, 2, 1), then turn the number into a letter (A = 65). The chart is in the toolkit if you need it.",
+    cipher:'01000011 01001001 01010000 01001000 01000101 01010010',
+    answer:'CIPHER',
+    hints:[
+      "01000011 = 64 + 2 + 1 = 67, which is C.",
+      "The answer is another word for a secret code. You've been cracking them all along."
+    ],
+    tool:'binaryTable'
+  },
+  {
+    key:'polybius', name:'Keyed Polybius Square', category:'Coordinate Cipher', difficulty:'Hard',
+    title:'The Grid Coordinates',
+    briefing:"A new 5×5 grid, keyed with your last answer.",
+    explainer:"A <b>Polybius square</b> puts the alphabet into a 5×5 grid (I and J share a square), and each letter becomes row then column. The keyword is your last answer, <b>CIPHER</b>. Its letters fill the grid first. Open the toolkit to see the grid.",
+    cipher:'43 13 54 52 22 21 15',
+    keyword:'CIPHER',
+    answer:'SPYWARE',
+    hints:[
+      "The grid starts C I P H E R, then carries on with A B D F G and so on, skipping letters already used.",
+      "43 = S, 13 = P. The answer is software that secretly watches what you do."
+    ],
+    tool:'polybiusTable'
+  },
+  {
+    key:'keyword', name:'Keyword Cipher', category:'Keyed Substitution', difficulty:'Very Hard',
+    title:'The Password-Built Alphabet',
+    briefing:"Your last answer becomes the seed for a new alphabet.",
+    explainer:"A <b>keyword cipher</b> builds a new alphabet: the keyword's letters first (skipping repeats), then the rest of the alphabet in order. The keyword is <b>SPYWARE</b>. Open the toolkit to see the alphabet it makes.",
+    cipher:'PJOIAO',
+    keyword:'SPYWARE',
+    answer:'BOTNET',
+    hints:[
+      "Find each cipher letter in the bottom row of the toolkit table. The plain letter is directly above it.",
+      "P decodes to B. The answer is a network of hijacked computers controlled by an attacker."
+    ],
+    tool:'keywordCipherTable'
+  },
+  {
+    key:'columnar', name:'Columnar Transposition', category:'Transposition', difficulty:'Very Hard',
+    title:'The Two-Row Shuffle',
+    briefing:"This shuffle uses a grid with more than one row, so each column holds two letters.",
+    explainer:"A <b>columnar transposition cipher</b> writes the message row by row under a keyword, numbers the columns in alphabetical order of the keyword's letters, then reads each column top to bottom in number order. The keyword is <b>BOTNET</b> and the message is 12 letters long, so the grid has 2 rows. Open the toolkit to see the column order.",
+    cipher:'CTRKECYTBAAS',
+    keyword:'BOTNET',
+    answer:'CYBERATTACKS',
+    hints:[
+      "Split the ciphertext into pairs: CT RK EC YT BA AS. Pair 1 goes in column 1, pair 2 in column 2, and so on, using the column numbers from the toolkit.",
+      "The top row reads CYBERA and the bottom row reads TTACKS. Read them together as one word."
+    ],
+    tool:'columnarHelper'
+  },
+  {
+    key:'vigenere', name:'Vigenère Cipher', category:'Polyalphabetic', difficulty:'Expert',
+    title:'The Long Key',
+    briefing:"The strongest lock yet. Its keyword is your 12-letter answer from the last stage.",
+    explainer:"A <b>Vigenère cipher</b> shifts each letter by a different amount, set by a repeating keyword. The keyword is <b>CYBERATTACKS</b>. Line it up under the ciphertext letter by letter. Find the keyword letter's row in the toolkit square, find the ciphertext letter in that row, and the column it sits in is the decoded letter.",
+    cipher:'SSBVRNMBNG',
+    keyword:'CYBERATTACKS',
+    answer:'QUARANTINE',
+    hints:[
+      "The message is 10 letters, so you only need the first 10 letters of the key: CYBERATTAC.",
+      "S with key C decodes to Q. The answer is what antivirus does with a suspicious file: it locks it away."
+    ],
+    tool:'vigenereTable'
+  },
+  {
+    key:'base64', name:'Base64 Encoding', category:'Computer Encoding', difficulty:'Expert',
+    title:'The Padded Transmission',
+    briefing:"The last signal ends with two equals signs. They matter.",
+    explainer:"<b>Base64</b> turns every 6 bits into one of 64 characters. To decode it, look up each character's 6-bit value in the toolkit, join all the bits together, split them into 8-bit bytes, and turn each byte into a letter (A = 65). The <b>=</b> signs are padding: skip them. The 10 real characters give 60 bits, which makes 7 full bytes plus 4 spare bits that you throw away.",
+    cipher:'RU5DUllQVA==',
+    answer:'ENCRYPT',
+    hints:[
+      "R = 010001 and U = 010100. Joined, the first 8 bits are 01000101 = 69 = E.",
+      "The answer is a 7-letter word for scrambling data so only the right person can read it."
+    ],
+    tool:'base64Table'
+  },
+  {
+    key:'final', name:'Final Synthesis', category:'Mission Assembly', difficulty:'Final Challenge',
+    title:'Free the Network',
+    briefing:"One word remains, and it's built from pieces of everything you've cracked.",
+    explainer:"Build a 9-letter word. For each piece, take that letter from that stage's answer, in this order: stage 2 letter 3 · stage 1 letter 1 · stage 4 letter 1 · stage 10 letter 1 · stage 5 letter 6 · stage 9 letter 3 · stage 7 letter 3 · stage 6 letter 7 · stage 1 letter 6.",
+    cipher:'',
+    answer:'LIBERATED',
+    hints:[
+      "Use the recap panel. Stage 2 is MALWARE, and its 3rd letter is L.",
+      "L (Malware) I (Intruder) B (Backdoor) E (Encrypt) R (Cipher) A (Quarantine) T (Botnet) E (Spyware) D (Intruder) → LIBERATED"
+    ],
+    tool:'recap'
+  }
+];
+
+/* ---------- KEY STAGE 4 (ages 14–16): original 11-stage chain ---------- */
+const KS4_STAGES = [
+  {
+    key:'caesar', name:'Caesar Shift', category:'Substitution', difficulty:'Warm-Up',
+    title:'The Shifted Alphabet',
+    briefing:'The intruder left a note by the server rack. Every letter has been pushed forward in the alphabet. Slide it back to read the truth.',
+    explainer:'A <b>Caesar cipher</b> encodes a message by shifting every letter forward by a fixed number of places (A→D, B→E, and so on, if the shift is 3). To decode it, shift each letter back by the same amount.',
+    cipher:'ILUHZDOO',
+    answer:'FIREWALL',
+    hints:[
+      'Try shifting the letters back by different amounts using the slider — one of them will spell a real word.',
+      'The shift is 3. I → F, L → I, U → R... keep going.'
+    ],
+    tool:'caesarSlider'
+  },
+  {
+    key:'atbash', name:'Mirror Cipher', category:'Substitution', difficulty:'Easy',
+    title:'The Mirrored Message',
+    briefing:'Taped behind a poster is a second note. This one doesn\'t shift — it mirrors the whole alphabet.',
+    explainer:'An <b>Atbash cipher</b> reverses the alphabet: A becomes Z, B becomes Y, C becomes X, and so on. Every letter swaps with its mirror partner. Open the toolkit for the full mirror table.',
+    cipher:'KZHHDLIW',
+    answer:'PASSWORD',
+    hints:[
+      'A ↔ Z, B ↔ Y, C ↔ X... open the Toolkit to see the full mirror table.',
+      'K mirrors to P, Z mirrors to A, H mirrors to S — the word is 8 letters long.'
+    ],
+    tool:'atbashTable'
+  },
+  {
+    key:'morse', name:'Morse Signal', category:'Encoding', difficulty:'Easy',
+    title:'The Blinking Light',
+    briefing:'An old desk lamp is blinking on and off in a pattern. It\'s signalling something.',
+    explainer:'<b>Morse code</b> represents each letter as a sequence of short signals (dots) and long signals (dashes). Press play to watch the light blink the message, and use the reference chart below to translate it.',
+    cipher:'..- -. .-.. --- -.-. -.-',
+    answer:'UNLOCK',
+    hints:[
+      'Each group of dots/dashes separated by a space is one letter. There are 6 letters.',
+      '..- = U, -. = N, .-.. = L, --- = O, -.-. = C, -.- = K'
+    ],
+    tool:'morsePlayer'
+  },
+  {
+    key:'railfence', name:'Rail Fence Cipher', category:'Transposition', difficulty:'Easy–Medium',
+    title:'The Zigzag Message',
+    briefing:'The next note doesn\'t hide letters behind symbols at all — it just writes them in a zigzag pattern and reads the rows back in order.',
+    explainer:'A <b>rail fence cipher</b> writes the message in a zigzag down and up across a fixed number of "rails" (rows), then reads each row left to right to build the ciphertext. This one uses <b>3 rails</b>. Open the toolkit to see the zigzag pattern, then work out which original position each letter came from.',
+    cipher:'GWAEATY',
+    keyword:'3 rails',
+    keywordLabel:'Pattern',
+    rails:3,
+    answer:'GATEWAY',
+    hints:[
+      'With 3 rails and 7 letters, the zigzag goes row0, row1, row2, row1, row0, row1, row2 — open the toolkit to see it drawn out.',
+      'Row 0 holds letters 1 and 5 of the original word ("G" and "W"). Row 1 holds letters 2, 4 and 6 ("A", "E", "A"). Row 2 holds letters 3 and 7 ("T" and "Y").'
+    ],
+    tool:'railFenceDiagram'
+  },
+  {
+    key:'binary', name:'Binary Code', category:'Computer Encoding', difficulty:'Medium',
+    title:'The Binary String',
+    briefing:'The server\'s screen is frozen on a string of 1s and 0s. This is how computers store letters as text.',
+    explainer:'Computers store each letter as an 8-digit <b>binary (ASCII)</b> code. Split the string into groups of 8, convert each group to a decimal number, then match it to a letter using the toolkit chart (A = 65, B = 66...).',
+    cipher:'01000001 01000011 01000011 01000101 01010011 01010011',
+    answer:'ACCESS',
+    hints:[
+      'The first group, 01000001, converts to decimal 65 — check the toolkit chart to see which letter that is.',
+      '01000001=A, 01000011=C, 01000011=C, 01000101=E, 01010011=S, 01010011=S'
+    ],
+    tool:'binaryTable'
+  },
+  {
+    key:'polybius', name:'Keyed Polybius Square', category:'Coordinate Cipher', difficulty:'Medium',
+    title:'The Grid Coordinates',
+    briefing:'A tattered grid map is really a 5×5 letter square. Every letter of the next message has been swapped for its row-and-column coordinates.',
+    explainer:'A <b>Polybius square</b> arranges the alphabet (I and J share a cell) into a 5×5 grid, numbered 1–5 on each side. Each letter becomes a two-digit coordinate: row, then column. Build the grid using your last answer, <b>ACCESS</b>, as the keyword — its letters fill the grid first (repeats are skipped). Open the toolkit to see the grid, then convert each coordinate pair back into a letter.',
+    cipher:'34 13 44 52 35 43 31',
+    keyword:'ACCESS',
+    answer:'NETWORK',
+    hints:[
+      'The grid starts A C E S, then continues with the rest of the alphabet (I and J share one cell). Row first, then column.',
+      '34 = N, 13 = E, 44 = T... the answer is 7 letters and names the whole system you\'re restoring.'
+    ],
+    tool:'polybiusTable'
+  },
+  {
+    key:'keyword', name:'Keyword Cipher', category:'Keyed Substitution', difficulty:'Medium–Hard',
+    title:'The Password-Built Alphabet',
+    briefing:'A deeper layer of the network lies ahead. A new cipher uses your last answer as the seed for an entirely new alphabet.',
+    explainer:'A <b>keyword cipher</b> builds a new substitution alphabet by writing the keyword\'s letters first (skipping repeats), then filling in the rest of the alphabet in order. Use your last answer, <b>NETWORK</b>, as the keyword. Open the toolkit to see the full substitution alphabet it creates, then use it to decode the message below.',
+    cipher:'POTSMO',
+    keyword:'NETWORK',
+    answer:'SECURE',
+    hints:[
+      'Build the cipher alphabet: write N E T W O R K first, then the rest of the alphabet skipping letters already used — A B C D F G H I J L M P Q S U V X Y Z.',
+      'Using that alphabet, P decodes to S and O decodes to E... the answer is 6 letters and means "protected."'
+    ],
+    tool:'keywordCipherTable'
+  },
+  {
+    key:'columnar', name:'Columnar Transposition', category:'Transposition', difficulty:'Hard',
+    title:'The Rearranged Letters',
+    briefing:'This lock shuffles letter order using a keyword as the shuffle pattern — a tougher cousin of the zigzag you already cracked.',
+    explainer:'A <b>columnar transposition cipher</b> writes the keyword across the top of a grid, numbers each column by the alphabetical order of its letters, then reads the message down the columns in that number order to build the ciphertext. Use <b>SECURE</b> as the keyword. Open the toolkit to see the column numbering, then work out which original position each ciphertext letter came from.',
+    cipher:'FEDNDE',
+    keyword:'SECURE',
+    answer:'DEFEND',
+    hints:[
+      'Under S E C U R E, letters are numbered alphabetically (leftmost tie wins for repeats): C=1, E(pos2)=2, E(pos6)=3, R=4, S=5, U=6.',
+      'The ciphertext letters were read off in column-number order, 1 to 6. Reverse the process to rebuild the 6-letter word.'
+    ],
+    tool:'columnarHelper'
+  },
+  {
+    key:'vigenere', name:'Vigenère Cipher', category:'Polyalphabetic', difficulty:'Hard',
+    title:'The Keyword-Shifted Message',
+    briefing:'This cipher is stronger than anything so far — it uses a different shift for every single letter, based on a repeating keyword.',
+    explainer:'A <b>Vigenère cipher</b> shifts each letter of the message by an amount set by a keyword, repeated over and over. Use your last answer, <b>DEFEND</b>, as the keyword. Line the keyword up under the ciphertext, letter by letter, and use the toolkit table to find where each ciphertext letter and keyword letter meet in reverse.',
+    cipher:'RZJVELGI',
+    keyword:'DEFEND',
+    answer:'OVERRIDE',
+    hints:[
+      'Repeat the keyword under the ciphertext: DEFEND DE. R (cipher) with D (key) decodes to O.',
+      'The full decode is an 8-letter word meaning "take manual control of a system."'
+    ],
+    tool:'vigenereTable'
+  },
+  {
+    key:'base64', name:'Base64 Encoding', category:'Computer Encoding', difficulty:'Very Hard',
+    title:'The Encoded Transmission',
+    briefing:'The final signal looks nothing like the others — a string of odd-looking letters, numbers, and symbols computers use to pack text more tightly.',
+    explainer:'<b>Base64</b> re-groups a message\'s bits into chunks of 6 instead of 8, then maps every possible 6-bit chunk to one of 64 characters (A–Z, a–z, 0–9, + and /). To decode it: look up each character\'s 6-bit binary value in the toolkit chart, join all the bits together in order, split that long bit-string back into 8-bit bytes, then convert each byte to a letter using the ASCII chart (same as the Binary Code stage).',
+    cipher:'Uk9VVEVS',
+    answer:'ROUTER',
+    hints:[
+      'There are 8 characters, each worth 6 bits — that\'s 48 bits total, which splits evenly into six 8-bit bytes.',
+      'The first byte works out to 01010010 in binary, which is decimal 82 — check the ASCII chart from the Binary Code stage to see which letter that is.'
+    ],
+    tool:'base64Table'
+  },
+  {
+    key:'final', name:'Final Synthesis', category:'Mission Assembly', difficulty:'Hardest — Final Challenge',
+    title:'Restore the Network',
+    briefing:'One word remains, and no cipher will produce it. You have to build it yourself, piece by piece, from everything you\'ve already cracked.',
+    explainer:'Assemble an 8-letter word from these pieces, in order: <b>6th</b> letter of your Polybius Square answer · <b>4th</b> letter of your Columnar Transposition answer · <b>1st</b> letter of your Keyword Cipher answer · <b>3rd</b> letter of your Polybius Square answer · <b>1st</b> letter of your Vigenère answer · <b>4th</b> letter of your Vigenère answer · <b>8th (last)</b> letter of your Vigenère answer · <b>1st</b> letter of your Columnar Transposition answer.',
+    cipher:'',
+    answer:'RESTORED',
+    hints:[
+      'Use the recap panel below to see all your previous answers lined up together.',
+      'Polybius(6)=R, Columnar(4)=E, Keyword(1)=S, Polybius(3)=T, Vigenère(1)=O, Vigenère(4)=R, Vigenère(8)=E, Columnar(1)=D → R E S T O R E D'
+    ],
+    tool:'recap'
+  }
+];
+
+/* ============ LEVELS ============ */
+const LEVELS = {
+  ks3:{ id:'ks3', short:'KS3', label:'Key Stage 3', ages:'Ages 11–14', multiplier:1,
+        blurb:'8 stages with shorter codes and friendlier hints.', stages:KS3_STAGES },
+  ks4:{ id:'ks4', short:'KS4', label:'Key Stage 4', ages:'Ages 14–16', multiplier:1.25,
+        blurb:'11 stages. Each answer becomes the key to the next lock.', stages:KS4_STAGES },
+  ult:{ id:'ult', short:'ULT', label:'Ultimate', ages:'Anyone brave enough', multiplier:2,
+        blurb:'The same 11 techniques with longer codes, bigger keys and fewer helpers.', stages:ULTIMATE_STAGES }
+};
+const LEVEL_ORDER = ['ks3','ks4','ult'];
+
+/* ============ SCORING ============ */
+const SCORING = { start:5000, perSecond:1, perHint:100, floor:500 };
+
+function computeScore(elapsedMs, hints, multiplier){
+  const seconds = Math.max(0, Math.floor(elapsedMs/1000));
+  const timeDeduction = seconds * SCORING.perSecond;
+  const hintDeduction = hints * SCORING.perHint;
+  const raw = SCORING.start - timeDeduction - hintDeduction;
+  const base = Math.max(SCORING.floor, raw);
+  return {
+    seconds, start:SCORING.start, timeDeduction, hintDeduction,
+    base, floorApplied: raw < SCORING.floor,
+    multiplier, total: Math.round(base * multiplier)
+  };
+}
+function fmtPoints(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+function fmtMultiplier(m){ return '×' + m; }
+
+/* ============ STATE ============ */
+function freshState(){
+  return {
+    screen:'brief',        // 'brief' | stage index | 'done'
+    level:null,            // 'ks3' | 'ks4' | 'ult'
+    answers:[],
+    hintsShown:[],
+    startTime:null, endTime:null, timerHandle:null,
+    playerName:'',
+    scoreSubmitted:false,
+    myEntryId:null
+  };
+}
+let state = freshState();
+
+function activeStages(){ return state.level ? LEVELS[state.level].stages : []; }
+function totalHints(){ return state.hintsShown.reduce((a,b)=>a+b,0); }
+
+function resetState(){
+  if(state.timerHandle) clearInterval(state.timerHandle);
+  state = freshState();
+  updateHud();
+  render();
+}
+
+/* ============ TIMER + LIVE POINTS ============ */
+function fmtTime(ms){
+  const s = Math.floor(ms/1000);
+  const m = Math.floor(s/60);
+  const r = s%60;
+  return String(m).padStart(2,'0')+':'+String(r).padStart(2,'0');
+}
+function startTimer(){
+  state.startTime = Date.now();
+  state.endTime = null;
+  updateHud();
+  state.timerHandle = setInterval(updateHud, 500);
+}
+function updateHud(){
+  const clock = document.getElementById('clock');
+  const pts = document.getElementById('livePoints');
+  if(!state.startTime || !state.level){
+    clock.textContent = '00:00';
+    pts.innerHTML = '<b>—</b> pts';
+    return;
+  }
+  const elapsed = (state.endTime || Date.now()) - state.startTime;
+  clock.textContent = fmtTime(elapsed);
+  const sc = computeScore(elapsed, totalHints(), LEVELS[state.level].multiplier);
+  pts.innerHTML = `<b>${fmtPoints(sc.total)}</b> pts`;
+}
+
+/* ============ CIPHER HELPERS ============ */
+function caesarShift(str, shift){
+  return str.split('').map(ch=>{
+    if(ch===' ') return ' ';
+    const code = ch.charCodeAt(0)-65;
+    return String.fromCharCode(((code-shift+260)%26)+65);
+  }).join('');
+}
+function caesarWheelHtml(shift){
+  const A = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  return `<table class="wheel">
+    <tr><th>Cipher</th>${A.map(c=>`<td>${c}</td>`).join('')}</tr>
+    <tr><th>Plain</th>${A.map(c=>`<td>${caesarShift(c, shift)}</td>`).join('')}</tr>
+  </table>`;
+}
+function atbashMap(){
+  let rows='';
+  for(let i=0;i<26;i++){
+    rows += `<tr><td>${String.fromCharCode(65+i)}</td><td>${String.fromCharCode(90-i)}</td></tr>`;
+  }
+  return rows;
+}
+const MORSE = {A:'.-',B:'-...',C:'-.-.',D:'-..',E:'.',F:'..-.',G:'--.',H:'....',I:'..',J:'.---',K:'-.-',L:'.-..',M:'--',N:'-.',O:'---',P:'.--.',Q:'--.-',R:'.-.',S:'...',T:'-',U:'..-',V:'...-',W:'.--',X:'-..-',Y:'-.--',Z:'--..'};
+
+function buildKeywordAlphabet(keyword){
+  const clean = (keyword||'').toUpperCase();
+  let used = [];
+  for(const ch of clean){ if(/[A-Z]/.test(ch) && !used.includes(ch)) used.push(ch); }
+  for(let i=0;i<26;i++){
+    const ch = String.fromCharCode(65+i);
+    if(!used.includes(ch)) used.push(ch);
+  }
+  return used; // used[i] is the cipher letter for plain letter i
+}
+function columnRanks(keyword){
+  const letters = (keyword||'').toUpperCase().split('').map((ch,i)=>({ch,i}));
+  const sorted = [...letters].sort((a,b)=> a.ch===b.ch ? a.i-b.i : a.ch.localeCompare(b.ch));
+  const ranks = new Array(letters.length);
+  sorted.forEach((item, rankIndex)=>{ ranks[item.i] = rankIndex+1; });
+  return ranks;
+}
+function buildPolybiusGrid(keyword){
+  const clean = (keyword||'').toUpperCase().replace(/J/g,'I');
+  let used = [];
+  for(const ch of clean){ if(/[A-Z]/.test(ch) && ch!=='J' && !used.includes(ch)) used.push(ch); }
+  for(const ch of 'ABCDEFGHIKLMNOPQRSTUVWXYZ'){ if(!used.includes(ch)) used.push(ch); }
+  return used; // 25-letter grid, row-major 5x5
+}
+function railFenceDiagram(length, rails){
+  const grid = Array.from({length:rails}, ()=> Array(length).fill(''));
+  let row=0, dir=1;
+  for(let i=0;i<length;i++){
+    grid[row][i] = i+1;
+    if(row===0) dir=1; else if(row===rails-1) dir=-1;
+    row+=dir;
+  }
+  return grid;
+}
+
+/* ============ TOOLKIT: one list drives both the button and its wiring ============ */
+const TOOLKIT_LABELS = {
+  atbashTable:'Open Toolkit Reference',
+  vigenereTable:'Open Toolkit Reference',
+  binaryTable:'Open Toolkit Reference',
+  keywordCipherTable:'Open Toolkit Reference',
+  columnarHelper:'Open Toolkit Reference',
+  polybiusTable:'Open Toolkit Reference',
+  base64Table:'Open Toolkit Reference',
+  morseTable:'Open Toolkit Reference',
+  railFenceDiagram:'Open Zigzag Diagram'
+};
+function toolkitKind(s){
+  if(s.tool==='morsePlayer') return s.inlineChart===false ? 'morseTable' : null;
+  return TOOLKIT_LABELS[s.tool] ? s.tool : null;
+}
+function toolkitExtra(s){
+  return { rails:s.rails, length:(s.cipher||'').replace(/[\s=]/g,'').length };
+}
+
+/* ============ RENDER: TRACE ============ */
+function renderTrace(){
+  const trace = document.getElementById('trace');
+  const list = activeStages();
+  if(!list.length){ trace.innerHTML = ''; return; }
+  const currentIdx = typeof state.screen === 'number' ? state.screen : -1;
+  let html = '';
+  for(let i=0;i<list.length;i++){
+    const done = state.answers[i] && state.answers[i]===list[i].answer;
+    html += `<div class="node ${done?'done':''} ${currentIdx===i?'active':''}">${i+1}</div>`;
+    if(i<list.length-1) html += `<div class="wire"><div class="fill" style="width:${done?100:0}%"></div></div>`;
+  }
+  trace.innerHTML = html;
+}
+
+/* ============ RENDER: BRIEFING + LEVEL PICKER ============ */
+function startLabel(){
+  return state.level ? `Begin ${LEVELS[state.level].label} mission` : 'Choose a level to begin';
+}
+function renderBrief(){
+  const cards = LEVEL_ORDER.map(id=>{
+    const L = LEVELS[id];
+    const sel = state.level===id;
+    return `<button type="button" class="level-card lvl-${id}${sel?' selected':''}" data-level="${id}" aria-pressed="${sel}">
+      <span class="level-name">${L.label}</span>
+      <span class="level-ages">${L.ages}</span>
+      <span class="level-blurb">${L.blurb}</span>
+      <span class="level-mult">${fmtMultiplier(L.multiplier)} points</span>
+    </button>`;
+  }).join('');
+
+  document.getElementById('panel').innerHTML = `
+    <div class="center-icon">🛰️</div>
+    <p class="stage-eyebrow">Incoming Transmission</p>
+    <h2 class="stage-title">The School Network Has Been Breached</h2>
+    <p class="briefing">
+      Overnight, an intruder locked down the school's server room and scattered encrypted clues
+      through the building. Your team has been called in as <strong>Cyber Cadets</strong> to
+      crack each cipher, in order, and restore the system before the network stays down for good.
+    </p>
+    <div class="explainer">
+      <b>How scoring works:</b> every team starts with ${fmtPoints(SCORING.start)} points. The clock takes
+      away ${SCORING.perSecond} point every second and each hint costs ${SCORING.perHint}. When you finish,
+      your points are multiplied by your level's multiplier. You always keep at least ${SCORING.floor}
+      points before the multiplier, so finishing always counts.
+    </div>
+    <ul class="rules">
+      <li>Each stage teaches one real encryption technique. Solve it to unlock the next.</li>
+      <li>Use the <b>Toolkit</b> button on each stage for reference charts.</li>
+      <li>Answers aren't case-sensitive. Type what you decode.</li>
+    </ul>
+    <div class="name-row">
+      <label for="nameInput">Team / Callsign (shown on the shared leaderboard)</label>
+      <input type="text" id="nameInput" placeholder="e.g. NIGHT-OWLS" maxlength="24" value="${escapeHtml(state.playerName)}">
+    </div>
+    <div class="level-pick">
+      <p class="level-pick-label" id="levelPickLabel">Choose your level</p>
+      <div class="level-grid" role="group" aria-labelledby="levelPickLabel">${cards}</div>
+    </div>
+    <button class="btn start" id="startBtn" ${state.level?'':'disabled'}>${startLabel()}</button>
+    <button class="btn ghost view-lb" id="viewLbBtn">View leaderboard</button>
+  `;
+  document.getElementById('viewLbBtn').onclick = openLeaderboardDialog;
+
+  document.querySelectorAll('.level-card').forEach(card=>{
+    card.onclick = ()=>{
+      state.level = card.dataset.level;
+      document.querySelectorAll('.level-card').forEach(c=>{
+        const on = c===card;
+        c.classList.toggle('selected', on);
+        c.setAttribute('aria-pressed', on);
+      });
+      const btn = document.getElementById('startBtn');
+      btn.disabled = false;
+      btn.textContent = startLabel();
+      renderTrace();
+    };
+  });
+
+  document.getElementById('startBtn').onclick = ()=>{
+    if(!state.level) return;
+    const raw = document.getElementById('nameInput').value.trim();
+    state.playerName = raw ? raw.toUpperCase().slice(0,24) : 'UNKNOWN-CADET';
+    const n = activeStages().length;
+    state.answers = Array(n).fill('');
+    state.hintsShown = Array(n).fill(0);
+    state.screen = 0;
+    startTimer();
+    render();
+  };
+}
+
+/* ============ RENDER: STAGE ============ */
+function hintButtonLabel(idx, s){
+  const used = state.hintsShown[idx];
+  if(used >= s.hints.length) return `All hints used (${used}/${s.hints.length})`;
+  return `Get a hint: −${SCORING.perHint} pts (${used}/${s.hints.length} used)`;
+}
+function hintAreaHtml(idx, s){
+  return s.hints.slice(0, state.hintsShown[idx]).map((h,i)=>`Hint ${i+1}: ${h}`).join('<br>');
+}
+
+function renderStage(idx){
+  const list = activeStages();
+  const s = list[idx];
+  const panel = document.getElementById('panel');
+
+  let toolHtml = '';
+  if(s.tool==='caesarSlider'){
+    const showPreview = s.preview !== false;
+    toolHtml = `
+      <div class="shift-tool">
+        <label for="shiftRange">${showPreview ? 'Shift back by' : 'Test a shift'}: <span id="shiftVal">0</span></label>
+        <input type="range" min="0" max="25" value="0" id="shiftRange">
+        ${showPreview
+          ? `<div class="shift-preview" id="shiftPreview">${s.cipher}</div>`
+          : `<div class="wheel-wrap" id="shiftWheel">${caesarWheelHtml(0)}</div>`}
+      </div>`;
+  } else if(s.tool==='morsePlayer'){
+    const chips = Object.keys(MORSE).map(l => `<span class="morse-chip"><b>${l}</b> ${MORSE[l]}</span>`).join('');
+    toolHtml = `
+      <div class="morse-flash-wrap">
+        <div class="morse-light" id="morseLight"></div>
+        <button class="play-btn" id="playMorse">▶ Play Signal</button>
+      </div>
+      ${s.inlineChart === false ? '' : `
+      <div class="morse-ref">
+        <div class="morse-ref-title">Morse Reference — A to Z</div>
+        <div class="morse-grid">${chips}</div>
+      </div>`}`;
+  } else if(s.tool==='recap'){
+    const rows = list.slice(0,-1).map((st,i) =>
+      `<div class="recap-row"><span>${i+1}. ${st.name}</span><span>${state.answers[i] || '—'}</span></div>`).join('');
+    toolHtml = `<div class="recap">${rows}</div>`;
+  }
+  const kitKind = toolkitKind(s);
+  if(kitKind){
+    toolHtml += `<div class="tool-row"><button class="btn ghost" id="openToolkit">${TOOLKIT_LABELS[kitKind]}</button></div>`;
+  }
+
+  const cipherBlock = s.cipher ? `
+    <div class="cipher-box">
+      <div class="cipher-text">${s.cipher}</div>
+      ${s.keyword ? `<div class="cipher-sub">${s.keywordLabel || 'Keyword'}: ${s.keyword}</div>` : ''}
+    </div>` : '';
+
+  const outOfHints = state.hintsShown[idx] >= s.hints.length;
+  panel.innerHTML = `
+    <p class="stage-eyebrow">Stage ${idx+1} / ${list.length} — ${s.category} <span style="color:var(--text-dim); text-transform:none; letter-spacing:0;">· ${s.difficulty}</span></p>
+    <h2 class="stage-title">${s.title}</h2>
+    <p class="briefing">${s.briefing}</p>
+    <div class="explainer">${s.explainer}</div>
+    ${cipherBlock}
+    ${toolHtml}
+    <div class="answer-row">
+      <input type="text" id="answerInput" placeholder="Type the decoded word..." autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Your answer">
+      <button class="btn" id="submitBtn">Decrypt</button>
+    </div>
+    <div class="feedback" id="feedback" aria-live="polite"></div>
+    <div class="aux-row">
+      <button class="btn ghost" id="hintBtn" ${outOfHints?'disabled':''}>${hintButtonLabel(idx, s)}</button>
+      ${idx>0 ? `<button class="btn ghost" id="backBtn">← Previous</button>` : '<span></span>'}
+    </div>
+    <div class="hint-area" id="hintArea">${hintAreaHtml(idx, s)}</div>
+  `;
+
+  if(state.answers[idx]) document.getElementById('answerInput').value = state.answers[idx];
+
+  // inline tool wiring
+  if(s.tool==='caesarSlider'){
+    const range = document.getElementById('shiftRange');
+    const val = document.getElementById('shiftVal');
+    range.oninput = ()=>{
+      const shift = parseInt(range.value, 10);
+      val.textContent = shift;
+      if(s.preview !== false) document.getElementById('shiftPreview').textContent = caesarShift(s.cipher, shift);
+      else document.getElementById('shiftWheel').innerHTML = caesarWheelHtml(shift);
+    };
+  }
+  if(s.tool==='morsePlayer'){
+    document.getElementById('playMorse').onclick = (e)=> playMorseSignal(s.cipher, e.currentTarget, s.morseUnit);
+  }
+  // toolkit wiring uses the same toolkitKind() as the render step above
+  if(kitKind){
+    document.getElementById('openToolkit').onclick = ()=> openToolkit(kitKind, s.keyword, toolkitExtra(s));
+  }
+
+  document.getElementById('submitBtn').onclick = ()=> checkAnswer(idx);
+  document.getElementById('answerInput').addEventListener('keydown', e=>{ if(e.key==='Enter') checkAnswer(idx); });
+  document.getElementById('hintBtn').onclick = ()=> showHint(idx);
+  if(idx>0) document.getElementById('backBtn').onclick = ()=>{ state.screen = idx-1; render(); };
+}
+
+/* ============ AUDIO (Morse) ============ */
+let audioCtx = null;
+function ensureAudioCtx(){
+  try{
+    if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==='suspended') audioCtx.resume();
+  }catch(e){ console.error('Audio unavailable', e); }
+  return audioCtx;
+}
+function beep(ctx, startTime, durationSec){
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.value = 660;
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  const rampUp = Math.min(0.008, durationSec/3);
+  gain.gain.setValueAtTime(0.0001, startTime);
+  gain.gain.exponentialRampToValueAtTime(0.22, startTime+rampUp);
+  gain.gain.setValueAtTime(0.22, Math.max(startTime+rampUp, startTime+durationSec-rampUp));
+  gain.gain.exponentialRampToValueAtTime(0.0001, startTime+durationSec);
+  osc.start(startTime);
+  osc.stop(startTime+durationSec+0.02);
+}
+function playMorseSignal(morseStr, btn, unitMs){
+  btn.disabled = true;
+  const light = document.getElementById('morseLight');
+  const ctx = ensureAudioCtx();
+  const unit = unitMs || 160;
+  let seq = [];
+  morseStr.split('').forEach(ch=>{
+    if(ch==='.') seq.push({on:unit, off:unit});
+    else if(ch==='-') seq.push({on:unit*3, off:unit});
+    else if(ch===' ') seq.push({on:0, off:unit*2});
+  });
+  let t = 0;
+  const audioStart = ctx ? ctx.currentTime + 0.08 : null;
+  seq.forEach(step=>{
+    if(step.on>0){
+      setTimeout(()=> light && light.classList.add('on'), t);
+      setTimeout(()=> light && light.classList.remove('on'), t+step.on);
+      if(ctx) beep(ctx, audioStart + t/1000, step.on/1000);
+    }
+    t += step.on + step.off;
+  });
+  setTimeout(()=>{ btn.disabled = false; }, t+150);
+}
+
+/* ============ HINTS + ANSWERS ============ */
+function showHint(idx){
+  const s = activeStages()[idx];
+  if(state.hintsShown[idx] >= s.hints.length) return;
+  state.hintsShown[idx]++;
+  document.getElementById('hintArea').innerHTML = hintAreaHtml(idx, s);
+  const btn = document.getElementById('hintBtn');
+  btn.textContent = hintButtonLabel(idx, s);
+  btn.disabled = state.hintsShown[idx] >= s.hints.length;
+  updateHud();
+}
+
+function checkAnswer(idx){
+  const list = activeStages();
+  const s = list[idx];
+  const input = document.getElementById('answerInput');
+  const feedback = document.getElementById('feedback');
+  const guess = input.value.trim().toUpperCase();
+  if(guess === s.answer){
+    state.answers[idx] = guess;
+    feedback.className = 'feedback ok';
+    feedback.textContent = '✓ Correct — system trace advancing...';
+    document.getElementById('submitBtn').disabled = true;
+    renderTrace();
+    setTimeout(()=>{
+      if(state.screen !== idx) return;           // player navigated away during the delay
+      if(idx === list.length-1) finishMission();
+      else { state.screen = idx+1; render(); }
+    }, 700);
+  } else {
+    feedback.className = 'feedback err';
+    feedback.textContent = guess ? '✗ Not quite. Check the technique explanation and try again.' : 'Type your answer first.';
+  }
+}
+
+function finishMission(){
+  clearInterval(state.timerHandle);
+  state.timerHandle = null;
+  state.endTime = Date.now();
+  updateHud();
+  state.screen = 'done';
+  render();
+  launchConfetti();
+}
+
+/* ============ LEADERBOARD (saved on this device when the browser allows it) ============ */
+// Saved with localStorage so scores survive a refresh or closing the tab when the file is opened
+// in a normal browser. Sandboxes that block storage (e.g. the Claude app preview) fall back to
+// memory only. Do NOT use window.storage: it failed in the Claude mobile app.
+const LB_KEY = 'breachProtocol.leaderboard.v1';
+const CLEARED_KEY = 'breachProtocol.clearedIds.v1';   // IDs wiped by Clear, so old codes can't bring them back
+const DEVICE_KEY = 'breachProtocol.deviceId.v1';
+const lbStore = (function(){
+  try{
+    const ls = window.localStorage;
+    const probe = '__bp_probe__';
+    ls.setItem(probe, '1');
+    ls.removeItem(probe);
+    return ls;
+  }catch(e){ return null; }
+})();
+
+// Random ID for this device, so every score has a unique ID across all devices (used to skip duplicates on import).
+const DEVICE_ID = (function(){
+  const make = ()=>{
+    let s = '';
+    try{ crypto.getRandomValues(new Uint8Array(6)).forEach(b=>{ s += (b % 36).toString(36); }); }
+    catch(e){ s = Math.random().toString(36).slice(2,8); }
+    return s.padEnd(6,'0');
+  };
+  if(!lbStore) return make();
+  try{
+    let id = lbStore.getItem(DEVICE_KEY);
+    if(!/^[a-z0-9]{6}$/.test(id || '')){ id = make(); lbStore.setItem(DEVICE_KEY, id); }
+    return id;
+  }catch(e){ return make(); }
+})();
+function makeEntryId(ts){ return DEVICE_ID + '-' + ts.toString(36); }
+
+function isValidEntry(e){
+  return !!e && typeof e.id==='string' && typeof e.name==='string' && !!LEVELS[e.level] &&
+    Number.isFinite(e.timeMs) && Number.isFinite(e.total) && Number.isFinite(e.ts);
+}
+function sortLeaderboard(list){ return list.sort((a,b)=> b.total-a.total || a.timeMs-b.timeMs); }
+function readSavedLeaderboard(){
+  if(!lbStore) return null;
+  try{
+    const parsed = JSON.parse(lbStore.getItem(LB_KEY) || '[]');
+    if(!Array.isArray(parsed)) return [];
+    let migrated = false;
+    parsed.forEach(e=>{   // scores saved before IDs existed get one now
+      if(e && !e.id && Number.isFinite(e.ts)){ e.id = makeEntryId(e.ts); migrated = true; }
+    });
+    const list = sortLeaderboard(parsed.filter(isValidEntry));
+    if(migrated){ try{ lbStore.setItem(LB_KEY, JSON.stringify(list)); }catch(e){} }
+    return list;
+  }catch(e){ console.error('Saved leaderboard unreadable', e); return []; }
+}
+function writeSavedLeaderboard(){
+  if(!lbStore) return false;
+  try{ lbStore.setItem(LB_KEY, JSON.stringify(leaderboard)); return true; }
+  catch(e){ console.error('Could not save leaderboard', e); return false; }
+}
+function syncFromSaved(){ const saved = readSavedLeaderboard(); if(saved) leaderboard = saved; }
+
+let leaderboard = readSavedLeaderboard() || [];
+let clearedIdsMemory = [];
+
+function readClearedIds(){
+  if(!lbStore) return new Set(clearedIdsMemory);
+  try{ const a = JSON.parse(lbStore.getItem(CLEARED_KEY) || '[]'); return new Set(Array.isArray(a) ? a : []); }
+  catch(e){ return new Set(); }
+}
+
+function submitScore(entry){
+  syncFromSaved();   // pick up scores saved from another tab of this file
+  leaderboard.push(entry);
+  sortLeaderboard(leaderboard);
+  writeSavedLeaderboard();
+  return entry;
+}
+function clearLeaderboard(){
+  const cleared = readClearedIds();
+  leaderboard.forEach(e => cleared.add(e.id));
+  clearedIdsMemory = [...cleared];
+  leaderboard = [];
+  if(lbStore){
+    try{
+      lbStore.removeItem(LB_KEY);
+      lbStore.setItem(CLEARED_KEY, JSON.stringify(clearedIdsMemory));
+    }catch(e){ console.error('Could not clear saved leaderboard', e); }
+  }
+}
+function leaderboardNote(){
+  return lbStore
+    ? 'One board for all levels, ranked by total score. Scores are saved on this device, so they stay after a refresh or closing the tab.'
+    : 'One board for all levels, ranked by total score. This browser is blocking saved data (the Claude app preview does this), so scores clear on refresh. Open the downloaded file in Chrome, Edge or Safari to keep them.';
+}
+
+/* ============ LEADERBOARD CODES (copy a device's whole board to a master device) ============ */
+// Format: BP1z.<base64url of deflate-raw JSON>.<checksum>   (BP1j = uncompressed fallback)
+// JSON: { v:1, d:deviceId, e:[[id, name, level, timeMs, hints, ts], ...] }
+// Totals are NOT in the code: the importing device recalculates them from time, hints and level.
+const CODE_SALT = 'breach-protocol/cyber-switchup';
+
+function codeChecksum(str){
+  let h = 0x811c9dc5;   // FNV-1a, 32-bit
+  const s = CODE_SALT + '|' + str;
+  for(let i=0;i<s.length;i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193); }
+  return (h >>> 0).toString(36);
+}
+function bytesToB64url(bytes){
+  let bin = '';
+  for(let i=0;i<bytes.length;i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function b64urlToBytes(s){
+  const b64 = s.replace(/-/g,'+').replace(/_/g,'/') + '==='.slice((s.length + 3) % 4);
+  const bin = atob(b64);
+  const out = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+async function streamBytes(bytes, transform){
+  const stream = new Blob([bytes]).stream().pipeThrough(transform);
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+
+async function exportLeaderboardCode(){
+  const json = JSON.stringify({ v:1, d:DEVICE_ID, e: leaderboard.map(e=>[e.id, e.name, e.level, e.timeMs, e.hints, e.ts]) });
+  const raw = new TextEncoder().encode(json);
+  let packed = null;
+  if(typeof CompressionStream !== 'undefined'){
+    try{ packed = await streamBytes(raw, new CompressionStream('deflate-raw')); }catch(e){ packed = null; }
+  }
+  return `BP1${packed ? 'z' : 'j'}.${bytesToB64url(packed || raw)}.${codeChecksum(json)}`;
+}
+
+function codeError(kind){ const e = new Error(kind); e.kind = kind; return e; }
+
+async function decodeLeaderboardCode(code){
+  const clean = String(code || '').replace(/\s+/g, '');
+  const m = /^BP1([zj])\.([A-Za-z0-9_-]+)\.([a-z0-9]{1,8})$/.exec(clean);
+  if(!m) throw codeError('format');
+  let json;
+  try{
+    let bytes = b64urlToBytes(m[2]);
+    if(m[1] === 'z'){
+      if(typeof DecompressionStream === 'undefined') throw codeError('unsupported');
+      bytes = await streamBytes(bytes, new DecompressionStream('deflate-raw'));
+    }
+    json = new TextDecoder('utf-8', { fatal:true }).decode(bytes);
+  }catch(e){ throw e.kind ? e : codeError('damaged'); }
+  if(codeChecksum(json) !== m[3]) throw codeError('damaged');
+  let payload;
+  try{ payload = JSON.parse(json); }catch(e){ throw codeError('damaged'); }
+  if(!payload || payload.v !== 1 || !Array.isArray(payload.e)) throw codeError('format');
+  return payload;
+}
+
+function maxHintsFor(level){ return LEVELS[level].stages.reduce((n,s)=> n + s.hints.length, 0); }
+
+// Turn one imported row into a leaderboard entry, or null if anything about it doesn't add up.
+function entryFromCode(row){
+  if(!Array.isArray(row) || row.length !== 6) return null;
+  const [id, name, level, timeMs, hints, ts] = row;
+  if(typeof id !== 'string' || !/^[a-z0-9]{6}-[a-z0-9]{1,12}$/.test(id)) return null;
+  if(typeof name !== 'string') return null;
+  const cleanName = name.trim().toUpperCase().slice(0,24);
+  if(!cleanName) return null;
+  if(!LEVELS[level]) return null;
+  if(!Number.isInteger(timeMs) || timeMs < 0 || timeMs > 24*3600*1000) return null;
+  if(!Number.isInteger(hints) || hints < 0 || hints > maxHintsFor(level)) return null;
+  if(!Number.isInteger(ts) || ts <= 0) return null;
+  const total = computeScore(timeMs, hints, LEVELS[level].multiplier).total;   // recalculated, never trusted
+  return { id, name:cleanName, level, timeMs, hints, total, ts };
+}
+
+async function importLeaderboardCode(code){
+  const payload = await decodeLeaderboardCode(code);
+  syncFromSaved();
+  const have = new Set(leaderboard.map(e=>e.id));
+  const cleared = readClearedIds();
+  const result = { added:0, skipped:0, cleared:0, rejected:0, fromThisDevice: payload.d === DEVICE_ID };
+  for(const row of payload.e){
+    const entry = entryFromCode(row);
+    if(!entry){ result.rejected++; continue; }
+    if(have.has(entry.id)){ result.skipped++; continue; }
+    if(cleared.has(entry.id)){ result.cleared++; continue; }
+    have.add(entry.id);
+    leaderboard.push(entry);
+    result.added++;
+  }
+  sortLeaderboard(leaderboard);
+  writeSavedLeaderboard();
+  return result;
+}
+
+const CODE_ERROR_TEXT = {
+  format:"That doesn't look like a Breach Protocol leaderboard code. Make sure you copied all of it, from BP1 to the end.",
+  damaged:"This code is incomplete or has been changed. Copy it again from the other device and paste the whole thing.",
+  unsupported:"This browser is too old to read leaderboard codes. Use an up-to-date Chrome, Edge or Safari for the master leaderboard."
+};
+
+// Export box shown under the leaderboard (end screen and start-screen viewer).
+function renderExportBox(containerId){
+  const box = document.getElementById(containerId);
+  if(!box) return;
+  if(!leaderboard.length){ box.innerHTML = ''; return; }
+  const n = leaderboard.length;
+  box.innerHTML = `
+    <div class="export-box">
+      <div class="export-title">Leaderboard code</div>
+      <p class="export-help">Copy this code to add this device's ${n === 1 ? 'score' : `${n} scores`} to the master leaderboard. Pasting the same code more than once is safe.</p>
+      <textarea class="export-code" readonly rows="3" spellcheck="false" aria-label="Leaderboard code">Creating code…</textarea>
+      <div class="export-actions">
+        <button class="btn ghost" type="button" disabled>Copy code</button>
+        <span class="export-status" aria-live="polite"></span>
+      </div>
+    </div>`;
+  const ta = box.querySelector('textarea');
+  const btn = box.querySelector('button');
+  const status = box.querySelector('.export-status');
+  exportLeaderboardCode().then(code=>{
+    ta.value = code;
+    btn.disabled = false;
+  }).catch(err=>{
+    console.error('Could not create leaderboard code', err);
+    ta.value = '';
+    status.className = 'export-status err';
+    status.textContent = 'This browser could not create a code.';
+  });
+  ta.addEventListener('focus', ()=> ta.select());
+  btn.onclick = ()=> copyCode(ta, status);
+}
+async function copyCode(ta, status){
+  let ok = false;
+  try{
+    if(navigator.clipboard && window.isSecureContext){ await navigator.clipboard.writeText(ta.value); ok = true; }
+  }catch(e){ ok = false; }
+  if(!ok){
+    try{ ta.focus(); ta.select(); ok = document.execCommand('copy'); }catch(e){ ok = false; }
+  }
+  status.className = 'export-status ' + (ok ? 'ok' : 'err');
+  status.textContent = ok ? '✓ Copied' : 'Copy blocked here. Select the code and copy it by hand.';
+  if(ok) setTimeout(()=>{ if(status.textContent === '✓ Copied') status.textContent = ''; }, 4000);
+}
+
+function renderLeaderboardRows(entries, highlightId, limit = 10){
+  const lbRow = (e,i)=>`
+    <div class="lb-row ${highlightId && e.id===highlightId?'me':''}">
+      <span class="lb-rank">${i+1}</span>
+      <span class="lb-name">${escapeHtml(e.name)}</span>
+      <span class="lb-level lvl-${e.level}">${LEVELS[e.level].short}</span>
+      <span class="lb-time">${fmtTime(e.timeMs)}</span>
+      <span class="lb-score">${fmtPoints(e.total)}</span>
+    </div>`;
+  let rows = entries.slice(0, limit).map(lbRow).join('');
+  const myIdx = highlightId ? entries.findIndex(e=>e.id===highlightId) : -1;
+  if(myIdx >= limit) rows += `<div class="lb-gap">⋯</div>` + lbRow(entries[myIdx], myIdx);
+  return `
+    <div class="lb-row head"><span>#</span><span>Team</span><span>Level</span><span>Time</span><span>Score</span></div>
+    ${rows || '<div class="lb-status">No scores yet. Be the first.</div>'}
+  `;
+}
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+
+/* ============ RENDER: DONE / FINAL SCORE ============ */
+function renderDone(){
+  const L = LEVELS[state.level];
+  const list = activeStages();
+  const elapsed = state.endTime - state.startTime;
+  const hints = totalHints();
+  const sc = computeScore(elapsed, hints, L.multiplier);
+
+  document.getElementById('panel').innerHTML = `
+    <div class="center-icon">🔓</div>
+    <p class="stage-eyebrow">System Restored</p>
+    <h2 class="stage-title">ACCESS GRANTED</h2>
+    <p class="briefing">The school network is back online. Your team cracked every layer of encryption the intruder left behind.</p>
+
+    <section class="score-card" aria-label="Final score">
+      <div class="score-head">
+        <span class="score-team">${escapeHtml(state.playerName)}</span>
+        <span class="score-level lvl-${state.level}">${L.label}</span>
+      </div>
+      <div class="score-total"><span class="score-total-num">${fmtPoints(sc.total)}</span><span class="score-total-unit">points</span></div>
+      <div class="score-lines">
+        <div class="score-line"><span>Time</span><span>${fmtTime(elapsed)}</span></div>
+        <div class="score-line"><span>Starting points</span><span>${fmtPoints(sc.start)}</span></div>
+        <div class="score-line minus"><span>Time: ${fmtPoints(sc.seconds)} seconds × ${SCORING.perSecond}</span><span>${sc.timeDeduction ? '−'+fmtPoints(sc.timeDeduction) : '0'}</span></div>
+        <div class="score-line minus"><span>Hints: ${hints} × ${SCORING.perHint}</span><span>${sc.hintDeduction ? '−'+fmtPoints(sc.hintDeduction) : '0'}</span></div>
+        <div class="score-line sub"><span>Base points${sc.floorApplied ? ` (minimum of ${SCORING.floor} applied)` : ''}</span><span>${fmtPoints(sc.base)}</span></div>
+        <div class="score-line"><span>${L.label} multiplier</span><span>${fmtMultiplier(sc.multiplier)}</span></div>
+        <div class="score-line grand"><span>Total score</span><span>${fmtPoints(sc.total)}</span></div>
+      </div>
+    </section>
+
+    <div class="leaderboard">
+      <div class="leaderboard-title">Leaderboard</div>
+      <div id="lbContent"></div>
+      <p class="lb-note">${leaderboardNote()}</p>
+      <div id="exportDone"></div>
+    </div>
+
+    <details class="answers">
+      <summary>Show decoded answers</summary>
+      <div class="recap">
+        ${list.map((s,i)=>`<div class="recap-row"><span>${i+1}. ${s.name}</span><span>${state.answers[i]}</span></div>`).join('')}
+      </div>
+    </details>
+
+    <button class="btn start" id="playAgainBtn" style="margin-top:16px;">Run Mission Again</button>
+  `;
+  document.getElementById('playAgainBtn').onclick = resetState;
+
+  const lbContent = document.getElementById('lbContent');
+  if(!state.scoreSubmitted){
+    lbContent.innerHTML = `
+      <div class="lb-status" style="margin-bottom:10px;">Submit your score as <b style="color:var(--blue)">${escapeHtml(state.playerName)}</b>?</div>
+      <button class="btn danger" id="submitScoreBtn">Submit to Leaderboard</button>
+      <button class="btn ghost" id="skipScoreBtn" style="margin-left:8px;">Skip</button>
+    `;
+    document.getElementById('submitScoreBtn').onclick = ()=>{
+      const ts = Date.now();
+      const entry = submitScore({ id:makeEntryId(ts), name:state.playerName, level:state.level, timeMs:elapsed, hints, total:sc.total, ts });
+      state.scoreSubmitted = true;
+      state.myEntryId = entry.id;
+      lbContent.innerHTML = renderLeaderboardRows(leaderboard, entry.id);
+      renderExportBox('exportDone');
+    };
+    document.getElementById('skipScoreBtn').onclick = ()=>{
+      state.scoreSubmitted = true;
+      syncFromSaved();
+      lbContent.innerHTML = renderLeaderboardRows(leaderboard, null);
+      renderExportBox('exportDone');
+    };
+  } else {
+    syncFromSaved();
+    lbContent.innerHTML = renderLeaderboardRows(leaderboard, state.myEntryId);
+    renderExportBox('exportDone');
+  }
+}
+
+function launchConfetti(){
+  const colors = ['#00E5FF','#FF2145','#E7F6FF','#B45CFF'];
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'position:fixed;top:0;left:0;right:0;height:0;z-index:60;pointer-events:none;';
+  document.body.appendChild(wrap);
+  for(let i=0;i<50;i++){
+    const c = document.createElement('div');
+    c.className='confetti';
+    c.style.left = Math.random()*100+'vw';
+    c.style.background = colors[i%colors.length];
+    c.style.animationDuration = (1.6+Math.random()*1.2)+'s';
+    c.style.animationDelay = (Math.random()*0.4)+'s';
+    wrap.appendChild(c);
+  }
+  setTimeout(()=> wrap.remove(), 3200);
+}
+
+/* ============ TOOLKIT MODAL ============ */
+function openToolkit(kind, keyword, extra){
+  extra = extra || {};
+  const backdrop = document.getElementById('modalBackdrop');
+  const content = document.getElementById('modalContent');
+  const note = txt => `<p style="font-size:12px;color:var(--text-dim)">${txt}</p>`;
+  let html = '';
+  if(kind==='atbashTable'){
+    html = `<h3>Mirror (Atbash) Table</h3><table><tr><th>Letter</th><th>Mirrors To</th></tr>${atbashMap()}</table>`;
+  } else if(kind==='morseTable'){
+    let rows = '<tr><th>Letter</th><th>Morse</th><th>Letter</th><th>Morse</th></tr>';
+    const L = Object.keys(MORSE);
+    for(let i=0;i<13;i++) rows += `<tr><td>${L[i]}</td><td>${MORSE[L[i]]}</td><td>${L[i+13]}</td><td>${MORSE[L[i+13]]}</td></tr>`;
+    html = `<h3>Morse Code Chart</h3><table>${rows}</table>`;
+  } else if(kind==='vigenereTable'){
+    let rows = '<tr><th>Key→</th>' + 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(c=>`<th>${c}</th>`).join('') + '</tr>';
+    for(let r=0;r<26;r++){
+      let cells = `<td>${String.fromCharCode(65+r)}</td>`;
+      for(let c=0;c<26;c++) cells += `<td>${String.fromCharCode(((r+c)%26)+65)}</td>`;
+      rows += `<tr>${cells}</tr>`;
+    }
+    html = `<h3>Vigenère Square</h3>${note("Find the keyword letter's row and the ciphertext letter inside that row. The column it sits in is the decoded letter.")}<div style="overflow-x:auto"><table>${rows}</table></div>`;
+  } else if(kind==='binaryTable'){
+    let rows = '<tr><th>Letter</th><th>Decimal</th><th>Binary</th></tr>';
+    for(let i=0;i<26;i++){
+      const dec = 65+i;
+      rows += `<tr><td>${String.fromCharCode(dec)}</td><td>${dec}</td><td>${dec.toString(2).padStart(8,'0')}</td></tr>`;
+    }
+    html = `<h3>ASCII Binary Chart</h3><table>${rows}</table>`;
+  } else if(kind==='keywordCipherTable'){
+    const cipherAlpha = buildKeywordAlphabet(keyword);
+    let rows = '<tr><th>Plain</th>' + 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(c=>`<th>${c}</th>`).join('') + '</tr>';
+    rows += '<tr><td>Cipher</td>' + cipherAlpha.map(c=>`<td>${c}</td>`).join('') + '</tr>';
+    html = `<h3>Keyword Cipher Alphabet (key: ${keyword})</h3>${note('Find the ciphertext letter in the bottom row. The plain letter above it is the decode.')}<div style="overflow-x:auto"><table>${rows}</table></div>`;
+  } else if(kind==='columnarHelper'){
+    const key = (keyword||'').toUpperCase().split('');
+    const ranks = columnRanks(keyword);
+    const perCol = Math.max(1, Math.ceil((extra.length||key.length) / key.length));
+    let rows = '<tr><th>Position</th>' + key.map((c,i)=>`<th>${i+1}</th>`).join('') + '</tr>';
+    rows += '<tr><td>Keyword letter</td>' + key.map(c=>`<td>${c}</td>`).join('') + '</tr>';
+    rows += '<tr><td>Column number</td>' + ranks.map(r=>`<td>${r}</td>`).join('') + '</tr>';
+    const howTo = perCol === 1
+      ? 'The ciphertext was read out column by column in the order shown (1 first, then 2, and so on). Write the ciphertext letters back into their columns in that order, then read the row left to right to get the plaintext.'
+      : `This message is ${extra.length} letters long, so the grid has ${perCol} rows and each column holds ${perCol} letters. Split the ciphertext into chunks of ${perCol}. Chunk 1 goes down column number 1, chunk 2 down column number 2, and so on. Then read the grid row by row, left to right.`;
+    html = `<h3>Columnar Transposition Key (key: ${keyword})</h3>${note(howTo)}<table>${rows}</table>`;
+  } else if(kind==='polybiusTable'){
+    const grid = buildPolybiusGrid(keyword);
+    let rows = '<tr><th></th>' + [1,2,3,4,5].map(c=>`<th>${c}</th>`).join('') + '</tr>';
+    for(let r=0;r<5;r++){
+      let cells = `<td><b>${r+1}</b></td>`;
+      for(let c=0;c<5;c++) cells += `<td>${grid[r*5+c]}</td>`;
+      rows += `<tr>${cells}</tr>`;
+    }
+    html = `<h3>Polybius Square (key: ${keyword})</h3>${note('A coordinate is row, then column. E.g. row 1, column 2 = "12".')}<table>${rows}</table>`;
+  } else if(kind==='railFenceDiagram'){
+    const rails = extra.rails, length = extra.length;
+    const grid = railFenceDiagram(length, rails);
+    let rows = '';
+    for(let r=0;r<rails;r++){
+      rows += '<tr><td><b>Row ' + (r+1) + '</b></td>' + grid[r].map(v=>`<td>${v||''}</td>`).join('') + '</tr>';
+    }
+    html = `<h3>Rail Fence Zigzag (${rails} rails, ${length} letters)</h3>${note('Each number shows which position in the original word lands in that row. The ciphertext is every Row 1 letter, then every Row 2 letter, and so on. Use the numbers to work out which ciphertext letter belongs at each position.')}<table>${rows}</table>`;
+  } else if(kind==='base64Table'){
+    const B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+    let rows = '<tr><th>Char</th><th>Index</th><th>6-bit</th></tr>';
+    for(let i=0;i<64;i++) rows += `<tr><td>${B64[i]}</td><td>${i}</td><td>${i.toString(2).padStart(6,'0')}</td></tr>`;
+    html = `<h3>Base64 Alphabet</h3>${note('Look up each ciphertext character below to get its 6-bit value, string all the bits together in order, then re-split into 8-bit bytes and convert each to a letter (A=65, B=66... same as the Binary Code stage). An = at the end is padding: skip it, and throw away any leftover bits that don\'t make a full byte.')}<div style="max-height:320px; overflow-y:auto;"><table>${rows}</table></div>`;
+  }
+  content.innerHTML = html + `<button class="btn ghost modal-close" id="closeModal">Close</button>`;
+  backdrop.classList.add('show');
+  document.getElementById('closeModal').onclick = ()=> backdrop.classList.remove('show');
+}
+document.getElementById('modalBackdrop').addEventListener('click', (e)=>{
+  if(e.target.id==='modalBackdrop') e.currentTarget.classList.remove('show');
+});
+
+/* ============ MAIN RENDER ============ */
+function render(){
+  renderTrace();
+  if(state.screen === 'brief') renderBrief();
+  else if(state.screen === 'done') renderDone();
+  else renderStage(state.screen);
+}
+
+/* ============ DIALOGS (in-app, because native pop-ups are blocked in the Claude app sandbox) ============ */
+function openDialog(html){
+  const content = document.getElementById('modalContent');
+  content.innerHTML = html;
+  content.scrollTop = 0;   // always open at the top (long leaderboards)
+  document.getElementById('modalBackdrop').classList.add('show');
+}
+function closeDialog(){ document.getElementById('modalBackdrop').classList.remove('show'); }
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeDialog(); });
+
+document.getElementById('restartBtn').onclick = ()=>{
+  if(!state.startTime){ closeDialog(); resetState(); return; }   // nothing in progress, no need to ask
+  const unsent = state.screen==='done' && !state.scoreSubmitted;
+  openDialog(`
+    <h3>Restart the mission?</h3>
+    <p class="dialog-text">${unsent ? "This team's score hasn't been submitted to the leaderboard yet. " : ''}Progress and time for this run will be lost. The leaderboard is kept.</p>
+    <div class="dialog-actions">
+      <button class="btn danger" id="confirmRestart">Restart mission</button>
+      <button class="btn ghost" id="cancelRestart">Cancel</button>
+    </div>`);
+  document.getElementById('confirmRestart').onclick = ()=>{ closeDialog(); resetState(); };
+  document.getElementById('cancelRestart').onclick = closeDialog;
+  document.getElementById('cancelRestart').focus();
+};
+
+/* Leaderboard viewer (start screen): shows every saved score, not just the top 10. */
+function openLeaderboardDialog(){
+  syncFromSaved();   // include scores saved from another tab
+  const n = leaderboard.length;
+  openDialog(`
+    <h3>Leaderboard</h3>
+    <p class="lb-note" style="margin:0 0 10px;">${n ? `${n} ${n===1?'score':'scores'}, ranked by total score.` : ''}</p>
+    ${renderLeaderboardRows(leaderboard, null, Infinity)}
+    <p class="lb-note">${leaderboardNote()}</p>
+    <div id="exportDialog"></div>
+    <button class="btn ghost modal-close" id="closeLb">Close</button>`);
+  renderExportBox('exportDialog');
+  document.getElementById('closeLb').onclick = closeDialog;
+  document.getElementById('closeLb').focus({ preventScroll:true });
+}
+
+/* Hidden facilitator control: tap or click the BREACH_PROTOCOL title 5 times within 3 seconds. */
+(function(){
+  let taps = [];
+  document.getElementById('brandTitle').addEventListener('click', ()=>{
+    const now = Date.now();
+    taps = taps.filter(t => now - t < 3000);
+    taps.push(now);
+    if(taps.length >= 5){ taps = []; openFacilitatorDialog(); }
+  });
+})();
+
+function refreshAfterBoardChange(){ if(state.screen === 'done') render(); }
+
+function openFacilitatorDialog(){
+  syncFromSaved();
+  const n = leaderboard.length;
+  openDialog(`
+    <h3>Facilitator tools</h3>
+    <p class="dialog-text">This device has ${n === 0 ? 'no saved scores' : n === 1 ? '1 saved score' : `${n} saved scores`}.</p>
+    <label class="dialog-label" for="importCodeInput">Paste a leaderboard code from another device</label>
+    <textarea id="importCodeInput" class="dialog-input import-input" rows="4" spellcheck="false" autocomplete="off" placeholder="BP1z..."></textarea>
+    <div class="feedback" id="importFeedback" aria-live="polite"></div>
+    <div class="dialog-actions">
+      <button class="btn" id="importBtn" disabled>Import scores</button>
+      <button class="btn ghost" id="closeFac">Close</button>
+    </div>
+    <div class="fac-divider"></div>
+    <div class="dialog-actions">
+      <button class="btn danger" id="openClearBtn">Clear leaderboard</button>
+    </div>`);
+  const input = document.getElementById('importCodeInput');
+  const btn = document.getElementById('importBtn');
+  const feedback = document.getElementById('importFeedback');
+  input.oninput = ()=>{ btn.disabled = !input.value.trim(); feedback.textContent = ''; feedback.className = 'feedback'; };
+  document.getElementById('closeFac').onclick = closeDialog;
+  document.getElementById('openClearBtn').onclick = openClearDialog;
+  btn.onclick = async ()=>{
+    btn.disabled = true;
+    btn.textContent = 'Importing…';
+    try{
+      const r = await importLeaderboardCode(input.value);
+      refreshAfterBoardChange();
+      showImportResult(r);
+    }catch(err){
+      console.error('Import failed', err);
+      feedback.className = 'feedback err';
+      feedback.textContent = CODE_ERROR_TEXT[err.kind] || CODE_ERROR_TEXT.damaged;
+      btn.textContent = 'Import scores';
+      btn.disabled = false;
+    }
+  };
+  input.focus();
+}
+
+function showImportResult(r){
+  const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+  const lines = [`<b style="color:var(--blue)">${r.added ? `Added ${plural(r.added, 'new score', 'new scores')}.` : 'No new scores to add.'}</b>`];
+  if(r.skipped) lines.push(`Skipped ${plural(r.skipped, 'score that was', 'scores that were')} already on this board.`);
+  if(r.cleared) lines.push(`Ignored ${plural(r.cleared, 'score', 'scores')} that had been cleared from this board earlier.`);
+  if(r.rejected) lines.push(`<span style="color:var(--red)">Rejected ${plural(r.rejected, 'score that doesn\'t', 'scores that don\'t')} add up.</span>`);
+  if(r.fromThisDevice) lines.push('This code came from this device, so there was nothing new to add.');
+  openDialog(`
+    <h3>Import complete</h3>
+    <p class="dialog-text">${lines.join('<br>')}</p>
+    <div class="dialog-actions">
+      <button class="btn" id="importAnother">Import another code</button>
+      <button class="btn ghost" id="viewAfterImport">View leaderboard</button>
+      <button class="btn ghost" id="closeImport">Close</button>
+    </div>`);
+  document.getElementById('importAnother').onclick = openFacilitatorDialog;
+  document.getElementById('viewAfterImport').onclick = openLeaderboardDialog;
+  document.getElementById('closeImport').onclick = closeDialog;
+  document.getElementById('importAnother').focus({ preventScroll:true });
+}
+
+function openClearDialog(){
+  syncFromSaved();
+  const n = leaderboard.length;
+  openDialog(`
+    <h3>Clear the leaderboard</h3>
+    <p class="dialog-text">${n === 0 ? 'There are no saved scores on this device right now.' : `This permanently deletes ${n === 1 ? 'the 1 saved score' : `all ${n} saved scores`} on this device. It can't be undone, and importing an older code won't bring them back.`}</p>
+    <label class="dialog-label" for="clearConfirmInput">Type CLEAR to confirm</label>
+    <input type="text" id="clearConfirmInput" class="dialog-input" autocomplete="off" autocapitalize="characters" spellcheck="false">
+    <div class="dialog-actions">
+      <button class="btn danger" id="confirmClear" disabled>Clear leaderboard</button>
+      <button class="btn ghost" id="cancelClear">Cancel</button>
+    </div>`);
+  const input = document.getElementById('clearConfirmInput');
+  const btn = document.getElementById('confirmClear');
+  input.oninput = ()=>{ btn.disabled = input.value.trim().toUpperCase() !== 'CLEAR'; };
+  input.onkeydown = e=>{ if(e.key==='Enter' && !btn.disabled) btn.click(); };
+  document.getElementById('cancelClear').onclick = closeDialog;
+  btn.onclick = ()=>{
+    clearLeaderboard();
+    state.myEntryId = null;
+    refreshAfterBoardChange();
+    openDialog(`
+      <h3>Leaderboard cleared</h3>
+      <p class="dialog-text">All saved scores have been deleted. The next team starts with an empty board.</p>
+      <div class="dialog-actions"><button class="btn ghost" id="closeCleared">Close</button></div>`);
+    document.getElementById('closeCleared').onclick = closeDialog;
+  };
+  input.focus();
+}
+
+updateHud();
+render();
+</script>
+</body>
+</html>
