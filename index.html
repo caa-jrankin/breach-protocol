@@ -1279,7 +1279,7 @@ function renderStage(idx){
     };
   }
   if(s.tool==='morsePlayer'){
-    document.getElementById('playMorse').onclick = (e)=> playMorseSignal(s.cipher, e.currentTarget, s.morseUnit);
+    document.getElementById('playMorse').onclick = (e)=>{ playMorseSignal(s.cipher, e.currentTarget, s.morseUnit); focusAnswer(); };
   }
   // toolkit wiring uses the same toolkitKind() as the render step above
   if(kitKind){
@@ -1290,6 +1290,7 @@ function renderStage(idx){
   document.getElementById('answerInput').addEventListener('keydown', e=>{ if(e.key==='Enter') checkAnswer(idx); });
   document.getElementById('hintBtn').onclick = ()=> showHint(idx);
   if(idx>0) document.getElementById('backBtn').onclick = ()=>{ state.screen = idx-1; render(); };
+  focusAnswer();
 }
 
 /* ============ AUDIO (Morse) ============ */
@@ -1341,6 +1342,22 @@ function playMorseSignal(morseStr, btn, unitMs){
 }
 
 /* ============ HINTS + ANSWERS ============ */
+/* Put the cursor in the answer box so players can type straight away.
+   Only on laptops/desktops (mouse or trackpad): on phones and tablets it would pop up the keyboard
+   and cover the cipher. preventScroll keeps the page where it is so the briefing stays in view. */
+function canAutoFocus(){
+  return !window.matchMedia || window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+}
+function focusAnswer(selectAll){
+  if(typeof state.screen !== 'number' || !canAutoFocus()) return;
+  if(document.getElementById('modalBackdrop').classList.contains('show')) return;
+  const input = document.getElementById('answerInput');
+  if(!input) return;
+  try{ input.focus({ preventScroll:true }); }catch(e){ input.focus(); }
+  if(selectAll) input.select();
+  else { const end = input.value.length; input.setSelectionRange(end, end); }
+}
+
 function showHint(idx){
   const s = activeStages()[idx];
   if(state.hintsShown[idx] >= s.hints.length) return;
@@ -1350,6 +1367,7 @@ function showHint(idx){
   btn.textContent = hintButtonLabel(idx, s);
   btn.disabled = state.hintsShown[idx] >= s.hints.length;
   updateHud();
+  focusAnswer();
 }
 
 function checkAnswer(idx){
@@ -1372,6 +1390,7 @@ function checkAnswer(idx){
   } else {
     feedback.className = 'feedback err';
     feedback.textContent = guess ? '✗ Not quite. Check the technique explanation and try again.' : 'Type your answer first.';
+    focusAnswer(true);
   }
 }
 
@@ -1921,10 +1940,10 @@ function openToolkit(kind, keyword, extra){
   }
   content.innerHTML = html + `<button class="btn ghost modal-close" id="closeModal">Close</button>`;
   backdrop.classList.add('show');
-  document.getElementById('closeModal').onclick = ()=> backdrop.classList.remove('show');
+  document.getElementById('closeModal').onclick = closeDialog;
 }
 document.getElementById('modalBackdrop').addEventListener('click', (e)=>{
-  if(e.target.id==='modalBackdrop') e.currentTarget.classList.remove('show');
+  if(e.target.id==='modalBackdrop') closeDialog();
 });
 
 /* ============ MAIN RENDER ============ */
@@ -1942,7 +1961,10 @@ function openDialog(html){
   content.scrollTop = 0;   // always open at the top (long leaderboards)
   document.getElementById('modalBackdrop').classList.add('show');
 }
-function closeDialog(){ document.getElementById('modalBackdrop').classList.remove('show'); }
+function closeDialog(){
+  document.getElementById('modalBackdrop').classList.remove('show');
+  focusAnswer();   // back to the answer box if a stage is showing
+}
 document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeDialog(); });
 
 document.getElementById('restartBtn').onclick = ()=>{
