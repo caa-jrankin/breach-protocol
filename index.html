@@ -240,6 +240,18 @@
   .export-status.ok{ color:var(--ok); }
   .export-status.err{ color:var(--red); }
   .import-input{ resize:vertical; min-height:90px; font-size:13px; letter-spacing:0; word-break:break-all; line-height:1.4; }
+  .lb-tabs{ display:flex; gap:6px; margin:0 0 14px; border-bottom:1px solid var(--line); }
+  .lb-tab{
+    background:none; border:none; border-bottom:2px solid transparent; margin-bottom:-1px;
+    color:var(--text-dim); font-family:var(--mono); font-size:13px; letter-spacing:.06em; text-transform:uppercase;
+    padding:8px 12px; cursor:pointer;
+  }
+  .lb-tab:hover{ color:var(--text); }
+  .lb-tab.active{ color:var(--blue); border-bottom-color:var(--blue); }
+  .lb-tab:focus-visible{ outline:2px solid var(--blue); outline-offset:2px; }
+  .dialog-text.small{ font-size:13px; color:var(--text-dim); }
+  .dialog-steps{ margin:0 0 12px; padding-left:20px; font-size:14px; color:var(--text); }
+  .dialog-steps li{ margin-bottom:4px; }
   .fac-divider{ border-top:1px solid var(--line); margin:16px 0 14px; }
   .lb-gap{ text-align:center; color:var(--text-dim); font-family:var(--mono); font-size:12px; padding:2px 0; }
 
@@ -1455,13 +1467,13 @@ function entryFromCode(row){
   return { id, name:cleanName, level, timeMs, hints, total, ts };
 }
 
-async function importLeaderboardCode(code){
-  const payload = await decodeLeaderboardCode(code);
+// Merge rows ([id, name, level, timeMs, hints, ts]) into this device's board. Used by codes and the published file.
+function mergeRows(rows){
   syncFromSaved();
   const have = new Set(leaderboard.map(e=>e.id));
   const cleared = readClearedIds();
-  const result = { added:0, skipped:0, cleared:0, rejected:0, fromThisDevice: payload.d === DEVICE_ID };
-  for(const row of payload.e){
+  const result = { added:0, skipped:0, cleared:0, rejected:0, fromThisDevice:false };
+  for(const row of rows){
     const entry = entryFromCode(row);
     if(!entry){ result.rejected++; continue; }
     if(have.has(entry.id)){ result.skipped++; continue; }
@@ -1473,6 +1485,81 @@ async function importLeaderboardCode(code){
   sortLeaderboard(leaderboard);
   writeSavedLeaderboard();
   return result;
+}
+
+async function importLeaderboardCode(code){
+  const payload = await decodeLeaderboardCode(code);
+  const result = mergeRows(payload.e);
+  result.fromThisDevice = payload.d === DEVICE_ID;
+  return result;
+}
+
+/* ============ PUBLISHED EVENT LEADERBOARD (leaderboard.json in the GitHub repository) ============ */
+// The facilitator downloads leaderboard.json from the master device and uploads it to the repository.
+// Every copy of the game that's online can then read it. Nothing is ever written to GitHub from the page.
+const PUBLISHED_FILE = 'leaderboard.json';
+const PUBLISHED_FALLBACK_URL = 'https://caa-jrankin.github.io/breach-protocol/leaderboard.json';   // for downloaded copies
+const PUBLISHED_FORMAT = 'breach-protocol-leaderboard';
+
+function publishedUrl(){ return /^https?:$/.test(location.protocol) ? PUBLISHED_FILE : PUBLISHED_FALLBACK_URL; }
+
+function buildPublishedFile(){
+  const head = { format:PUBLISHED_FORMAT, v:1, updated:new Date().toISOString(), count:leaderboard.length };
+  const rows = leaderboard.map(e => '    ' + JSON.stringify([e.id, e.name, e.level, e.timeMs, e.hints, e.ts]));
+  return '{\n' +
+    Object.entries(head).map(([k,v]) => `  ${JSON.stringify(k)}: ${JSON.stringify(v)},`).join('\n') +
+    '\n  "entries": [\n' + rows.join(',\n') + (rows.length ? '\n' : '') + '  ]\n}\n';
+}
+
+async function fetchPublishedLeaderboard(){
+  const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const timer = ctrl ? setTimeout(()=> ctrl.abort(), 8000) : null;
+  try{
+    const res = await fetch(publishedUrl() + '?t=' + Date.now(), { cache:'no-store', signal: ctrl ? ctrl.signal : undefined });
+    if(res.status === 404) return { status:'none' };
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    let data;
+    try{ data = await res.json(); }catch(e){ return { status:'invalid' }; }
+    if(!data || data.format !== PUBLISHED_FORMAT || data.v !== 1 || !Array.isArray(data.entries)) return { status:'invalid' };
+    const seen = new Set();
+    const entries = [];
+    let rejected = 0;
+    for(const row of data.entries){
+      const e = entryFromCode(row);   // same checks as codes; totals recalculated
+      if(!e){ rejected++; continue; }
+      if(seen.has(e.id)) continue;
+      seen.add(e.id);
+      entries.push(e);
+    }
+    sortLeaderboard(entries);
+    return { status:'ok', entries, rows:data.entries, rejected, updated: typeof data.updated === 'string' ? data.updated : null };
+  }catch(e){
+    console.error('Could not load the published leaderboard', e);
+    return { status:'error' };
+  }finally{
+    if(timer) clearTimeout(timer);
+  }
+}
+
+function fmtUpdated(iso){
+  const d = iso ? new Date(iso) : null;
+  if(!d || isNaN(d)) return 'at an unknown time';
+  try{ return d.toLocaleString('en-GB', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }); }
+  catch(e){ return d.toISOString().slice(0,16).replace('T',' '); }
+}
+
+function downloadPublishedFile(){
+  syncFromSaved();
+  const blob = new Blob([buildPublishedFile()], { type:'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = PUBLISHED_FILE;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=> URL.revokeObjectURL(url), 4000);
+  return leaderboard.length;
 }
 
 const CODE_ERROR_TEXT = {
@@ -1582,6 +1669,7 @@ function renderDone(){
       <div id="lbContent"></div>
       <p class="lb-note">${leaderboardNote()}</p>
       <div id="exportDone"></div>
+      <button class="btn ghost" id="viewEventLbBtn" style="margin-top:12px;">View event leaderboard</button>
     </div>
 
     <details class="answers">
@@ -1594,6 +1682,7 @@ function renderDone(){
     <button class="btn start" id="playAgainBtn" style="margin-top:16px;">Run Mission Again</button>
   `;
   document.getElementById('playAgainBtn').onclick = resetState;
+  document.getElementById('viewEventLbBtn').onclick = ()=> openLeaderboardDialog('event');
 
   const lbContent = document.getElementById('lbContent');
   if(!state.scoreSubmitted){
@@ -1749,20 +1838,74 @@ document.getElementById('restartBtn').onclick = ()=>{
   document.getElementById('cancelRestart').focus();
 };
 
-/* Leaderboard viewer (start screen): shows every saved score, not just the top 10. */
-function openLeaderboardDialog(){
+/* Leaderboard viewer: "Event" tab reads the published leaderboard.json, "This device" tab shows local scores. */
+let lbTab = /^https?:$/.test(location.protocol) ? 'event' : 'device';
+let lbFetchToken = 0;
+
+function openLeaderboardDialog(tab){
   syncFromSaved();   // include scores saved from another tab
-  const n = leaderboard.length;
+  if(tab === 'event' || tab === 'device') lbTab = tab;   // ignore click events passed in by onclick handlers
   openDialog(`
     <h3>Leaderboard</h3>
-    <p class="lb-note" style="margin:0 0 10px;">${n ? `${n} ${n===1?'score':'scores'}, ranked by total score.` : ''}</p>
-    ${renderLeaderboardRows(leaderboard, null, Infinity)}
-    <p class="lb-note">${leaderboardNote()}</p>
-    <div id="exportDialog"></div>
+    <div class="lb-tabs" role="tablist" aria-label="Leaderboard">
+      <button type="button" class="lb-tab" role="tab" id="tabEvent" data-tab="event">Event</button>
+      <button type="button" class="lb-tab" role="tab" id="tabDevice" data-tab="device">This device</button>
+    </div>
+    <div id="lbTabBody" role="tabpanel"></div>
     <button class="btn ghost modal-close" id="closeLb">Close</button>`);
-  renderExportBox('exportDialog');
+  document.querySelectorAll('.lb-tab').forEach(btn=>{
+    btn.onclick = ()=>{ lbTab = btn.dataset.tab; renderLbTab(); };
+  });
   document.getElementById('closeLb').onclick = closeDialog;
+  renderLbTab();
   document.getElementById('closeLb').focus({ preventScroll:true });
+}
+
+function renderLbTab(){
+  const body = document.getElementById('lbTabBody');
+  if(!body) return;
+  document.querySelectorAll('.lb-tab').forEach(btn=>{
+    const on = btn.dataset.tab === lbTab;
+    btn.classList.toggle('active', on);
+    btn.setAttribute('aria-selected', on);
+  });
+  if(lbTab === 'device'){
+    lbFetchToken++;   // ignore any event fetch still in flight
+    const n = leaderboard.length;
+    body.innerHTML = `
+      <p class="lb-note" style="margin:0 0 10px;">${n ? `${n} ${n===1?'score':'scores'} saved on this device, ranked by total score.` : ''}</p>
+      ${renderLeaderboardRows(leaderboard, null, Infinity)}
+      <p class="lb-note">${leaderboardNote()}</p>
+      <div id="exportDialog"></div>`;
+    renderExportBox('exportDialog');
+    return;
+  }
+  body.innerHTML = `<div class="lb-status">Loading the event leaderboard…</div>`;
+  const token = ++lbFetchToken;
+  fetchPublishedLeaderboard().then(r=>{
+    if(token !== lbFetchToken || lbTab !== 'event' || !document.getElementById('lbTabBody')) return;
+    body.innerHTML = publishedHtml(r);
+    const again = document.getElementById('refreshPublished');
+    if(again) again.onclick = renderLbTab;
+  });
+}
+
+function publishedHtml(r){
+  const refresh = `<div class="dialog-actions" style="margin-top:12px;"><button class="btn ghost" id="refreshPublished">Refresh</button></div>`;
+  if(r.status === 'none'){
+    return `<div class="lb-status">No event leaderboard has been published yet. Scores saved here are under <b>This device</b>.</div>${refresh}`;
+  }
+  if(r.status === 'invalid'){
+    return `<div class="lb-status">The published leaderboard file couldn't be read. The event team should download a fresh file from the master device and upload it again.</div>${refresh}`;
+  }
+  if(r.status === 'error'){
+    return `<div class="lb-status">The event leaderboard couldn't be loaded. Check the internet connection, or use <b>This device</b> to see scores saved here.</div>${refresh}`;
+  }
+  const n = r.entries.length;
+  return `
+    <p class="lb-note" style="margin:0 0 10px;">Updated ${fmtUpdated(r.updated)}${n ? `, ${n} ${n===1?'score':'scores'}` : ''}. The event team updates this during the day, so the newest games may not be on it yet.</p>
+    ${n ? renderLeaderboardRows(r.entries, null, Infinity) : '<div class="lb-status">The event leaderboard is empty right now.</div>'}
+    ${refresh}`;
 }
 
 /* Hidden facilitator control: tap or click the BREACH_PROTOCOL title 5 times within 3 seconds. */
@@ -1792,6 +1935,14 @@ function openFacilitatorDialog(){
       <button class="btn ghost" id="closeFac">Close</button>
     </div>
     <div class="fac-divider"></div>
+    <p class="dialog-label">Event leaderboard on GitHub</p>
+    <p class="dialog-text small">Download this device's scores as <b>leaderboard.json</b>, then upload it to the GitHub repository to update the event leaderboard that everyone sees.</p>
+    <div class="feedback" id="publishFeedback" aria-live="polite"></div>
+    <div class="dialog-actions">
+      <button class="btn" id="downloadPubBtn">Download leaderboard file</button>
+      <button class="btn ghost" id="mergePubBtn">Merge in published scores</button>
+    </div>
+    <div class="fac-divider"></div>
     <div class="dialog-actions">
       <button class="btn danger" id="openClearBtn">Clear leaderboard</button>
     </div>`);
@@ -1801,6 +1952,31 @@ function openFacilitatorDialog(){
   input.oninput = ()=>{ btn.disabled = !input.value.trim(); feedback.textContent = ''; feedback.className = 'feedback'; };
   document.getElementById('closeFac').onclick = closeDialog;
   document.getElementById('openClearBtn').onclick = openClearDialog;
+  document.getElementById('downloadPubBtn').onclick = ()=>{
+    const count = downloadPublishedFile();
+    showPublishInstructions(count);
+  };
+  const mergeBtn = document.getElementById('mergePubBtn');
+  mergeBtn.onclick = async ()=>{
+    const pubFeedback = document.getElementById('publishFeedback');
+    mergeBtn.disabled = true;
+    mergeBtn.textContent = 'Loading…';
+    const r = await fetchPublishedLeaderboard();
+    if(r.status !== 'ok'){
+      pubFeedback.className = 'feedback err';
+      pubFeedback.textContent = r.status === 'none'
+        ? 'No event leaderboard has been published yet.'
+        : r.status === 'invalid'
+          ? "The published leaderboard.json couldn't be read. Upload a fresh file from the master device."
+          : "The published leaderboard couldn't be loaded. Check the internet connection.";
+      mergeBtn.textContent = 'Merge in published scores';
+      mergeBtn.disabled = false;
+      return;
+    }
+    const result = mergeRows(r.rows);
+    refreshAfterBoardChange();
+    showImportResult(result, 'Published scores merged');
+  };
   btn.onclick = async ()=>{
     btn.disabled = true;
     btn.textContent = 'Importing…';
@@ -1819,7 +1995,27 @@ function openFacilitatorDialog(){
   input.focus();
 }
 
-function showImportResult(r){
+function showPublishInstructions(count){
+  openDialog(`
+    <h3>Leaderboard file downloaded</h3>
+    <p class="dialog-text">${count === 0
+      ? '<span style="color:var(--red)">This file has no scores. Uploading it will empty the event leaderboard.</span>'
+      : `The file contains ${count === 1 ? '1 score' : `${count} scores`}.`}</p>
+    <ol class="dialog-steps">
+      <li>In the GitHub repository, click <b>Add file</b>, then <b>Upload files</b>.</li>
+      <li>Drag in <b>leaderboard.json</b> and click <b>Commit changes</b>.</li>
+      <li>The event leaderboard updates in a minute or two.</li>
+    </ol>
+    <p class="dialog-text small">If your browser saved it as something like <b>leaderboard (1).json</b>, rename it to <b>leaderboard.json</b> before uploading, or the game won't find it.</p>
+    <div class="dialog-actions">
+      <button class="btn ghost" id="backToFac">Back to facilitator tools</button>
+      <button class="btn ghost" id="closePub">Close</button>
+    </div>`);
+  document.getElementById('backToFac').onclick = openFacilitatorDialog;
+  document.getElementById('closePub').onclick = closeDialog;
+}
+
+function showImportResult(r, title = 'Import complete'){
   const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
   const lines = [`<b style="color:var(--blue)">${r.added ? `Added ${plural(r.added, 'new score', 'new scores')}.` : 'No new scores to add.'}</b>`];
   if(r.skipped) lines.push(`Skipped ${plural(r.skipped, 'score that was', 'scores that were')} already on this board.`);
@@ -1827,7 +2023,7 @@ function showImportResult(r){
   if(r.rejected) lines.push(`<span style="color:var(--red)">Rejected ${plural(r.rejected, 'score that doesn\'t', 'scores that don\'t')} add up.</span>`);
   if(r.fromThisDevice) lines.push('This code came from this device, so there was nothing new to add.');
   openDialog(`
-    <h3>Import complete</h3>
+    <h3>${title}</h3>
     <p class="dialog-text">${lines.join('<br>')}</p>
     <div class="dialog-actions">
       <button class="btn" id="importAnother">Import another code</button>
