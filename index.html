@@ -252,6 +252,8 @@
   .dialog-text.small{ font-size:13px; color:var(--text-dim); }
   .dialog-steps{ margin:0 0 12px; padding-left:20px; font-size:14px; color:var(--text); }
   .dialog-steps li{ margin-bottom:4px; }
+  .label-row{ display:flex; gap:10px; align-items:center; }
+  .label-row .dialog-input{ margin:0; flex:1; min-width:0; text-transform:uppercase; }
   .fac-divider{ border-top:1px solid var(--line); margin:16px 0 14px; }
   .lb-gap{ text-align:center; color:var(--text-dim); font-family:var(--mono); font-size:12px; padding:2px 0; }
 
@@ -260,6 +262,11 @@
   ul.rules{ color:var(--text-dim); font-size:14px; padding-left:20px; }
   ul.rules li{ margin-bottom:6px; }
   .name-row{ margin-bottom:18px; }
+  .name-warn{ font-size:13px; color:var(--red); margin-top:8px; min-height:0; }
+  .name-warn:empty{ display:none; }
+  .device-tag{ font-family:var(--mono); font-size:12px; color:var(--text-dim); margin:8px 0 0; }
+  .device-tag:empty{ display:none; }
+  .device-tag b{ color:var(--text); }
   .name-row label{ font-family:var(--mono); font-size:11px; letter-spacing:.1em; color:var(--text-dim); text-transform:uppercase; display:block; margin-bottom:8px; }
   .name-row input[type=text]{
     width:100%; background:#04060E; border:1px solid var(--line); border-radius:4px;
@@ -284,7 +291,12 @@
   .lb-row.head{ color:var(--text-dim); font-size:11px; text-transform:uppercase; letter-spacing:.06em; }
   .lb-row.me{ background:rgba(0,229,255,0.08); border-left:2px solid var(--blue); }
   .lb-rank{ color:var(--red); font-weight:700; }
-  .lb-name{ color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .lb-name{ color:var(--text); display:flex; align-items:center; gap:6px; min-width:0; }
+  .lb-name-text{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+  .lb-label{
+    flex:none; font-size:10px; line-height:1.5; color:var(--text-dim); border:1px solid var(--line);
+    border-radius:3px; padding:0 4px; letter-spacing:.04em;
+  }
   .lb-time{ color:var(--blue); text-align:right; }
   .lb-hints{ color:var(--text-dim); text-align:right; }
   .lb-note{ font-size:12px; color:var(--text-dim); margin-top:10px; }
@@ -333,6 +345,7 @@
     padding:18px 18px 8px; margin:18px 0; box-shadow: inset 0 0 30px rgba(0,229,255,0.05);
   }
   .score-head{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+  .score-head .lb-label{ font-size:12px; padding:1px 6px; }
   .score-team{ font-family:var(--mono); font-size:16px; font-weight:700; color:var(--text); letter-spacing:.06em; word-break:break-all; }
   .score-level{ font-family:var(--mono); font-size:12px; padding:3px 8px; border-radius:3px; border:1px solid var(--blue); color:var(--blue); }
   .score-level.lvl-ult{ border-color:var(--red); color:var(--red); }
@@ -1061,7 +1074,9 @@ function renderBrief(){
     </ul>
     <div class="name-row">
       <label for="nameInput">Team / Callsign (shown on the shared leaderboard)</label>
-      <input type="text" id="nameInput" placeholder="e.g. NIGHT-OWLS" maxlength="24" value="${escapeHtml(state.playerName)}">
+      <input type="text" id="nameInput" placeholder="e.g. NIGHT-OWLS" maxlength="24" value="${escapeHtml(state.playerName)}" autocomplete="off" aria-describedby="nameWarn">
+      <div class="name-warn" id="nameWarn" aria-live="polite"></div>
+      <p class="device-tag" id="deviceTag">${getDeviceLabel() ? `This laptop: <b>${escapeHtml(getDeviceLabel())}</b>` : ''}</p>
     </div>
     <div class="level-pick">
       <p class="level-pick-label" id="levelPickLabel">Choose your level</p>
@@ -1087,17 +1102,93 @@ function renderBrief(){
     };
   });
 
+  const nameInput = document.getElementById('nameInput');
+  syncFromSaved();
+  nameInput.oninput = ()=>{ dupConfirmedFor = ''; showNameWarning(); };
+  showNameWarning();
+  loadPublishedNames();
+
   document.getElementById('startBtn').onclick = ()=>{
     if(!state.level) return;
-    const raw = document.getElementById('nameInput').value.trim();
-    state.playerName = raw ? raw.toUpperCase().slice(0,24) : 'UNKNOWN-CADET';
+    const name = nameInput.value.trim().toUpperCase().slice(0,24);
+    const warn = document.getElementById('nameWarn');
+    if(!nameKey(name)){
+      warn.textContent = 'Enter a team name to start.';
+      nameInput.focus();
+      return;
+    }
+    syncFromSaved();
+    if(findNameInUse(name) && dupConfirmedFor !== nameKey(name)){
+      confirmDuplicateName(name);
+      return;
+    }
+    beginMission(name);
+  };
+}
+
+/* ---------- duplicate team names (start screen) ---------- */
+let dupConfirmedFor = '';   // name key a team has confirmed is really theirs
+
+function findNameInUse(name){
+  const k = nameKey(name);
+  if(!k) return null;
+  const local = leaderboard.find(e => nameKey(e.name) === k);
+  if(local) return local;
+  if(publishedNameKeys.has(k)) return { name, published:true };
+  return null;
+}
+function nameInUseText(name){
+  const hit = findNameInUse(name);
+  if(!hit) return '';
+  const where = hit.published ? 'on the event leaderboard' : `on the leaderboard${hit.label ? ` (laptop ${hit.label})` : ''}`;
+  return `${name.trim().toUpperCase()} is already ${where}. If that's your team playing again, carry on. Otherwise, please pick a different name.`;
+}
+function showNameWarning(){
+  const input = document.getElementById('nameInput');
+  const warn = document.getElementById('nameWarn');
+  if(!input || !warn) return;
+  warn.textContent = nameInUseText(input.value);
+}
+// Pull names from the published event leaderboard (if online) so clashes with other laptops are caught too.
+function loadPublishedNames(){
+  if(Date.now() - publishedNamesFetchedAt < 60000) return;
+  publishedNamesFetchedAt = Date.now();
+  fetchPublishedLeaderboard(true).then(r=>{   // quiet: offline is normal for downloaded copies
+    if(r.status !== 'ok') return;
+    publishedNameKeys = new Set(r.entries.map(e => nameKey(e.name)));
+    if(state.screen === 'brief') showNameWarning();
+  });
+}
+function confirmDuplicateName(name){
+  openDialog(`
+    <h3>That name is already taken</h3>
+    <p class="dialog-text">${escapeHtml(nameInUseText(name))}</p>
+    <div class="dialog-actions">
+      <button class="btn" id="dupChange">Choose another name</button>
+      <button class="btn ghost" id="dupSame">We're the same team, start</button>
+    </div>`);
+  document.getElementById('dupChange').onclick = ()=>{
+    closeDialog();
+    const input = document.getElementById('nameInput');
+    if(input){ input.focus(); input.select(); }
+  };
+  document.getElementById('dupSame').onclick = ()=>{
+    closeDialog();
+    dupConfirmedFor = nameKey(name);
+    beginMission(name);
+  };
+  document.getElementById('dupChange').focus({ preventScroll:true });
+}
+
+function beginMission(name){
+    state.playerName = name;
+    dupConfirmedFor = '';
     const n = activeStages().length;
     state.answers = Array(n).fill('');
     state.hintsShown = Array(n).fill(0);
     state.screen = 0;
     startTimer();
     render();
-  };
 }
 
 /* ============ RENDER: STAGE ============ */
@@ -1328,6 +1419,26 @@ const DEVICE_ID = (function(){
 })();
 function makeEntryId(ts){ return DEVICE_ID + '-' + ts.toString(36); }
 
+// Laptop label (e.g. "L3"), set by a facilitator. Shown next to every score this laptop records.
+const LABEL_KEY = 'breachProtocol.deviceLabel.v1';
+let deviceLabelMemory = '';
+function cleanLabel(v){ return String(v || '').toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0,6); }
+function getDeviceLabel(){
+  if(lbStore){ try{ return cleanLabel(lbStore.getItem(LABEL_KEY) || ''); }catch(e){} }
+  return deviceLabelMemory;
+}
+function setDeviceLabel(v){
+  const label = cleanLabel(v);
+  deviceLabelMemory = label;
+  if(lbStore){ try{ label ? lbStore.setItem(LABEL_KEY, label) : lbStore.removeItem(LABEL_KEY); }catch(e){} }
+  return label;
+}
+
+// Duplicate team names: compared ignoring case, spaces and punctuation ("Night Owls" = "NIGHT-OWLS").
+function nameKey(n){ return String(n || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
+let publishedNameKeys = new Set();
+let publishedNamesFetchedAt = 0;
+
 function isValidEntry(e){
   return !!e && typeof e.id==='string' && typeof e.name==='string' && !!LEVELS[e.level] &&
     Number.isFinite(e.timeMs) && Number.isFinite(e.total) && Number.isFinite(e.ts);
@@ -1418,7 +1529,7 @@ async function streamBytes(bytes, transform){
 }
 
 async function exportLeaderboardCode(){
-  const json = JSON.stringify({ v:1, d:DEVICE_ID, e: leaderboard.map(e=>[e.id, e.name, e.level, e.timeMs, e.hints, e.ts]) });
+  const json = JSON.stringify({ v:1, d:DEVICE_ID, e: leaderboard.map(entryToRow) });
   const raw = new TextEncoder().encode(json);
   let packed = null;
   if(typeof CompressionStream !== 'undefined'){
@@ -1451,10 +1562,18 @@ async function decodeLeaderboardCode(code){
 
 function maxHintsFor(level){ return LEVELS[level].stages.reduce((n,s)=> n + s.hints.length, 0); }
 
+// Row format: [id, name, level, timeMs, hints, ts] plus an optional 7th item, the laptop label.
+function entryToRow(e){
+  const row = [e.id, e.name, e.level, e.timeMs, e.hints, e.ts];
+  if(e.label) row.push(e.label);
+  return row;
+}
+
 // Turn one imported row into a leaderboard entry, or null if anything about it doesn't add up.
 function entryFromCode(row){
-  if(!Array.isArray(row) || row.length !== 6) return null;
-  const [id, name, level, timeMs, hints, ts] = row;
+  if(!Array.isArray(row) || (row.length !== 6 && row.length !== 7)) return null;
+  const [id, name, level, timeMs, hints, ts, label] = row;
+  if(row.length === 7 && (typeof label !== 'string' || !label || cleanLabel(label) !== label)) return null;
   if(typeof id !== 'string' || !/^[a-z0-9]{6}-[a-z0-9]{1,12}$/.test(id)) return null;
   if(typeof name !== 'string') return null;
   const cleanName = name.trim().toUpperCase().slice(0,24);
@@ -1464,7 +1583,9 @@ function entryFromCode(row){
   if(!Number.isInteger(hints) || hints < 0 || hints > maxHintsFor(level)) return null;
   if(!Number.isInteger(ts) || ts <= 0) return null;
   const total = computeScore(timeMs, hints, LEVELS[level].multiplier).total;   // recalculated, never trusted
-  return { id, name:cleanName, level, timeMs, hints, total, ts };
+  const entry = { id, name:cleanName, level, timeMs, hints, total, ts };
+  if(label) entry.label = label;
+  return entry;
 }
 
 // Merge rows ([id, name, level, timeMs, hints, ts]) into this device's board. Used by codes and the published file.
@@ -1505,13 +1626,13 @@ function publishedUrl(){ return /^https?:$/.test(location.protocol) ? PUBLISHED_
 
 function buildPublishedFile(){
   const head = { format:PUBLISHED_FORMAT, v:1, updated:new Date().toISOString(), count:leaderboard.length };
-  const rows = leaderboard.map(e => '    ' + JSON.stringify([e.id, e.name, e.level, e.timeMs, e.hints, e.ts]));
+  const rows = leaderboard.map(e => '    ' + JSON.stringify(entryToRow(e)));
   return '{\n' +
     Object.entries(head).map(([k,v]) => `  ${JSON.stringify(k)}: ${JSON.stringify(v)},`).join('\n') +
     '\n  "entries": [\n' + rows.join(',\n') + (rows.length ? '\n' : '') + '  ]\n}\n';
 }
 
-async function fetchPublishedLeaderboard(){
+async function fetchPublishedLeaderboard(quiet = false){
   const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
   const timer = ctrl ? setTimeout(()=> ctrl.abort(), 8000) : null;
   try{
@@ -1534,7 +1655,7 @@ async function fetchPublishedLeaderboard(){
     sortLeaderboard(entries);
     return { status:'ok', entries, rows:data.entries, rejected, updated: typeof data.updated === 'string' ? data.updated : null };
   }catch(e){
-    console.error('Could not load the published leaderboard', e);
+    if(!quiet) console.error('Could not load the published leaderboard', e);
     return { status:'error' };
   }finally{
     if(timer) clearTimeout(timer);
@@ -1616,7 +1737,7 @@ function renderLeaderboardRows(entries, highlightId, limit = 10){
   const lbRow = (e,i)=>`
     <div class="lb-row ${highlightId && e.id===highlightId?'me':''}">
       <span class="lb-rank">${i+1}</span>
-      <span class="lb-name">${escapeHtml(e.name)}</span>
+      <span class="lb-name"><span class="lb-name-text">${escapeHtml(e.name)}</span>${e.label ? `<span class="lb-label" title="Laptop">${escapeHtml(e.label)}</span>` : ''}</span>
       <span class="lb-level lvl-${e.level}">${LEVELS[e.level].short}</span>
       <span class="lb-time">${fmtTime(e.timeMs)}</span>
       <span class="lb-score">${fmtPoints(e.total)}</span>
@@ -1649,7 +1770,7 @@ function renderDone(){
 
     <section class="score-card" aria-label="Final score">
       <div class="score-head">
-        <span class="score-team">${escapeHtml(state.playerName)}</span>
+        <span class="score-team">${escapeHtml(state.playerName)}${getDeviceLabel() ? ` <span class="lb-label" title="Laptop">${escapeHtml(getDeviceLabel())}</span>` : ''}</span>
         <span class="score-level lvl-${state.level}">${L.label}</span>
       </div>
       <div class="score-total"><span class="score-total-num">${fmtPoints(sc.total)}</span><span class="score-total-unit">points</span></div>
@@ -1693,7 +1814,8 @@ function renderDone(){
     `;
     document.getElementById('submitScoreBtn').onclick = ()=>{
       const ts = Date.now();
-      const entry = submitScore({ id:makeEntryId(ts), name:state.playerName, level:state.level, timeMs:elapsed, hints, total:sc.total, ts });
+      const label = getDeviceLabel();
+      const entry = submitScore({ id:makeEntryId(ts), name:state.playerName, level:state.level, timeMs:elapsed, hints, total:sc.total, ts, ...(label ? { label } : {}) });
       state.scoreSubmitted = true;
       state.myEntryId = entry.id;
       lbContent.innerHTML = renderLeaderboardRows(leaderboard, entry.id);
@@ -1927,6 +2049,14 @@ function openFacilitatorDialog(){
   openDialog(`
     <h3>Facilitator tools</h3>
     <p class="dialog-text">This device has ${n === 0 ? 'no saved scores' : n === 1 ? '1 saved score' : `${n} saved scores`}.</p>
+    <label class="dialog-label" for="labelInput">This laptop's label</label>
+    <div class="label-row">
+      <input type="text" id="labelInput" class="dialog-input" maxlength="6" placeholder="e.g. L3" autocomplete="off" spellcheck="false" value="${escapeHtml(getDeviceLabel())}">
+      <button class="btn ghost" id="saveLabelBtn">Save label</button>
+    </div>
+    <div class="feedback" id="labelFeedback" aria-live="polite"></div>
+    <p class="dialog-text small">Shown next to every new score from this laptop, so teams with the same name can be told apart. Letters, numbers and dashes, up to 6.</p>
+    <div class="fac-divider"></div>
     <label class="dialog-label" for="importCodeInput">Paste a leaderboard code from another device</label>
     <textarea id="importCodeInput" class="dialog-input import-input" rows="4" spellcheck="false" autocomplete="off" placeholder="BP1z..."></textarea>
     <div class="feedback" id="importFeedback" aria-live="polite"></div>
@@ -1952,6 +2082,18 @@ function openFacilitatorDialog(){
   input.oninput = ()=>{ btn.disabled = !input.value.trim(); feedback.textContent = ''; feedback.className = 'feedback'; };
   document.getElementById('closeFac').onclick = closeDialog;
   document.getElementById('openClearBtn').onclick = openClearDialog;
+  const labelInput = document.getElementById('labelInput');
+  const saveLabel = ()=>{
+    const label = setDeviceLabel(labelInput.value);
+    labelInput.value = label;
+    const fb = document.getElementById('labelFeedback');
+    fb.className = 'feedback ok';
+    fb.textContent = label ? `✓ Saved. New scores from this laptop will show ${label}.` : '✓ Label removed.';
+    const tag = document.getElementById('deviceTag');
+    if(tag) tag.innerHTML = label ? `This laptop: <b>${escapeHtml(label)}</b>` : '';
+  };
+  document.getElementById('saveLabelBtn').onclick = saveLabel;
+  labelInput.onkeydown = e=>{ if(e.key === 'Enter') saveLabel(); };
   document.getElementById('downloadPubBtn').onclick = ()=>{
     const count = downloadPublishedFile();
     showPublishInstructions(count);
@@ -1992,7 +2134,6 @@ function openFacilitatorDialog(){
       btn.disabled = false;
     }
   };
-  input.focus();
 }
 
 function showPublishInstructions(count){
