@@ -370,6 +370,7 @@
 
   .lb-level{ font-size:11px; color:var(--blue); }
   .lb-level.lvl-ult{ color:var(--red); }
+  .lb-time.lb-inc{ color:var(--text-dim); }
   .lb-score{ color:var(--text); font-weight:700; text-align:right; }
 
   /* ---------- event strip ---------- */
@@ -991,19 +992,35 @@ const LEVELS = {
 const LEVEL_ORDER = ['ks3','ks4','ult'];
 
 /* ============ SCORING ============ */
-const SCORING = { start:5000, perSecond:1, perHint:100, floor:500 };
+// perGiven: penalty when a facilitator gives a team the answer to a stage.
+// perStageIncomplete: points per stage solved when a facilitator ends a run early (no time element).
+const SCORING = { start:5000, perSecond:1, perHint:100, floor:500, perGiven:500, perStageIncomplete:300 };
 
-function computeScore(elapsedMs, hints, multiplier){
+function computeScore(elapsedMs, hints, multiplier, given = 0){
   const seconds = Math.max(0, Math.floor(elapsedMs/1000));
   const timeDeduction = seconds * SCORING.perSecond;
   const hintDeduction = hints * SCORING.perHint;
-  const raw = SCORING.start - timeDeduction - hintDeduction;
+  const givenDeduction = given * SCORING.perGiven;
+  const raw = SCORING.start - timeDeduction - hintDeduction - givenDeduction;
   const base = Math.max(SCORING.floor, raw);
   return {
-    seconds, start:SCORING.start, timeDeduction, hintDeduction,
+    seconds, start:SCORING.start, timeDeduction, hintDeduction, givenDeduction,
     base, floorApplied: raw < SCORING.floor,
     multiplier, total: Math.round(base * multiplier)
   };
+}
+// Score for a run ended early by a facilitator: points per stage solved. Always ranked below finished runs.
+function computePartialScore(solved, hints, multiplier, given = 0){
+  const stagePoints = solved * SCORING.perStageIncomplete;
+  const hintDeduction = hints * SCORING.perHint;
+  const givenDeduction = given * SCORING.perGiven;
+  const base = Math.max(0, stagePoints - hintDeduction - givenDeduction);
+  return { solved, stagePoints, hintDeduction, givenDeduction, base, multiplier, total: Math.round(base * multiplier) };
+}
+function entryTotal(e){
+  const m = LEVELS[e.level].multiplier;
+  return e.incomplete ? computePartialScore(e.solved, e.hints, m, e.given || 0).total
+                      : computeScore(e.timeMs, e.hints, m, e.given || 0).total;
 }
 function fmtPoints(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
 function fmtMultiplier(m){ return '×' + m; }
@@ -1105,6 +1122,8 @@ function freshState(){
     level:null,            // 'ks3' | 'ks4' | 'ult'
     answers:[],
     hintsShown:[],
+    given:[],              // true where a facilitator gave the answer
+    incomplete:false,      // true if a facilitator ended the run early
     startTime:null, endTime:null, timerHandle:null,
     playerName:'',
     scoreSubmitted:false,
@@ -1115,6 +1134,8 @@ let state = freshState();
 
 function activeStages(){ return state.level ? LEVELS[state.level].stages : []; }
 function totalHints(){ return state.hintsShown.reduce((a,b)=>a+b,0); }
+function totalGiven(){ return state.given.filter(Boolean).length; }
+function solvedCount(){ return state.answers.filter(Boolean).length; }
 
 function resetState(){
   if(state.timerHandle) clearInterval(state.timerHandle);
@@ -1147,8 +1168,10 @@ function updateHud(){
   }
   const elapsed = (state.endTime || Date.now()) - state.startTime;
   clock.textContent = fmtTime(elapsed);
-  const sc = computeScore(elapsed, totalHints(), LEVELS[state.level].multiplier);
-  pts.innerHTML = `<b>${fmtPoints(sc.total)}</b> pts`;
+  const m = LEVELS[state.level].multiplier;
+  const total = state.incomplete ? computePartialScore(solvedCount(), totalHints(), m, totalGiven()).total
+                                 : computeScore(elapsed, totalHints(), m, totalGiven()).total;
+  pts.innerHTML = `<b>${fmtPoints(total)}</b> pts`;
 }
 
 /* ============ Cipher helpers ============ */
@@ -1274,7 +1297,9 @@ function renderBrief(){
       <b>How scoring works:</b> every team starts with ${fmtPoints(SCORING.start)} points. The clock takes
       away ${SCORING.perSecond} point every second and each hint costs ${SCORING.perHint}. When you finish,
       your points are multiplied by your level's multiplier. You always keep at least ${SCORING.floor}
-      points before the multiplier, so finishing always counts.
+      points before the multiplier, so finishing always counts. If a facilitator has to give you an answer, it costs
+      ${SCORING.perGiven}. If time runs out, a facilitator can end your run: you'll get ${SCORING.perStageIncomplete} points for each
+      stage solved, but you'll be ranked below every team that finished.
     </div>
     <ul class="rules">
       <li>Each stage teaches one real encryption technique. Solve it to unlock the next.</li>
@@ -1395,6 +1420,8 @@ function beginMission(name){
     const n = activeStages().length;
     state.answers = Array(n).fill('');
     state.hintsShown = Array(n).fill(0);
+    state.given = Array(n).fill(false);
+    state.incomplete = false;
     state.screen = 0;
     startTimer();
     render();
@@ -1607,14 +1634,15 @@ function checkAnswer(idx){
   }
 }
 
-function finishMission(){
+function finishMission(endedEarly = false){
   clearInterval(state.timerHandle);
   state.timerHandle = null;
   state.endTime = Date.now();
+  state.incomplete = !!endedEarly;
   updateHud();
   state.screen = 'done';
   render();
-  launchConfetti();
+  if(!endedEarly) launchConfetti();
 }
 
 /* ============ LEADERBOARD (saved on this device when the browser allows it) ============ */
@@ -1675,7 +1703,10 @@ function isValidEntry(e){
   return !!e && typeof e.id==='string' && typeof e.name==='string' && !!LEVELS[e.level] &&
     Number.isFinite(e.timeMs) && Number.isFinite(e.total) && Number.isFinite(e.ts);
 }
-function sortLeaderboard(list){ return list.sort((a,b)=> b.total-a.total || a.timeMs-b.timeMs); }
+function sortLeaderboard(list){
+  // finished runs always rank above incomplete ones; then by score, then by time
+  return list.sort((a,b)=> (a.incomplete?1:0)-(b.incomplete?1:0) || b.total-a.total || a.timeMs-b.timeMs);
+}
 function readSavedLeaderboard(){
   if(!lbStore) return null;
   try{
@@ -1797,15 +1828,33 @@ function maxHintsFor(level){ return LEVELS[level].stages.reduce((n,s)=> n + stag
 // Row format: [id, name, level, timeMs, hints, ts] plus an optional 7th item, the laptop label.
 function entryToRow(e){
   const row = [e.id, e.name, e.level, e.timeMs, e.hints, e.ts];
-  if(e.label) row.push(e.label);
+  const extra = {};
+  if(e.given) extra.g = e.given;
+  if(e.incomplete) extra.s = e.solved;
+  if(Object.keys(extra).length) row.push(e.label || '', extra);   // 8 items: label (may be empty) + extras
+  else if(e.label) row.push(e.label);
   return row;
 }
 
 // Turn one imported row into a leaderboard entry, or null if anything about it doesn't add up.
 function entryFromCode(row){
-  if(!Array.isArray(row) || (row.length !== 6 && row.length !== 7)) return null;
-  const [id, name, level, timeMs, hints, ts, label] = row;
-  if(row.length === 7 && (typeof label !== 'string' || !label || cleanLabel(label) !== label)) return null;
+  if(!Array.isArray(row) || row.length < 6 || row.length > 8) return null;
+  const [id, name, level, timeMs, hints, ts, label, extra] = row;
+  if(row.length >= 7){
+    if(typeof label !== 'string' || cleanLabel(label) !== label) return null;
+    if(row.length === 7 && !label) return null;
+  }
+  if(!LEVELS[level]) return null;
+  const n = LEVELS[level].stages.length;
+  let given = 0, incomplete = false, solved = 0;
+  if(row.length === 8){
+    if(!extra || typeof extra !== 'object' || Array.isArray(extra)) return null;
+    const keys = Object.keys(extra);
+    if(!keys.length || keys.some(k => k !== 'g' && k !== 's')) return null;
+    if('g' in extra){ if(!Number.isInteger(extra.g) || extra.g < 1 || extra.g > n) return null; given = extra.g; }
+    if('s' in extra){ if(!Number.isInteger(extra.s) || extra.s < 0 || extra.s >= n) return null; incomplete = true; solved = extra.s; }
+    if(incomplete && given > solved) return null;
+  }
   if(typeof id !== 'string' || !/^[a-z0-9]{6}-[a-z0-9]{1,12}$/.test(id)) return null;
   if(typeof name !== 'string') return null;
   const cleanName = name.trim().toUpperCase().slice(0,24);
@@ -1814,9 +1863,11 @@ function entryFromCode(row){
   if(!Number.isInteger(timeMs) || timeMs < 0 || timeMs > 24*3600*1000) return null;
   if(!Number.isInteger(hints) || hints < 0 || hints > maxHintsFor(level)) return null;
   if(!Number.isInteger(ts) || ts <= 0) return null;
-  const total = computeScore(timeMs, hints, LEVELS[level].multiplier).total;   // recalculated, never trusted
-  const entry = { id, name:cleanName, level, timeMs, hints, total, ts };
+  const entry = { id, name:cleanName, level, timeMs, hints, ts };
   if(label) entry.label = label;
+  if(given) entry.given = given;
+  if(incomplete){ entry.incomplete = true; entry.solved = solved; }
+  entry.total = entryTotal(entry);   // recalculated, never trusted
   return entry;
 }
 
@@ -1971,7 +2022,9 @@ function renderLeaderboardRows(entries, highlightId, limit = 10){
       <span class="lb-rank">${i+1}</span>
       <span class="lb-name"><span class="lb-name-text">${escapeHtml(e.name)}</span>${e.label ? `<span class="lb-label" title="Laptop">${escapeHtml(e.label)}</span>` : ''}</span>
       <span class="lb-level lvl-${e.level}">${LEVELS[e.level].short}</span>
-      <span class="lb-time">${fmtTime(e.timeMs)}</span>
+      ${e.incomplete
+        ? `<span class="lb-time lb-inc" title="Incomplete: ${e.solved} of ${LEVELS[e.level].stages.length} stages solved">${e.solved}/${LEVELS[e.level].stages.length}</span>`
+        : `<span class="lb-time">${fmtTime(e.timeMs)}</span>`}
       <span class="lb-score">${fmtPoints(e.total)}</span>
     </div>`;
   let rows = entries.slice(0, limit).map(lbRow).join('');
@@ -1980,6 +2033,7 @@ function renderLeaderboardRows(entries, highlightId, limit = 10){
   return `
     <div class="lb-row head"><span>#</span><span>Team</span><span>Level</span><span>Time</span><span>Score</span></div>
     ${rows || '<div class="lb-status">No scores yet. Be the first.</div>'}
+    ${entries.slice(0, limit).some(e => e.incomplete) ? '<p class="lb-note" style="margin-top:6px;">A score shown with stages (for example 6/11) instead of a time is an incomplete run ended by a facilitator.</p>' : ''}
   `;
 }
 function escapeHtml(str){
@@ -1992,29 +2046,43 @@ function renderDone(){
   const list = activeStages();
   const elapsed = state.endTime - state.startTime;
   const hints = totalHints();
-  const sc = computeScore(elapsed, hints, L.multiplier);
+  const given = totalGiven();
+  const inc = state.incomplete;
+  const solved = solvedCount();
+  const sc = inc ? computePartialScore(solved, hints, L.multiplier, given) : computeScore(elapsed, hints, L.multiplier, given);
+  const minus = v => v ? '−' + fmtPoints(v) : '0';
+  const lines = inc ? `
+        <div class="score-line"><span>Time when ended</span><span>${fmtTime(elapsed)}</span></div>
+        <div class="score-line"><span>Stages solved: ${solved} of ${list.length} × ${SCORING.perStageIncomplete}</span><span>${fmtPoints(sc.stagePoints)}</span></div>
+        <div class="score-line minus"><span>Hints: ${hints} × ${SCORING.perHint}</span><span>${minus(sc.hintDeduction)}</span></div>
+        ${given ? `<div class="score-line minus"><span>Answers given: ${given} × ${SCORING.perGiven}</span><span>${minus(sc.givenDeduction)}</span></div>` : ''}
+        <div class="score-line sub"><span>Base points</span><span>${fmtPoints(sc.base)}</span></div>` : `
+        <div class="score-line"><span>Time</span><span>${fmtTime(elapsed)}</span></div>
+        <div class="score-line"><span>Starting points</span><span>${fmtPoints(sc.start)}</span></div>
+        <div class="score-line minus"><span>Time: ${fmtPoints(sc.seconds)} seconds × ${SCORING.perSecond}</span><span>${minus(sc.timeDeduction)}</span></div>
+        <div class="score-line minus"><span>Hints: ${hints} × ${SCORING.perHint}</span><span>${minus(sc.hintDeduction)}</span></div>
+        ${given ? `<div class="score-line minus"><span>Answers given: ${given} × ${SCORING.perGiven}</span><span>${minus(sc.givenDeduction)}</span></div>` : ''}
+        <div class="score-line sub"><span>Base points${sc.floorApplied ? ` (minimum of ${SCORING.floor} applied)` : ''}</span><span>${fmtPoints(sc.base)}</span></div>`;
 
   document.getElementById('panel').innerHTML = `
-    <div class="center-icon">🔓</div>
-    <p class="stage-eyebrow">Mission Complete</p>
-    <h2 class="stage-title">ALL LOCKS CRACKED</h2>
-    <p class="briefing">The school network is back online. Your team cracked every layer of encryption the intruder left behind.</p>
+    <div class="center-icon">${inc ? '⏱️' : '🔓'}</div>
+    <p class="stage-eyebrow">${inc ? 'Run Ended' : 'Mission Complete'}</p>
+    <h2 class="stage-title">${inc ? "TIME'S UP" : 'ALL LOCKS CRACKED'}</h2>
+    <p class="briefing">${inc
+      ? `A facilitator ended this run. Your team solved ${solved} of ${list.length} stages. Great effort, and well done for everything you cracked.`
+      : 'The school network is back online. Your team cracked every layer of encryption the intruder left behind.'}</p>
 
     <section class="score-card" aria-label="Final score">
       <div class="score-head">
         <span class="score-team">${escapeHtml(state.playerName)}${getDeviceLabel() ? ` <span class="lb-label" title="Laptop">${escapeHtml(getDeviceLabel())}</span>` : ''}</span>
-        <span class="score-level lvl-${state.level}">${L.label}</span>
+        <span class="score-level lvl-${state.level}">${L.label}${inc ? ' · Incomplete' : ''}</span>
       </div>
       <div class="score-total"><span class="score-total-num">${fmtPoints(sc.total)}</span><span class="score-total-unit">points</span></div>
-      <div class="score-lines">
-        <div class="score-line"><span>Time</span><span>${fmtTime(elapsed)}</span></div>
-        <div class="score-line"><span>Starting points</span><span>${fmtPoints(sc.start)}</span></div>
-        <div class="score-line minus"><span>Time: ${fmtPoints(sc.seconds)} seconds × ${SCORING.perSecond}</span><span>${sc.timeDeduction ? '−'+fmtPoints(sc.timeDeduction) : '0'}</span></div>
-        <div class="score-line minus"><span>Hints: ${hints} × ${SCORING.perHint}</span><span>${sc.hintDeduction ? '−'+fmtPoints(sc.hintDeduction) : '0'}</span></div>
-        <div class="score-line sub"><span>Base points${sc.floorApplied ? ` (minimum of ${SCORING.floor} applied)` : ''}</span><span>${fmtPoints(sc.base)}</span></div>
+      <div class="score-lines">${lines}
         <div class="score-line"><span>${L.label} multiplier</span><span>${fmtMultiplier(sc.multiplier)}</span></div>
         <div class="score-line grand"><span>Total score</span><span>${fmtPoints(sc.total)}</span></div>
       </div>
+      ${inc ? '<p class="lb-note" style="margin:8px 0 6px;">Incomplete runs are ranked below every team that finished.</p>' : ''}
     </section>
 
     <div class="leaderboard">
@@ -2028,7 +2096,7 @@ function renderDone(){
     <details class="answers">
       <summary>Show decoded answers</summary>
       <div class="recap">
-        ${list.map((s,i)=>`<div class="recap-row"><span>${i+1}. ${s.name}</span><span>${state.answers[i]}</span></div>`).join('')}
+        ${list.map((s,i)=>`<div class="recap-row"><span>${i+1}. ${s.name}</span><span>${state.answers[i] ? state.answers[i] + (state.given[i] ? ' (given)' : '') : '—'}</span></div>`).join('')}
       </div>
     </details>
 
@@ -2047,7 +2115,8 @@ function renderDone(){
     document.getElementById('submitScoreBtn').onclick = ()=>{
       const ts = Date.now();
       const label = getDeviceLabel();
-      const entry = submitScore({ id:makeEntryId(ts), name:state.playerName, level:state.level, timeMs:elapsed, hints, total:sc.total, ts, ...(label ? { label } : {}) });
+      const entry = submitScore({ id:makeEntryId(ts), name:state.playerName, level:state.level, timeMs:elapsed, hints, total:sc.total, ts,
+        ...(label ? { label } : {}), ...(given ? { given } : {}), ...(inc ? { incomplete:true, solved } : {}) });
       state.scoreSubmitted = true;
       state.myEntryId = entry.id;
       clearRun();
@@ -2173,7 +2242,8 @@ function saveRun(){
   try{
     lbStore.setItem(RUN_KEY, JSON.stringify({
       v:1, level:state.level, playerName:state.playerName, answers:state.answers, hintsShown:state.hintsShown,
-      screen:state.screen, startTime:state.startTime, endTime:state.endTime
+      screen:state.screen, startTime:state.startTime, endTime:state.endTime,
+      given:state.given, incomplete:state.incomplete
     }));
   }catch(e){ console.error('Could not save the current run', e); }
 }
@@ -2188,6 +2258,11 @@ function readRun(){
   const stages = LEVELS[r.level].stages, n = stages.length;
   if(typeof r.playerName !== 'string' || !r.playerName) return bad();
   if(!Array.isArray(r.answers) || r.answers.length !== n || !Array.isArray(r.hintsShown) || r.hintsShown.length !== n) return bad();
+  if(r.given === undefined) r.given = Array(n).fill(false);   // runs saved before this field existed
+  if(!Array.isArray(r.given) || r.given.length !== n || r.given.some(g => typeof g !== 'boolean')) return bad();
+  if(r.given.some((g,i) => g && !r.answers[i])) return bad();
+  r.incomplete = r.incomplete === true;
+  if(r.incomplete && r.screen !== 'done') return bad();
   if(!Number.isFinite(r.startTime) || r.startTime > Date.now() + 60000) return bad();
   const done = r.screen === 'done';
   if(done){
@@ -2201,7 +2276,7 @@ function readRun(){
     if(r.answers[i] !== '' && typeof r.answers[i] !== 'string') return bad();
   }
   // every stage before the current one must be solved, and every saved answer must really be right
-  const mustBeSolved = done ? n : r.screen;
+  const mustBeSolved = done ? (r.incomplete ? 0 : n) : r.screen;
   for(let i = 0; i < n; i++){
     if(i < mustBeSolved && !r.answers[i]) return bad();
     if(r.answers[i] && !answerOk(r.level, i, r.answers[i])) return bad();
@@ -2218,7 +2293,7 @@ function offerResume(){
   openDialog(`
     <h3>Continue the mission?</h3>
     <p class="dialog-text"><b>${escapeHtml(r.playerName)}</b> was playing ${L.label}, ${done
-      ? `and finished in ${time}, but the score hasn't been submitted yet.`
+      ? (r.incomplete ? `and the run was ended early, but the score hasn't been submitted yet.` : `and finished in ${time}, but the score hasn't been submitted yet.`)
       : `on stage ${r.screen + 1} of ${L.stages.length}. The clock has kept running: ${time} so far.`}</p>
     <div class="dialog-actions">
       <button class="btn" id="resumeRunBtn">${done ? 'Go to the score' : 'Continue mission'}</button>
@@ -2235,6 +2310,8 @@ function resumeRun(r){
   state.playerName = r.playerName;
   state.answers = r.answers.slice();
   state.hintsShown = r.hintsShown.slice();
+  state.given = r.given.slice();
+  state.incomplete = r.incomplete;
   state.startTime = r.startTime;
   state.endTime = r.screen === 'done' ? r.endTime : null;
   state.scoreSubmitted = false;
@@ -2369,11 +2446,89 @@ function publishedHtml(r){
 
 function refreshAfterBoardChange(){ if(state.screen === 'done') render(); }
 
+/* ---------- facilitator controls for the run in progress ---------- */
+function runSectionHtml(){
+  if(typeof state.screen !== 'number' || !state.level) return '';
+  const idx = state.screen, L = LEVELS[state.level], n = L.stages.length;
+  const solved = solvedCount();
+  const elapsed = fmtTime(Date.now() - state.startTime);
+  const alreadySolved = !!state.answers[idx];
+  return `
+    <p class="dialog-label">This run</p>
+    <p class="dialog-text"><b>${escapeHtml(state.playerName)}</b>, ${L.label}, on stage ${idx + 1} of ${n}, ${solved} solved, ${elapsed} on the clock.</p>
+    <div class="dialog-actions">
+      <button class="btn" id="giveAnswerBtn" ${alreadySolved ? 'disabled' : ''}>${alreadySolved ? 'Stage already solved' : `Give answer for stage ${idx + 1}`}</button>
+      <button class="btn danger" id="endRunBtn">End run now</button>
+    </div>
+    <p class="dialog-text small">Giving an answer costs the team ${SCORING.perGiven} points. Ending the run scores ${SCORING.perStageIncomplete} points per stage solved, and the team ranks below every team that finished.</p>
+    <div class="fac-divider"></div>`;
+}
+function wireRunSection(){
+  const give = document.getElementById('giveAnswerBtn');
+  if(give) give.onclick = openGiveAnswerDialog;
+  const end = document.getElementById('endRunBtn');
+  if(end) end.onclick = openEndRunDialog;
+}
+
+function openGiveAnswerDialog(){
+  if(typeof state.screen !== 'number') return;
+  const idx = state.screen, s = activeStages()[idx], L = LEVELS[state.level];
+  openDialog(`
+    <h3>Give the answer for stage ${idx + 1}</h3>
+    <p class="dialog-text">${L.label}, stage ${idx + 1}: ${escapeHtml(s.name)}. Type the answer from the facilitator answer sheet. The team will lose ${SCORING.perGiven} points and move on to the next stage.</p>
+    <label class="dialog-label" for="giveAnswerInput">Answer</label>
+    <input type="text" id="giveAnswerInput" class="dialog-input" autocomplete="off" autocapitalize="characters" spellcheck="false">
+    <div class="feedback" id="giveFeedback" aria-live="polite"></div>
+    <div class="dialog-actions">
+      <button class="btn" id="confirmGive" disabled>Give answer</button>
+      <button class="btn ghost" id="cancelGive">Back</button>
+    </div>`);
+  const input = document.getElementById('giveAnswerInput');
+  const btn = document.getElementById('confirmGive');
+  const fb = document.getElementById('giveFeedback');
+  input.oninput = ()=>{ btn.disabled = !input.value.trim(); fb.textContent = ''; fb.className = 'feedback'; };
+  input.onkeydown = e=>{ if(e.key === 'Enter' && !btn.disabled) btn.click(); };
+  document.getElementById('cancelGive').onclick = openFacilitatorDialog;
+  btn.onclick = ()=>{
+    const guess = input.value.trim().toUpperCase();
+    if(typeof state.screen !== 'number' || state.screen !== idx) { closeDialog(); return; }
+    if(!answerOk(state.level, idx, guess)){
+      fb.className = 'feedback err';
+      fb.textContent = `That isn't the answer for ${L.label}, stage ${idx + 1}. Check the answer sheet.`;
+      input.focus(); input.select();
+      return;
+    }
+    state.answers[idx] = guess;
+    state.given[idx] = true;
+    closeDialog();
+    if(idx === activeStages().length - 1) finishMission();
+    else { state.screen = idx + 1; render(); }
+  };
+  input.focus();
+}
+
+function openEndRunDialog(){
+  if(typeof state.screen !== 'number') return;
+  const L = LEVELS[state.level], n = L.stages.length, solved = solvedCount();
+  const sc = computePartialScore(solved, totalHints(), L.multiplier, totalGiven());
+  openDialog(`
+    <h3>End this run?</h3>
+    <p class="dialog-text"><b>${escapeHtml(state.playerName)}</b> has solved ${solved} of ${n} stages. Ending now gives <b>${fmtPoints(sc.total)} points</b>: ${solved} × ${SCORING.perStageIncomplete}, minus hints${totalGiven() ? ' and given answers' : ''}, × ${L.multiplier}. The score is marked Incomplete and ranks below every team that finished. This can't be undone.</p>
+    <div class="dialog-actions">
+      <button class="btn danger" id="confirmEndRun">End run</button>
+      <button class="btn ghost" id="cancelEndRun">Back</button>
+    </div>`);
+  document.getElementById('cancelEndRun').onclick = openFacilitatorDialog;
+  document.getElementById('confirmEndRun').onclick = ()=>{ closeDialog(); finishMission(true); };
+  document.getElementById('cancelEndRun').focus({ preventScroll:true });
+}
+
 function openFacilitatorDialog(){
   syncFromSaved();
   const n = leaderboard.length;
   openDialog(`
     <h3>Facilitator tools</h3>
+    ${runSectionHtml()}
     <p class="dialog-text">This device has ${n === 0 ? 'no saved scores' : n === 1 ? '1 saved score' : `${n} saved scores`}.</p>
     <label class="dialog-label" for="labelInput">This laptop's label</label>
     <div class="label-row">
@@ -2408,6 +2563,7 @@ function openFacilitatorDialog(){
   input.oninput = ()=>{ btn.disabled = !input.value.trim(); feedback.textContent = ''; feedback.className = 'feedback'; };
   document.getElementById('closeFac').onclick = closeDialog;
   document.getElementById('openClearBtn').onclick = openClearDialog;
+  wireRunSection();
   const labelInput = document.getElementById('labelInput');
   const saveLabel = ()=>{
     const label = setDeviceLabel(labelInput.value);
