@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,7 +15,7 @@
     --red:#FF2145;
     --red-dim:#7A1030;
     --text:#E7F6FF;
-    --text-dim:#6E7DA3;
+    --text-dim:#7B8AB0;   /* 4.5:1 or better on every background used (WCAG AA) */
     --ok:#39FF88;
     --violet:#B45CFF;
     --mono: ui-monospace, 'SF Mono', 'Cascadia Code', Consolas, 'Roboto Mono', monospace;
@@ -64,7 +64,7 @@
     text-shadow: 1px 0 var(--red), -1px 0 var(--blue);
   }
   .brand h1{ user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; touch-action:manipulation; -webkit-tap-highlight-color:transparent; cursor:default; }
-  .brand h1 .glitch{ color:var(--blue); text-shadow:0 0 8px var(--blue); animation: blink 1.6s steps(2) infinite; }
+  .brand h1 .glitch{ color:var(--blue); text-shadow:0 0 8px var(--blue); animation: blink 1.6s steps(2) 3;   /* stops after about 5 seconds (WCAG 2.2.2) */ }
   @keyframes blink{ 50%{ opacity:0.2; } }
 
   .status{ display:flex; align-items:center; gap:18px; }
@@ -161,8 +161,17 @@
     background:#04060E; border:1px solid var(--line); border-radius:4px; padding:14px 16px; margin-bottom:18px;
   }
   .morse-ref-title{ font-family:var(--mono); font-size:11px; letter-spacing:.1em; color:var(--red); text-transform:uppercase; margin-bottom:10px; }
-  .morse-grid{ display:flex; flex-wrap:wrap; gap:8px 14px; }
-  .morse-chip{ font-family:var(--mono); font-size:12px; color:var(--text-dim); white-space:nowrap; }
+  body, input, textarea, button, select{ font-variant-ligatures:none; font-feature-settings:"liga" 0, "calt" 0; }
+  /* Morse drawn as shapes, identical on every computer: round dots sit low, dashes are raised bars */
+  .morse{ display:inline-block; line-height:1.6; }
+  .morse .m-grp{ display:inline-block; white-space:nowrap; margin:0 0.32em; }
+  .morse .m-dot, .morse .m-dash{ display:inline-block; background:currentColor; margin:0 0.09em; }
+  .morse .m-dot{ width:0.32em; height:0.32em; border-radius:50%; vertical-align:baseline; }
+  .morse .m-dash{ width:0.9em; height:0.2em; border-radius:0.1em; vertical-align:0.34em; }
+  .cipher-text .morse .m-dot, .cipher-text .morse .m-dash{ box-shadow:0 0 8px rgba(0,229,255,.55); }
+  .morse-chip .morse{ color:var(--text); font-size:15px; margin-left:8px; }
+  .morse-grid{ display:flex; flex-wrap:wrap; gap:10px 20px; }
+  .morse-chip{ font-family:var(--mono); font-size:12px; color:var(--text-dim); white-space:nowrap; display:inline-flex; align-items:baseline; }
   .morse-chip b{ color:var(--blue); }
 
   .recap{ background:#04060E; border:1px solid var(--line); border-radius:4px; padding:16px; margin-bottom:18px; }
@@ -225,9 +234,10 @@
   .tk-steps li{ margin-bottom:4px; }
   .tk-steps b{ color:var(--blue); }
   .tk-sub{ font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--red); margin:14px 0 6px; }
-  .modal td.tk-key{ color:var(--red); font-weight:700; }
+  .modal .tk-key{ color:var(--red); font-weight:700; }
   .modal td.tk-letter{ color:var(--text); font-weight:700; }
-  .modal td.tk-morse{ color:var(--text); font-weight:700; font-size:15px; letter-spacing:.12em; }
+  .modal td.tk-morse{ color:var(--text); font-size:16px; }
+  .tk-example .morse{ font-size:15px; color:var(--text); }
   table + .tk-how{ margin-top:8px; }
   .tk-short{ display:none; }
   @media (max-width:640px){
@@ -319,7 +329,7 @@
     font-family:var(--mono); font-size:13px; padding:8px 10px; border-bottom:1px solid var(--line);
   }
   .lb-row.head{ color:var(--text-dim); font-size:11px; text-transform:uppercase; letter-spacing:.06em; }
-  .lb-row.me{ background:rgba(0,229,255,0.08); border-left:2px solid var(--blue); }
+  .lb-row.me{ background:rgba(0,229,255,0.05); border-left:2px solid var(--blue); }
   .lb-rank{ color:var(--red); font-weight:700; }
   .lb-name{ color:var(--text); display:flex; align-items:center; gap:6px; min-width:0; }
   .lb-name-text{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
@@ -345,6 +355,10 @@
   .level-pick{ margin-bottom:18px; }
   .level-pick-label{ font-family:var(--mono); font-size:11px; letter-spacing:.1em; color:var(--text-dim); text-transform:uppercase; margin:0 0 8px; }
   .level-grid{ display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; }
+  .level-grid.mode-grid{ grid-template-columns:repeat(2, 1fr); }
+  .mode-practice .level-mult{ display:none; }
+  .aux-left{ display:flex; gap:10px; flex-wrap:wrap; }
+  [hidden]{ display:none !important; }
   .level-card{
     display:flex; flex-direction:column; gap:4px; text-align:left; cursor:pointer;
     background:var(--bg-panel-2); color:var(--text); border:1px solid var(--line); border-radius:4px;
@@ -403,15 +417,20 @@
   .lb-time.lb-inc{ color:var(--text-dim); }
   .lb-score{ color:var(--text); font-weight:700; text-align:right; }
 
-  /* ---------- event strip ---------- */
-  .event-strip{
-    margin-top:22px; text-align:center; font-family:var(--mono); font-size:12px; letter-spacing:.04em;
-    color:var(--violet);
-  }
-  .event-strip b{ color:var(--text); font-weight:700; }
 
+  .sr-only{
+    position:absolute !important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden;
+    clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
+  button:focus-visible, a:focus-visible, [tabindex]:focus-visible, .level-card:focus-visible, input[type=range]:focus-visible{
+    outline:2px solid var(--blue); outline-offset:2px;
+  }
+  .modal:focus{ outline:none; }
+  .modal:focus-visible{ outline:2px solid var(--blue); outline-offset:-2px; }
+  .tk-scroll:focus-visible{ outline:2px solid var(--blue); outline-offset:2px; }
   @media (prefers-reduced-motion: reduce){
-    .node, .wire .fill, .morse-light, .confetti, .glitch, .level-card{ transition:none !important; animation:none !important; }
+    .node, .wire .fill, .confetti, .glitch, .level-card, .btn{ transition:none !important; animation:none !important; }
+    .confetti{ display:none; }
   }
 
   @media (max-width:560px){
@@ -425,6 +444,7 @@
     .org-bar .logo-stem{ height:48px; padding:7px 10px; }
     .org-bar .logo-caa{ height:48px; }
     .level-grid{ grid-template-columns:1fr; }
+    .level-grid.mode-grid{ grid-template-columns:1fr; }
     .score-total-num{ font-size:44px; }
     .lb-row{ grid-template-columns:20px 1fr 38px 48px 54px; gap:6px; font-size:12px; padding:8px 6px; }
     .lb-row.head{ font-size:10px; letter-spacing:0; }
@@ -446,24 +466,25 @@
   <header class="topbar">
     <div class="brand">
       <span class="eyebrow">School Network Recovery</span>
-      <h1 id="brandTitle">BREACH<span class="glitch">_</span>PROTOCOL</h1>
+      <h1 id="brandTitle" aria-label="Breach Protocol">BREACH<span class="glitch" aria-hidden="true">_</span>PROTOCOL</h1>
     </div>
     <div class="status">
-      <div class="clock" id="clock" aria-label="Mission time">00:00</div>
-      <div class="points-live" id="livePoints" aria-label="Points if you finished now" title="Points if you finished now"><b>—</b> pts</div>
+      <div class="clock" id="clock" role="timer" aria-label="Mission time">00:00</div>
+      <div class="points-live" id="livePoints" title="Points if you finished now"><span class="sr-only">Points if you finished now: </span><b>—</b> pts</div>
       <button class="restart-btn" id="restartBtn">Restart</button>
     </div>
   </header>
 
-  <div class="trace" id="trace"></div>
+  <main id="main">
+    <div class="trace" id="trace" role="img" aria-label="Progress"></div>
 
-  <div class="panel" id="panel"></div>
-
-  <footer class="event-strip">Made for the <b>Cyber Switchup 2026</b> final at Leeds Trinity University</footer>
+    <div class="panel" id="panel"></div>
+  </main>
+  <div class="sr-only" id="srAnnounce" aria-live="polite" aria-atomic="true"></div>
 </div>
 
 <div class="modal-backdrop" id="modalBackdrop">
-  <div class="modal" id="modalContent"></div>
+  <div class="modal" id="modalContent" role="dialog" aria-modal="true" tabindex="-1"></div>
 </div>
 
 <script>
@@ -485,6 +506,7 @@ const KS3_STAGES = [
       "JPVGLdi1LDyNcWfxZhkbIX-RhYwOowemwustonjRwoF2kdoOuPXAIbcsLM5keUaxEWQZ2YQ6tV4"
     ],
     "hintCount": 2,
+    "answerEnc": "_EwdpFk",
     "answerHash": "0ee54fe5e83d6b7b8c3f5a80d9d46429b3e1c497e5158ea4dc275b0bf17ef1f2"
   },
   {
@@ -502,6 +524,7 @@ const KS3_STAGES = [
       "XdhnOjr_pCcrzB1M7tuerGHWvylPfFmgAyMSiWAo2-vVV6a7sWRBSwChG7CSAjpjuPqqW6ANnYcE2FYCy8-VK_ziTsiqzCud3qLr"
     ],
     "hintCount": 2,
+    "answerEnc": "1G6gluo",
     "answerHash": "1898fdd44e689c019629a5bcba04473e76cc30358a3da623503ef80ebf7ed0e1"
   },
   {
@@ -511,7 +534,7 @@ const KS3_STAGES = [
     "difficulty": "Easy",
     "title": "The Blinking Light",
     "briefing": "A light in the server room is blinking on and off. Someone is sending a signal.",
-    "explainer": "<b>Morse code</b> turns each letter into short signals (dots) and long signals (dashes). Press play to watch and hear the message, then use the chart below to turn each group back into a letter.",
+    "explainer": "<b>Morse code</b> turns each letter into short signals (dots) and long signals (dashes). Press play to watch and hear the message, then use the chart below to turn each group back into a letter. Morse code is an <b>encoding</b>, not a cipher: there's no secret key, so anyone with the chart can read it.",
     "cipher": "--- -. .-.. .. -. .",
     "tool": "morsePlayer",
     "hintsEnc": [
@@ -519,6 +542,7 @@ const KS3_STAGES = [
       "0q708P0RmcACABk9bLFTU_tMbDo0OZCswAUt1fCFg-ljyi3T3_XIxcVeRxS4XqG_"
     ],
     "hintCount": 2,
+    "answerEnc": "oTt6JBL0",
     "answerHash": "106fcccdeb45823f1383c6b805a50eac1c3f3079d705c12954b8fa9885b814d7"
   },
   {
@@ -539,6 +563,7 @@ const KS3_STAGES = [
       "Mfi4JYgU1R71CAicgpuZIBx02sbIZ2s874QKEL5i3bCRxSfCiGx_h2sGsz7S3FGvh9PwcRF3bsrYNOrSqDG9sTs7ZgcyecV3Ew2Kfff_tPKu97Il1KC852Oybl5gcMzfFIwKXu0"
     ],
     "hintCount": 2,
+    "answerEnc": "t-s8Ztv3",
     "answerHash": "31189ad4698ac48e04b654233947830cb49e9dc3f6b9e81559fdb7337f28f6cd"
   },
   {
@@ -548,7 +573,7 @@ const KS3_STAGES = [
     "difficulty": "Medium",
     "title": "The Binary String",
     "briefing": "A laptop screen is frozen on a row of 1s and 0s. This is how computers store letters.",
-    "explainer": "Computers store each letter as an 8-digit <b>binary (ASCII)</b> code. Each group of 8 digits is one letter. Open the toolkit and match each group to its letter.",
+    "explainer": "Computers store each letter as an 8-digit <b>binary (ASCII)</b> code. Each group of 8 digits is one letter. Open the toolkit and match each group to its letter. Binary is an <b>encoding</b>, not a cipher: it's simply how computers store text, and anyone can convert it back.",
     "cipher": "01000101 01001101 01000001 01001001 01001100",
     "tool": "binaryTable",
     "hintsEnc": [
@@ -556,6 +581,7 @@ const KS3_STAGES = [
       "iwWKq2fw_4yhKiIMKiXGp8dgRFfVuMY1RUAEMVyeOKB9bvr5jxAWxMwHgkBGwCBvhUkb88VBLHQxvKFCROzCtq76D3w"
     ],
     "hintCount": 2,
+    "answerEnc": "arbJhyc",
     "answerHash": "3b225bfcda3c998a956f2310abb09d962cb6e01f1426a0be45e7a23cf6157415"
   },
   {
@@ -574,6 +600,7 @@ const KS3_STAGES = [
       "mbHHtpEG2dmDhMmgDbITYptXsmih03l0iRp1yCpanDqTdbre7OICxrn0rWn1jNaQEM7GTs41HCXjkfob-cEZDfIZIZEU3UFW"
     ],
     "hintCount": 2,
+    "answerEnc": "VxtnZts",
     "answerHash": "b72eaebc61b4da88f4116846f33abf2d35ee9e2eb8ae19514a303e69c0d9786e"
   },
   {
@@ -592,6 +619,7 @@ const KS3_STAGES = [
       "es0wfnNhm4fal2fREfPh7H33jsqLMejY2Qh1IKhZdD9aDEXhZNZjxGtbKNQFRfMpSqN1gpOWgBdgIi-A8kaUxvtYe8_RBo3vsFPyAsT0BM0xre7oIBqjKXNWAtbJmB3KX40EllI"
     ],
     "hintCount": 2,
+    "answerEnc": "sEZKAjgw",
     "answerHash": "dc65293aff3851b993cc1b938c27d59e091b3aa7ecca2f1011a4960b0b33c712"
   },
   {
@@ -609,6 +637,7 @@ const KS3_STAGES = [
       "PGyGiolJw9lu-ea2g6dv1lHDX5oOHYdtzBmKhEsC_2mlNLaml3Vdx96MwcbUlfVWcRJ271Z7TpEcIT5bBYxiAzEr8zc_yGmU02kA1G51sidvTrrB"
     ],
     "hintCount": 2,
+    "answerEnc": "U7nh0yTpMw",
     "answerHash": "5f309254117095fb0a56897cd47d90724d6ce4ba3cc09b682736ecaa0ed809e1"
   }
 ];
@@ -629,6 +658,7 @@ const KS4_STAGES = [
       "sTZx2L4xSxVuc-2iIuvvi3CswJoUXo83LDYxWfC-QUAX8dSuG8ZBNh9sgh3oLXfQtZBsSDakpjM"
     ],
     "hintCount": 2,
+    "answerEnc": "iU7sehdLT38",
     "answerHash": "ac79f1b199b61da06d6f8b9759343e440f651ee0d9eed8f016c65cbe304331a4"
   },
   {
@@ -646,6 +676,7 @@ const KS4_STAGES = [
       "CW_I-AkxodjmXVy-nRaUupq_WIBIDzOcWutLqHplmSQKS9jmyX2saLCg-3LZJGkKEceUzw9pr2o8bIsCNvwo9KknmRsJ7Am3gPh3LMlm"
     ],
     "hintCount": 2,
+    "answerEnc": "xIKhmxRzWlI",
     "answerHash": "3b900bf487b623d8087559ec61081e9d063c4ca92b8a3ee30401e245ce1d316b"
   },
   {
@@ -655,7 +686,7 @@ const KS4_STAGES = [
     "difficulty": "Easy",
     "title": "The Blinking Light",
     "briefing": "An old desk lamp is blinking on and off in a pattern. It's signalling something.",
-    "explainer": "<b>Morse code</b> represents each letter as a sequence of short signals (dots) and long signals (dashes). Press play to watch the light blink the message, and use the reference chart below to translate it.",
+    "explainer": "<b>Morse code</b> represents each letter as a sequence of short signals (dots) and long signals (dashes). Press play to watch the light blink the message, and use the reference chart below to translate it. Morse code is an <b>encoding</b>, not a cipher: there's no secret key, so anyone with the chart can read it.",
     "cipher": "..- -. .-.. --- -.-. -.-",
     "tool": "morsePlayer",
     "hintsEnc": [
@@ -663,6 +694,7 @@ const KS4_STAGES = [
       "8trXTc2J8SkYk3iJeulBrrmko8oBNb64RfxwcCWLan4SCSUsEw75cDxQNggN2pI5hMoKAOA"
     ],
     "hintCount": 2,
+    "answerEnc": "xj1sEEfu",
     "answerHash": "fbf989ae9966f958f49152c50e11e6b0546eb7311e85b1de7e21a14912a7d9ea"
   },
   {
@@ -683,6 +715,7 @@ const KS4_STAGES = [
       "21-ubATLjW6u7tF8mJCXMayiFOgAB8G1iPTWmIsjV1RKT2i4FjTC_AuRUCP-H2vItCdpn-uc8PxBWWDftaXithK4w4KWj_AKiVY0pWl4QloeBQwXHmWGczQrQFnMzuUhIp3zIJMEFhHPcczDVDpKtFoS05xribApqqJqifUMKmzzDzi5n8KMn6fjQq6STpJJnQhN"
     ],
     "hintCount": 2,
+    "answerEnc": "NckS4bDFHQ",
     "answerHash": "04be43610002cc05c3f3bd802c0d08b3f674731183e88e75a339ec253b409a40"
   },
   {
@@ -692,7 +725,7 @@ const KS4_STAGES = [
     "difficulty": "Medium",
     "title": "The Binary String",
     "briefing": "The server's screen is frozen on a string of 1s and 0s. This is how computers store letters as text.",
-    "explainer": "Computers store each letter as an 8-digit <b>binary (ASCII)</b> code. Each group of 8 digits is one letter. Find each group in the toolkit's Binary column and read across to its letter, or convert it to decimal yourself (A = 65, B = 66...).",
+    "explainer": "Computers store each letter as an 8-digit <b>binary (ASCII)</b> code. Each group of 8 digits is one letter. Find each group in the toolkit's Binary column and read across to its letter, or convert it to decimal yourself (A = 65, B = 66...). Binary is an <b>encoding</b>, not a cipher: it's simply how computers store text, and anyone can convert it back.",
     "cipher": "01000001 01000011 01000011 01000101 01010011 01010011",
     "tool": "binaryTable",
     "hintsEnc": [
@@ -700,6 +733,7 @@ const KS4_STAGES = [
       "P9ivtlzYSq2oB_ush4QI9LEyPmTGFwAaGi335q5d2Q1vKQvEEsdvPBbszSQF4hbszzimpAZRdiivWDXvuT2xc4VTmsTf3Q"
     ],
     "hintCount": 2,
+    "answerEnc": "9u5lgF4x",
     "answerHash": "36d262d9efee4b539519fe9766a51addd3fe71e369c9aba9d0a55a55d771515e"
   },
   {
@@ -718,6 +752,7 @@ const KS4_STAGES = [
       "0fucnpi-2ICoHjdkQjWDNc-FqGY4cKQx9lRfm50joV4Ir21sHaGevjFs2QHx9yhvLdQU87TVfLsAUKGnQ9Ft_OEukGl-LEXKvNJB7aQEc__TmXNbxl_0nZPHOC2Y9A"
     ],
     "hintCount": 2,
+    "answerEnc": "J-Vhlm83Qw",
     "answerHash": "87a19a236f12341c135c1de709c1f2bafa8eab79c7ecdba40427470f5fbc7924"
   },
   {
@@ -736,6 +771,7 @@ const KS4_STAGES = [
       "X4F9Nv0MvnpwhY5ewvcXotMZjEJnfqMbY1Zj3gaiXrjv_6IPTGQ-XVE0vBrFJgGsRLadM-1VV6sQLb6gzJ1nPsgEvdZheCnMe0-wSe1BY-t22c5aniKCSxk1R9Ixe69pe1Zbl2RdsxU"
     ],
     "hintCount": 2,
+    "answerEnc": "jKzfnaqm",
     "answerHash": "2c142c769af46af978f4028b15c5d3ed9c54bd0e6742714fdfd67ce5f33707cd"
   },
   {
@@ -754,6 +790,7 @@ const KS4_STAGES = [
       "E_rTMGsNOUp6KdlHsX1YG1fX3s3fWPys4yDl359cFQNH6_1Gk43ECiLB9LLGxjYwfclyWCdOolYIEkwug9nzK5yBmjwUH7zUIQeEvPTj2A1Nyr751-49w969Tp2wuKoaYAp9t11JIoB-w0TAw_-FY4rPQP7hyg"
     ],
     "hintCount": 2,
+    "answerEnc": "G2jYZNV2",
     "answerHash": "edcfc80977d7e2958cca0e8396e1df6d86bd5050df0bd6c470545b087f29cf44"
   },
   {
@@ -772,6 +809,7 @@ const KS4_STAGES = [
       "KGZxJdzo22hfVzuIhXSD5bQyR9q8DQROVpAxr4VJ_EsDADmJI4EYqFo-uzRRPMpd9y_p_eEsjP2nALgxPbz0AHmqGb3tUjF7nH2cZjju"
     ],
     "hintCount": 2,
+    "answerEnc": "8bIaeQ2mFSg",
     "answerHash": "8f91c13e4f08ddb61fc8b8c07ec836ff426b4cf87cfed32ecac50d74645e4dd2"
   },
   {
@@ -780,8 +818,8 @@ const KS4_STAGES = [
     "category": "Computer Encoding",
     "difficulty": "Very Hard",
     "title": "The Encoded Transmission",
-    "briefing": "The final signal looks nothing like the others — a string of odd-looking letters, numbers, and symbols computers use to pack text more tightly.",
-    "explainer": "<b>Base64</b> re-groups a message's bits into chunks of 6 instead of 8, then maps every possible 6-bit chunk to one of 64 characters (A–Z, a–z, 0–9, + and /). To decode it: look up each character's 6-bit binary value in the toolkit chart, join all the bits together in order, split that long bit-string back into 8-bit bytes, then convert each byte to a letter using the ASCII chart (same as the Binary Code stage).",
+    "briefing": "The final signal looks nothing like the others — a string of odd-looking letters, numbers, and symbols computers use to send data as plain text.",
+    "explainer": "<b>Base64</b> re-groups a message's bits into chunks of 6 instead of 8, then maps every possible 6-bit chunk to one of 64 characters (A–Z, a–z, 0–9, + and /). To decode it: look up each character's 6-bit binary value in the toolkit chart, join all the bits together in order, split that long bit-string back into 8-bit bytes, then convert each byte to a letter using the ASCII chart (same as the Binary Code stage). Base64 is often mistaken for encryption, but it isn't: there's no key, so anyone can decode it. It's used to send data safely as plain text, not to keep it secret.",
     "cipher": "Uk9VVEVS",
     "tool": "base64Table",
     "hintsEnc": [
@@ -789,6 +827,7 @@ const KS4_STAGES = [
       "sVwYtjstJ1yNU9uUkh2e67CEgPAidflADXLB-yh-YBthphezfQK7I4b4l6sPpU__Z2BXDdT-WEehNctDWWQm228KalWS6YhrXp6Sa8238b7-UwJxOT8qjI5bV6KHpO5ecQ7QL5PAe5vlLyXmNi9l_IJy73jmVLzdroT-vhI4_lDAIQW9eHgcVsK5tL8T-RoqJXT4NVI"
     ],
     "hintCount": 2,
+    "answerEnc": "4fStE3zW",
     "answerHash": "9d0f171c81812f1a6af932ddb684910178448a7ef6a5325963f0fd216bf7d491"
   },
   {
@@ -806,6 +845,7 @@ const KS4_STAGES = [
       "fUSAAvxnCZahOO9vUP8vVBkB_mtu6HCAqG3TDgAdywqh1se4_AoP9RamwQCzgeNbsU7_oGJEcQhFBlSB2KqnO47yuUc3JxBUSoYvPG7CE59TaArz4riL5z6zLttaXhFuvesY6KjD6nJYfbOc2CPAbBHkgcdR8OvtaQXhl3pib-UL0lnZ_oJz-Kgl5nU"
     ],
     "hintCount": 2,
+    "answerEnc": "EYaLtSV_iuU",
     "answerHash": "63c6af288db9b144ac960516a0506072beb35728fcbb363c1d0ac3bc5c503ef8"
   }
 ];
@@ -827,6 +867,7 @@ const ULTIMATE_STAGES = [
       "qUym83Ft3fr_xDNlz--PgN5RFmNDGnmRqRJo8knD_AjftS1-loNtlRCCEBra"
     ],
     "hintCount": 2,
+    "answerEnc": "aJ5OZxLtx-k",
     "answerHash": "6f5b1054ab00e9befd30a842002cc941961f781fa34d9cc262915c48fff79f6e"
   },
   {
@@ -844,6 +885,7 @@ const ULTIMATE_STAGES = [
       "g806MoHYukQBY_raXJyeNpVuhmwhr9lw3_5KRUkvh4Ruj4pcXPkxcZV3rJ4CKYMAjmdgpflcRJSFqnaitQ"
     ],
     "hintCount": 2,
+    "answerEnc": "HKPAl25Liw",
     "answerHash": "af6a60116759577bfed910599d837a80cb80365965d0086ad8cd811d61b05210"
   },
   {
@@ -853,7 +895,7 @@ const ULTIMATE_STAGES = [
     "difficulty": "Tricky",
     "title": "The Faster Signal",
     "briefing": "The signal is faster now, and the chart isn't pinned to the wall any more.",
-    "explainer": "<b>Morse code</b> turns each letter into dots and dashes. Press play to watch and hear the signal. The Morse chart is in the toolkit, not on the page.",
+    "explainer": "<b>Morse code</b> turns each letter into dots and dashes. Press play to watch and hear the signal. The Morse chart is in the toolkit, not on the page. Morse code is an <b>encoding</b>, not a cipher: there's no secret key, so anyone with the chart can read it.",
     "cipher": ".--. .... .. ... .... .. -. --.",
     "morseUnit": 110,
     "inlineChart": false,
@@ -863,6 +905,7 @@ const ULTIMATE_STAGES = [
       "6Hx4w3tFU-wn-d2KJGHKUvZDBM_7QimoGmyfahLHk7qki9M3ZEbxQdNxp4sOJcpXg6zrCxUCZgzch-cwvIMD6a8E0jaHTB3vx-e2Wds"
     ],
     "hintCount": 2,
+    "answerEnc": "BHqp4RWMDl0",
     "answerHash": "fcaa1cc4037b48b509efa818a341f48e7321843d6e939419bb14d7b12cdd66f8"
   },
   {
@@ -883,6 +926,7 @@ const ULTIMATE_STAGES = [
       "TJ5icGyFpwT5Ks0_C0Cvy109U7FbTzAwyzro-UHoOfPDf_meHFoRQMj2DfIXglZIN_9wPxq-1vp8oaoW-Uc0bsg_usD8v_NEvrw9-Tqb8FW-SoDHfYCqIaZl8e3hcKjf0AGIgU6eRQ"
     ],
     "hintCount": 2,
+    "answerEnc": "l5I79ZYIYdE",
     "answerHash": "390dab7b5323a84a0e000013c68c60d0c602e0778b07c1dbc3331dadfa46cc26"
   },
   {
@@ -892,7 +936,7 @@ const ULTIMATE_STAGES = [
     "difficulty": "Hard",
     "title": "The Binary String",
     "briefing": "Another frozen screen full of 1s and 0s.",
-    "explainer": "Each group of 8 <b>binary</b> digits is one letter. Convert each group to a decimal number (the place values are 128, 64, 32, 16, 8, 4, 2, 1), then turn the number into a letter (A = 65). The chart is in the toolkit if you need it.",
+    "explainer": "Each group of 8 <b>binary</b> digits is one letter. Convert each group to a decimal number (the place values are 128, 64, 32, 16, 8, 4, 2, 1), then turn the number into a letter (A = 65). The chart is in the toolkit if you need it. Binary is an <b>encoding</b>, not a way of keeping secrets: it's simply how computers store text, and anyone can convert it back.",
     "cipher": "01000011 01001001 01010000 01001000 01000101 01010010",
     "tool": "binaryTable",
     "hintsEnc": [
@@ -900,6 +944,7 @@ const ULTIMATE_STAGES = [
       "fncWSBlCgwSnShbZqmt60CKXy_SYAaWLdA7tXFslg8wkVATz_jrfnm_hPoG4P-lGjE2CP924uJqe4DAi32oIpv7e8y5yEkKsEQRwEqLrG9t55g"
     ],
     "hintCount": 2,
+    "answerEnc": "NcxLyT6R",
     "answerHash": "1c2f66a527442ea5af3d78c15ab089a1d696754861203678e728e30a2366edff"
   },
   {
@@ -918,6 +963,7 @@ const ULTIMATE_STAGES = [
       "24SRKcJll3_JylRyn9r3PBHxqnqqNB2wPWPvO-UIkusvkp-pfLV4-WV4FK-CGFZByey4rIdC1rc7Tu0uepvA7VIdLJRnamYFZQ"
     ],
     "hintCount": 2,
+    "answerEnc": "JVLgQGsSjw",
     "answerHash": "b43d7de3bf885f819ab129111225ccdd8ddeb53ae403d84a34b6a7aa409fe679"
   },
   {
@@ -936,6 +982,7 @@ const ULTIMATE_STAGES = [
       "NYKxOyPlPgJB10Gr84IeC2MRQwfYp8itNQ1o5jvbbGGn3uha-KVJ5HH-VsRS2SmoyCuPToffRYRIMhIIjfkZ-jMPvc3k78OdAN2wyaC79kWFacVzkyQd8Q"
     ],
     "hintCount": 2,
+    "answerEnc": "_EO6z17A",
     "answerHash": "01c6ae6d474a3ad49d427033507f3e03cac75a227eb32169dd0fb751438e6236"
   },
   {
@@ -954,6 +1001,7 @@ const ULTIMATE_STAGES = [
       "Mb8Fwg1o68htxJb6qu4oHFnJnjjLaOMtanK8QWUJUqkqjDqspm6Z7GXvmOEpM1TGLAzdrTcehkFZS43giuN5rwyXbklqqkXm_VBKxEVbutFO_3vTvqjn8ZI"
     ],
     "hintCount": 2,
+    "answerEnc": "0QvdBKpucEJgipHy",
     "answerHash": "df096c0cf7404ec6a6a342148df720f5ec191b76aab63337c56b4345e4dcf61e"
   },
   {
@@ -972,6 +1020,7 @@ const ULTIMATE_STAGES = [
       "I_ykajdcILwIYNy4w7PmdQH5ZjL11Klt2VTGvsXhWK3U5o7Rtytj52LElXNLbg0N07ZmvQa_xCeHcIDKBh8_wDj40eFbKnVHL3SaSDh7cXzB8IhL9Bf2-NuH84knMaNeybB_Lacw"
     ],
     "hintCount": 2,
+    "answerEnc": "I9aD266lxGnTeg",
     "answerHash": "0da8509c39f5e63defb58cf6cc200f601b32911160c2d38adea5b7f712e69036"
   },
   {
@@ -981,7 +1030,7 @@ const ULTIMATE_STAGES = [
     "difficulty": "Expert",
     "title": "The Padded Transmission",
     "briefing": "The last signal ends with two equals signs. They matter.",
-    "explainer": "<b>Base64</b> turns every 6 bits into one of 64 characters. To decode it, look up each character's 6-bit value in the toolkit, join all the bits together, split them into 8-bit bytes, and turn each byte into a letter (A = 65). The <b>=</b> signs are padding: skip them. The 10 real characters give 60 bits, which makes 7 full bytes plus 4 spare bits that you throw away.",
+    "explainer": "<b>Base64</b> turns every 6 bits into one of 64 characters. To decode it, look up each character's 6-bit value in the toolkit, join all the bits together, split them into 8-bit bytes, and turn each byte into a letter (A = 65). The <b>=</b> signs are padding: skip them. The 10 real characters give 60 bits, which makes 7 full bytes plus 4 spare bits that you throw away. Base64 is an <b>encoding</b>, not a way of keeping secrets: there's no key, so anyone can decode it.",
     "cipher": "RU5DUllQVA==",
     "tool": "base64Table",
     "hintsEnc": [
@@ -989,6 +1038,7 @@ const ULTIMATE_STAGES = [
       "8upgEMwqPV-s2qXB9kwfbS5qY63EdzIzS2OMXTh8Buuo1YSaQXMGo8Ut0gOQX_ajUmtHz6amJ6XbQIBLQrgEQkvudMMdcV9gnyh81v8E556ObrZT552A"
     ],
     "hintCount": 2,
+    "answerEnc": "irQ8Xx5jGg",
     "answerHash": "ddd7c29849dc88998ab3536bc8228a6b123a0e4eb5558e4dd4b3cc588e6ad69b"
   },
   {
@@ -1006,6 +1056,7 @@ const ULTIMATE_STAGES = [
       "M23b9AgJ8UAl6Pz60W61FXcyNGqnIVNsD7KioH_5Zu8rTFKzerkzrqlftZPR3VPMSqWn7CveDxSILJHnXIfrZYS1uOmOn72j4HbVwAbmx1lnu8r78MRI3z1n1JihVHw2n5i5zb7h_P8riZ0EadLRbZbVMSdoQaETHlcIPhI"
     ],
     "hintCount": 2,
+    "answerEnc": "ozGdqxM0n7mT",
     "answerHash": "05d294bb8fe48ad4ccbc03f3d59fbd2c53784ccc889d271ff9834cc44f2ca35a"
   }
 ];
@@ -1153,6 +1204,8 @@ function freshState(){
     answers:[],
     hintsShown:[],
     given:[],              // true where a facilitator gave the answer
+    revealed:[],           // practice: true where the player chose to see the answer
+    mode:null,             // 'practice' | 'challenge' (set on the start screen)
     incomplete:false,      // true if a facilitator ended the run early
     startTime:null, endTime:null, timerHandle:null,
     playerName:'',
@@ -1192,16 +1245,19 @@ function updateHud(){
   const clock = document.getElementById('clock');
   const pts = document.getElementById('livePoints');
   if(!state.startTime || !state.level){
+    pts.hidden = false;
     clock.textContent = '00:00';
-    pts.innerHTML = '<b>—</b> pts';
+    pts.innerHTML = '<span class="sr-only">Points if you finished now: </span><b>—</b> pts';
     return;
   }
   const elapsed = (state.endTime || Date.now()) - state.startTime;
+  pts.hidden = isPractice();
+  if(isPractice()){ clock.textContent = 'Practice'; return; }
   clock.textContent = fmtTime(elapsed);
   const m = LEVELS[state.level].multiplier;
   const total = state.incomplete ? computePartialScore(solvedCount(), totalHints(), m, totalGiven()).total
                                  : computeScore(elapsed, totalHints(), m, totalGiven()).total;
-  pts.innerHTML = `<b>${fmtPoints(total)}</b> pts`;
+  pts.innerHTML = `<span class="sr-only">Points if you finished now: </span><b>${fmtPoints(total)}</b> pts`;
 }
 
 /* ============ Cipher helpers ============ */
@@ -1283,26 +1339,177 @@ function toolkitExtra(s){
   return { rails:s.rails, length:(s.cipher||'').replace(/[\s=]/g,'').length, cipher:s.cipher || '', guided: state.level !== 'ult' };
 }
 
+/* ============ MORSE DRAWING ============ */
+// Draws Morse with shapes (not "." and "-" characters) so fonts can't change how it looks.
+function morseHtml(code){
+  // each letter is kept together; long messages can wrap between letters on narrow screens
+  const letters = String(code).trim().split(/\s+/).map(g =>
+    `<span class="m-grp">${g.split('').map(ch => ch === '.' ? '<span class="m-dot"></span>' : '<span class="m-dash"></span>').join('')}</span>`);
+  return `<span class="morse" aria-hidden="true">${letters.join(' ')}</span>`;
+}
+function morseSpoken(code){ return String(code).split('').map(ch => ch === '.' ? 'dot' : 'dash').join(' '); }
+function morseWithSpeech(code){ return `${morseHtml(code)}<span class="sr-only">${morseSpoken(code)}</span>`; }
+
+/* ============ ACCESSIBILITY HELPERS ============ */
+// Screen readers skip dots and dashes, read 01000001 as a large number and may try to pronounce SLAHO as a word,
+// so each ciphertext gets a spoken version alongside the visual one.
+function cipherSpoken(s){
+  const c = String(s.cipher || '').trim();
+  if(!c) return '';
+  if(/^[.\- ]+$/.test(c)){
+    const groups = c.split(/\s+/).map(g => g.split('').map(x => x === '.' ? 'dot' : 'dash').join(' '));
+    return `Morse code, ${groups.length} letters: ${groups.join('; ')}.`;
+  }
+  if(/^[01 ]+$/.test(c)){
+    const groups = c.split(/\s+/);
+    return `Binary, ${groups.length} groups of 8 digits: ${groups.map(g => g.split('').join(' ')).join('; ')}.`;
+  }
+  if(/^[0-9 ]+$/.test(c)){
+    const pairs = c.split(/\s+/);
+    return `Number pairs, row then column: ${pairs.map(g => g.split('').join(' ')).join('; ')}.`;
+  }
+  if(/[a-z0-9+\/=]/.test(c)){
+    const say = ch => /[A-Z]/.test(ch) ? `capital ${ch}` : /[a-z]/.test(ch) ? `small ${ch}` : /[0-9]/.test(ch) ? ch : ch === '=' ? 'equals sign' : ch === '+' ? 'plus' : ch === '/' ? 'slash' : ch;
+    return `Base64 text, ${c.length} characters: ${c.split('').map(say).join(', ')}.`;
+  }
+  return `Ciphertext, ${c.replace(/\s/g,'').length} letters: ${c.split('').filter(ch => ch !== ' ').join(' ')}.`;
+}
+function announce(text){
+  const el = document.getElementById('srAnnounce');
+  if(!el) return;
+  el.textContent = '';
+  setTimeout(() => { el.textContent = text; }, 60);   // re-set so the same text is announced again
+}
+
 /* ============ RENDER: TRACE ============ */
 function renderTrace(){
   const trace = document.getElementById('trace');
   const list = activeStages();
-  if(!list.length){ trace.innerHTML = ''; return; }
+  if(!list.length){ trace.innerHTML = ''; trace.setAttribute('aria-label', 'Progress'); return; }
   const currentIdx = typeof state.screen === 'number' ? state.screen : -1;
   let html = '';
   for(let i=0;i<list.length;i++){
     const done = !!state.answers[i];   // answers are only stored once verified
-    html += `<div class="node ${done?'done':''} ${currentIdx===i?'active':''}">${i+1}</div>`;
+    html += `<div class="node ${done?'done':''} ${currentIdx===i?'active':''}" aria-hidden="true">${i+1}</div>`;
     if(i<list.length-1) html += `<div class="wire"><div class="fill" style="width:${done?100:0}%"></div></div>`;
   }
   trace.innerHTML = html;
+  const solved = list.filter((_, i) => state.answers[i]).length;
+  trace.setAttribute('aria-label', currentIdx >= 0
+    ? `Progress: stage ${currentIdx + 1} of ${list.length}, ${solved} solved`
+    : `Progress: ${solved} of ${list.length} stages solved`);
+}
+
+/* ============ PLAY MODES ============ */
+// Website mode (the default): Practice (no clock or score, free hints, the answer can be shown) or Challenge (timed, scored).
+// Event mode (competition days): Challenge only, with facilitator wording and team callsigns. Switched on per device in
+// the facilitator panel (saved), or for one visit by adding ?event to the link.
+const EVENT_KEY = 'breachProtocol.eventMode.v1';
+let eventModeMemory = false;
+function eventModeFromUrl(){
+  const q = String(location.search || '') + '&' + String(location.hash || '').replace(/^#/, '');
+  return /(^|[?&])event(=(1|on|true|yes))?(&|$)/i.test(q);
+}
+function eventModeSaved(){
+  if(lbStore){ try{ return lbStore.getItem(EVENT_KEY) === 'on'; }catch(e){} }
+  return eventModeMemory;
+}
+function isEventMode(){ return eventModeFromUrl() || eventModeSaved(); }
+function setEventMode(on){
+  eventModeMemory = !!on;
+  if(lbStore){ try{ on ? lbStore.setItem(EVENT_KEY, 'on') : lbStore.removeItem(EVENT_KEY); }catch(e){} }
+}
+function isPractice(){ return state.mode === 'practice'; }
+
+// Practice can show a stage's answer. In the published file the answer is locked with a key made from the previous
+// stage's answer (like the hints), so it can only be unlocked by someone who has reached that stage.
+function revealAnswer(idx){
+  const s = activeStages()[idx];
+  if(s.answer) return s.answer;
+  if(!s.answerEnc) return '';
+  const prev = idx > 0 ? (state.answers[idx-1] || '') : '';
+  const key = stretchHash(`bp-reveal-v1|${state.level}|${idx}|${prev}`, HASH_ROUNDS.hint);
+  return new TextDecoder().decode(xorStream(key, b64urlToBytes(s.answerEnc)));
+}
+
+function modeExplainerHtml(){
+  if(isPractice()) return `<b>Practice mode:</b> take your time. There's no clock and no score, and hints are free.
+    Once you've used both hints on a stage, you can choose to see the answer.`;
+  const base = `<b>How scoring works:</b> you start with ${fmtPoints(SCORING.start)} points. The clock takes
+    away ${SCORING.perSecond} point every second and each hint costs ${SCORING.perHint}. When you finish,
+    your points are multiplied by your level's multiplier. You always keep at least ${SCORING.floor}
+    points before the multiplier, so finishing always counts.`;
+  if(!isEventMode()) return base;
+  return base + ` If a facilitator has to give you an answer, it costs ${SCORING.perGiven}. If time runs out, a facilitator
+    can end your run: you'll get ${SCORING.perStageIncomplete} points for each stage solved, but you'll be ranked below every team that finished.`;
+}
+function nameLabelText(){
+  return isEventMode() ? 'Team / Callsign (shown on the shared leaderboard)'
+                       : "Nickname or team name (shown on this device's leaderboard; please don't use your real name)";
+}
+
+function renderPracticeDone(){
+  const L = LEVELS[state.level], list = activeStages();
+  const elapsed = state.endTime - state.startTime;
+  const hints = totalHints(), shown = state.revealed.filter(Boolean).length;
+  document.getElementById('panel').innerHTML = `
+    <div class="center-icon" aria-hidden="true">🔓</div>
+    <p class="stage-eyebrow">Practice Complete</p>
+    <h2 class="stage-title">ALL LOCKS CRACKED</h2>
+    <p class="briefing">Well done. You've worked through every stage of ${L.label}${shown ? '' : ' without needing to see a single answer'}.</p>
+    <section class="score-card" aria-label="Practice summary">
+      <div class="score-lines">
+        <div class="score-line"><span>Level</span><span>${L.label}</span></div>
+        <div class="score-line"><span>Time taken</span><span>${fmtTime(elapsed)}</span></div>
+        <div class="score-line"><span>Hints used</span><span>${hints}</span></div>
+        <div class="score-line"><span>Answers shown</span><span>${shown}</span></div>
+      </div>
+    </section>
+    <p class="lb-note">Ready for more? The timed challenge scores your run and puts it on this device's leaderboard.</p>
+    <details class="answers">
+      <summary>Show decoded answers</summary>
+      <div class="recap">
+        ${list.map((s,i)=>`<div class="recap-row"><span>${i+1}. ${s.name}</span><span>${state.answers[i] ? state.answers[i] + (state.revealed[i] ? ' (shown)' : '') : '—'}</span></div>`).join('')}
+      </div>
+    </details>
+    <div class="dialog-actions" style="margin-top:16px;">
+      <button class="btn start" id="tryChallengeBtn">Try the timed challenge</button>
+      <button class="btn ghost" id="practiceAgainBtn">Practise again</button>
+    </div>`;
+  document.getElementById('tryChallengeBtn').onclick = ()=>{
+    const lvl = state.level;
+    resetState();
+    state.mode = 'challenge';
+    state.level = lvl;
+    render();
+    const input = document.getElementById('nameInput');
+    if(input) input.focus();
+  };
+  document.getElementById('practiceAgainBtn').onclick = ()=>{ const lvl = state.level; resetState(); state.level = lvl; render(); };
 }
 
 /* ============ RENDER: BRIEFING + LEVEL PICKER ============ */
 function startLabel(){
-  return state.level ? `Begin ${LEVELS[state.level].label} mission` : 'Choose a level to begin';
+  if(!state.level) return 'Choose a level to begin';
+  const word = isEventMode() ? 'mission' : isPractice() ? 'practice' : 'challenge';
+  return `Begin ${LEVELS[state.level].label} ${word}`;
 }
 function renderBrief(){
+  const ev = isEventMode();
+  if(ev) state.mode = 'challenge';
+  else if(!state.mode) state.mode = 'practice';
+  const modeCards = ev ? '' : `
+    <div class="level-pick">
+      <p class="level-pick-label" id="modePickLabel">Choose how to play</p>
+      <div class="level-grid mode-grid" role="group" aria-labelledby="modePickLabel">
+        ${[['practice','Practice',"No clock and no score. Hints are free, and you can see the answer if you're really stuck."],
+           ['challenge','Challenge',"Against the clock. Hints cost points, and your score goes on this device's leaderboard."]].map(([id,name,blurb]) => `
+          <button type="button" class="level-card mode-card${state.mode===id?' selected':''}" data-mode="${id}" aria-pressed="${state.mode===id}">
+            <span class="level-name">${name}</span>
+            <span class="level-blurb">${blurb}</span>
+          </button>`).join('')}
+      </div>
+    </div>`;
   const cards = LEVEL_ORDER.map(id=>{
     const L = LEVELS[id];
     const sel = state.level===id;
@@ -1314,30 +1521,26 @@ function renderBrief(){
     </button>`;
   }).join('');
 
-  document.getElementById('panel').innerHTML = `
-    <div class="center-icon">🛰️</div>
+  const panelEl = document.getElementById('panel');
+  panelEl.classList.toggle('mode-practice', isPractice());
+  panelEl.innerHTML = `
+    <div class="center-icon" aria-hidden="true">🛰️</div>
     <p class="stage-eyebrow">Incoming Transmission</p>
     <h2 class="stage-title">The School Network Has Been Breached</h2>
     <p class="briefing">
-      Overnight, an intruder locked down the school's server room and scattered encrypted clues
+      Overnight, an intruder locked down the school's server room and scattered coded clues
       through the building. Your team has been called in as <strong>Cyber Cadets</strong> to
-      crack each cipher, in order, and restore the system before the network stays down for good.
+      crack each code, in order, and restore the system before the network stays down for good.
     </p>
-    <div class="explainer">
-      <b>How scoring works:</b> every team starts with ${fmtPoints(SCORING.start)} points. The clock takes
-      away ${SCORING.perSecond} point every second and each hint costs ${SCORING.perHint}. When you finish,
-      your points are multiplied by your level's multiplier. You always keep at least ${SCORING.floor}
-      points before the multiplier, so finishing always counts. If a facilitator has to give you an answer, it costs
-      ${SCORING.perGiven}. If time runs out, a facilitator can end your run: you'll get ${SCORING.perStageIncomplete} points for each
-      stage solved, but you'll be ranked below every team that finished.
-    </div>
+    <div class="explainer" id="modeExplainer">${modeExplainerHtml()}</div>
     <ul class="rules">
-      <li>Each stage teaches one real encryption technique. Solve it to unlock the next.</li>
+      <li>Each stage teaches a real technique. Some are <b>ciphers</b>, which hide a message using a secret method or key. Others are <b>encodings</b>, like Morse code and binary, which anyone can read once they know the system. Solve each one to unlock the next.</li>
       <li>Use the <b>Toolkit</b> button on each stage for reference charts.</li>
       <li>Answers aren't case-sensitive. Type what you decode.</li>
     </ul>
-    <div class="name-row">
-      <label for="nameInput">Team / Callsign (shown on the shared leaderboard)</label>
+    ${modeCards}
+    <div class="name-row" id="nameRow" ${isPractice() ? 'hidden' : ''}>
+      <label for="nameInput" id="nameLabel">${nameLabelText()}</label>
       <input type="text" id="nameInput" placeholder="e.g. NIGHT-OWLS" maxlength="24" value="${escapeHtml(state.playerName)}" autocomplete="off" aria-describedby="nameWarn">
       <div class="name-warn" id="nameWarn" aria-live="polite"></div>
       <p class="device-tag" id="deviceTag">${getDeviceLabel() ? `This laptop: <b>${escapeHtml(getDeviceLabel())}</b>` : ''}</p>
@@ -1349,12 +1552,27 @@ function renderBrief(){
     <button class="btn start" id="startBtn" ${state.level?'':'disabled'}>${startLabel()}</button>
     <button class="btn ghost view-lb" id="viewLbBtn">View leaderboard</button>
   `;
-  document.getElementById('viewLbBtn').onclick = openLeaderboardDialog;
+  document.getElementById('viewLbBtn').onclick = ()=> openLeaderboardDialog();
 
-  document.querySelectorAll('.level-card').forEach(card=>{
+  document.querySelectorAll('.mode-card').forEach(card=>{
+    card.onclick = ()=>{
+      state.mode = card.dataset.mode;
+      document.querySelectorAll('.mode-card').forEach(c=>{
+        const on = c===card;
+        c.classList.toggle('selected', on);
+        c.setAttribute('aria-pressed', on);
+      });
+      panelEl.classList.toggle('mode-practice', isPractice());
+      document.getElementById('modeExplainer').innerHTML = modeExplainerHtml();
+      document.getElementById('nameRow').hidden = isPractice();
+      document.getElementById('startBtn').textContent = startLabel();
+    };
+  });
+
+  document.querySelectorAll('.level-card:not(.mode-card)').forEach(card=>{
     card.onclick = ()=>{
       state.level = card.dataset.level;
-      document.querySelectorAll('.level-card').forEach(c=>{
+      document.querySelectorAll('.level-card:not(.mode-card)').forEach(c=>{
         const on = c===card;
         c.classList.toggle('selected', on);
         c.setAttribute('aria-pressed', on);
@@ -1374,6 +1592,7 @@ function renderBrief(){
 
   document.getElementById('startBtn').onclick = ()=>{
     if(!state.level) return;
+    if(isPractice()){ beginMission('PRACTICE'); return; }
     const name = nameInput.value.trim().toUpperCase().slice(0,24);
     const warn = document.getElementById('nameWarn');
     if(!nameKey(name)){
@@ -1404,7 +1623,7 @@ function findNameInUse(name){
 function nameInUseText(name){
   const hit = findNameInUse(name);
   if(!hit) return '';
-  const where = hit.published ? 'on the event leaderboard' : `on the leaderboard${hit.label ? ` (laptop ${hit.label})` : ''}`;
+  const where = hit.published ? 'on the shared leaderboard' : `on the leaderboard${hit.label ? ` (laptop ${hit.label})` : ''}`;
   return `${name.trim().toUpperCase()} is already ${where}. If that's your team playing again, carry on. Otherwise, please pick a different name.`;
 }
 function showNameWarning(){
@@ -1413,7 +1632,7 @@ function showNameWarning(){
   if(!input || !warn) return;
   warn.textContent = nameInUseText(input.value);
 }
-// Pull names from the published event leaderboard (if online) so clashes with other laptops are caught too.
+// Pull names from the published shared leaderboard (if online) so clashes with other devices are caught too.
 function loadPublishedNames(){
   if(Date.now() - publishedNamesFetchedAt < 60000) return;
   publishedNamesFetchedAt = Date.now();
@@ -1451,6 +1670,7 @@ function beginMission(name){
     state.answers = Array(n).fill('');
     state.hintsShown = Array(n).fill(0);
     state.given = Array(n).fill(false);
+    state.revealed = Array(n).fill(false);
     state.incomplete = false;
     state.screen = 0;
     startTimer();
@@ -1462,6 +1682,7 @@ function hintButtonLabel(idx, s){
   const used = state.hintsShown[idx];
   const total = stageHintCount(s);
   if(used >= total) return `All hints used (${used}/${total})`;
+  if(isPractice()) return `Get a hint (${used}/${total} used)`;
   return `Get a hint: −${SCORING.perHint} pts (${used}/${total} used)`;
 }
 function hintAreaHtml(idx, s){
@@ -1482,15 +1703,15 @@ function renderStage(idx){
         <label for="shiftRange">${showPreview ? 'Shift back by' : 'Test a shift'}: <span id="shiftVal">0</span></label>
         <input type="range" min="0" max="25" value="0" id="shiftRange">
         ${showPreview
-          ? `<div class="shift-preview" id="shiftPreview">${s.cipher}</div>`
+          ? `<div class="shift-preview" id="shiftPreview" aria-live="polite">${s.cipher}</div>`
           : `<div class="wheel-wrap" id="shiftWheel">${caesarWheelHtml(0)}</div>`}
       </div>`;
   } else if(s.tool==='morsePlayer'){
-    const chips = Object.keys(MORSE).map(l => `<span class="morse-chip"><b>${l}</b> ${MORSE[l]}</span>`).join('');
+    const chips = Object.keys(MORSE).map(l => `<span class="morse-chip"><b>${l}</b>${morseWithSpeech(MORSE[l])}</span>`).join('');
     toolHtml = `
       <div class="morse-flash-wrap">
-        <div class="morse-light" id="morseLight"></div>
-        <button class="play-btn" id="playMorse">▶ Play Signal</button>
+        <div class="morse-light" id="morseLight" aria-hidden="true"></div>
+        <button class="play-btn" id="playMorse"><span aria-hidden="true">▶</span> Play Signal</button>
       </div>
       ${s.inlineChart === false ? '' : `
       <div class="morse-ref">
@@ -1509,7 +1730,8 @@ function renderStage(idx){
 
   const cipherBlock = s.cipher ? `
     <div class="cipher-box">
-      <div class="cipher-text">${s.cipher}</div>
+      <div class="cipher-text" aria-hidden="true">${s.key === 'morse' ? morseHtml(s.cipher) : s.cipher}</div>
+      <span class="sr-only">${cipherSpoken(s)}</span>
       ${stageKeyword(s, idx) ? `<div class="cipher-sub">${s.keywordLabel || 'Keyword'}: ${stageKeyword(s, idx)}</div>` : ''}
     </div>` : '';
 
@@ -1522,15 +1744,18 @@ function renderStage(idx){
     ${cipherBlock}
     ${toolHtml}
     <div class="answer-row">
-      <input type="text" id="answerInput" placeholder="Type the decoded word..." autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Your answer">
+      <input type="text" id="answerInput" placeholder="Type the decoded word..." autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Answer for stage ${idx+1}" aria-describedby="feedback">
       <button class="btn" id="submitBtn">Decrypt</button>
     </div>
     <div class="feedback" id="feedback" aria-live="polite"></div>
     <div class="aux-row">
-      <button class="btn ghost" id="hintBtn" ${outOfHints?'disabled':''}>${hintButtonLabel(idx, s)}</button>
+      <div class="aux-left">
+        <button class="btn ghost" id="hintBtn" ${outOfHints?'disabled':''}>${hintButtonLabel(idx, s)}</button>
+        ${isPractice() ? `<button class="btn ghost" id="revealBtn" ${outOfHints && !state.answers[idx] ? '' : 'hidden'}>Show the answer</button>` : ''}
+      </div>
       ${idx>0 ? `<button class="btn ghost" id="backBtn">← Previous</button>` : '<span></span>'}
     </div>
-    <div class="hint-area" id="hintArea">${hintAreaHtml(idx, s)}</div>
+    <div class="hint-area" id="hintArea" aria-live="polite">${hintAreaHtml(idx, s)}</div>
   `;
 
   if(state.answers[idx]) document.getElementById('answerInput').value = state.answers[idx];
@@ -1557,6 +1782,20 @@ function renderStage(idx){
   document.getElementById('submitBtn').onclick = ()=> checkAnswer(idx);
   document.getElementById('answerInput').addEventListener('keydown', e=>{ if(e.key==='Enter') checkAnswer(idx); });
   document.getElementById('hintBtn').onclick = ()=> showHint(idx);
+  const revealBtn = document.getElementById('revealBtn');
+  if(revealBtn) revealBtn.onclick = ()=>{
+    const answer = revealAnswer(idx);
+    if(!answer) return;
+    state.revealed[idx] = true;
+    const input = document.getElementById('answerInput');
+    input.value = answer;
+    const fb = document.getElementById('feedback');
+    fb.className = 'feedback ok';
+    fb.textContent = `The answer is ${answer}. Look back at the hints to see how it was decoded, then press Decrypt to carry on.`;
+    revealBtn.hidden = true;
+    saveRun();
+    focusAnswer();
+  };
   if(idx>0) document.getElementById('backBtn').onclick = ()=>{ state.screen = idx-1; render(); };
   focusAnswer();
 }
@@ -1634,6 +1873,8 @@ function showHint(idx){
   const btn = document.getElementById('hintBtn');
   btn.textContent = hintButtonLabel(idx, s);
   btn.disabled = state.hintsShown[idx] >= stageHintCount(s);
+  const revealBtn = document.getElementById('revealBtn');
+  if(revealBtn && btn.disabled && !state.answers[idx]) revealBtn.hidden = false;
   updateHud();
   saveRun();
   focusAnswer();
@@ -1796,7 +2037,7 @@ function leaderboardNote(){
 // Format: BP1z.<base64url of deflate-raw JSON>.<checksum>   (BP1j = uncompressed fallback)
 // JSON: { v:1, d:deviceId, e:[[id, name, level, timeMs, hints, ts], ...] }
 // Totals are NOT in the code: the importing device recalculates them from time, hints and level.
-const CODE_SALT = 'breach-protocol/cyber-switchup';
+const CODE_SALT = 'breach-protocol/cyber-switchup';   // internal only; changing it would stop older codes importing
 
 function codeChecksum(str){
   let h = 0x811c9dc5;   // FNV-1a, 32-bit
@@ -1928,7 +2169,7 @@ async function importLeaderboardCode(code){
   return result;
 }
 
-/* ============ PUBLISHED EVENT LEADERBOARD (leaderboard.json in the GitHub repository) ============ */
+/* ============ PUBLISHED SHARED LEADERBOARD (leaderboard.json next to the game on the website) ============ */
 // The facilitator downloads leaderboard.json from the master device and uploads it to the repository.
 // Every copy of the game that's online can then read it. Nothing is ever written to GitHub from the page.
 const PUBLISHED_FILE = 'leaderboard.json';
@@ -2048,21 +2289,24 @@ async function copyCode(ta, status){
 
 function renderLeaderboardRows(entries, highlightId, limit = 10){
   const lbRow = (e,i)=>`
-    <div class="lb-row ${highlightId && e.id===highlightId?'me':''}">
-      <span class="lb-rank">${i+1}</span>
-      <span class="lb-name"><span class="lb-name-text">${escapeHtml(e.name)}</span>${e.label ? `<span class="lb-label" title="Laptop">${escapeHtml(e.label)}</span>` : ''}</span>
-      <span class="lb-level lvl-${e.level}">${LEVELS[e.level].short}</span>
+    <div class="lb-row ${highlightId && e.id===highlightId?'me':''}" role="row">
+      <span class="lb-rank" role="cell">${i+1}</span>
+      <span class="lb-name" role="cell"><span class="lb-name-text">${escapeHtml(e.name)}</span>${e.label ? `<span class="lb-label" title="Laptop"><span class="sr-only">laptop </span>${escapeHtml(e.label)}</span>` : ''}${highlightId && e.id===highlightId ? '<span class="sr-only"> (your team)</span>' : ''}</span>
+      <span class="lb-level lvl-${e.level}" role="cell"><span aria-hidden="true">${LEVELS[e.level].short}</span><span class="sr-only">${LEVELS[e.level].label}</span></span>
       ${e.incomplete
-        ? `<span class="lb-time lb-inc" title="Incomplete: ${e.solved} of ${LEVELS[e.level].stages.length} stages solved">${e.solved}/${LEVELS[e.level].stages.length}</span>`
-        : `<span class="lb-time">${fmtTime(e.timeMs)}</span>`}
-      <span class="lb-score">${fmtPoints(e.total)}</span>
+        ? `<span class="lb-time lb-inc" role="cell" title="Incomplete: ${e.solved} of ${LEVELS[e.level].stages.length} stages solved"><span aria-hidden="true">${e.solved}/${LEVELS[e.level].stages.length}</span><span class="sr-only">Incomplete, ${e.solved} of ${LEVELS[e.level].stages.length} stages</span></span>`
+        : `<span class="lb-time" role="cell">${fmtTime(e.timeMs)}</span>`}
+      <span class="lb-score" role="cell">${fmtPoints(e.total)}</span>
     </div>`;
   let rows = entries.slice(0, limit).map(lbRow).join('');
   const myIdx = highlightId ? entries.findIndex(e=>e.id===highlightId) : -1;
-  if(myIdx >= limit) rows += `<div class="lb-gap">⋯</div>` + lbRow(entries[myIdx], myIdx);
+  if(myIdx >= limit) rows += `<div class="lb-gap" aria-hidden="true">⋯</div>` + lbRow(entries[myIdx], myIdx);
+  if(!rows) return '<div class="lb-status">No scores yet. Be the first.</div>';
   return `
-    <div class="lb-row head"><span>#</span><span>Team</span><span>Level</span><span>Time</span><span>Score</span></div>
-    ${rows || '<div class="lb-status">No scores yet. Be the first.</div>'}
+    <div role="table" aria-label="Leaderboard" aria-rowcount="${Math.min(entries.length, limit) + (myIdx >= limit ? 1 : 0) + 1}">
+    <div class="lb-row head" role="row"><span role="columnheader">Rank</span><span role="columnheader">Team</span><span role="columnheader">Level</span><span role="columnheader">Time</span><span role="columnheader">Score</span></div>
+    ${rows}
+    </div>
     ${entries.slice(0, limit).some(e => e.incomplete) ? '<p class="lb-note" style="margin-top:6px;">A score shown with stages (for example 6/11) instead of a time is an incomplete run ended by a facilitator.</p>' : ''}
   `;
 }
@@ -2072,6 +2316,7 @@ function escapeHtml(str){
 
 /* ============ RENDER: DONE / FINAL SCORE ============ */
 function renderDone(){
+  if(isPractice()){ renderPracticeDone(); return; }
   const L = LEVELS[state.level];
   const list = activeStages();
   const elapsed = state.endTime - state.startTime;
@@ -2095,12 +2340,12 @@ function renderDone(){
         <div class="score-line sub"><span>Base points${sc.floorApplied ? ` (minimum of ${SCORING.floor} applied)` : ''}</span><span>${fmtPoints(sc.base)}</span></div>`;
 
   document.getElementById('panel').innerHTML = `
-    <div class="center-icon">${inc ? '⏱️' : '🔓'}</div>
+    <div class="center-icon" aria-hidden="true">${inc ? '⏱️' : '🔓'}</div>
     <p class="stage-eyebrow">${inc ? 'Run Ended' : 'Mission Complete'}</p>
     <h2 class="stage-title">${inc ? "TIME'S UP" : 'ALL LOCKS CRACKED'}</h2>
     <p class="briefing">${inc
       ? `A facilitator ended this run. Your team solved ${solved} of ${list.length} stages. Great effort, and well done for everything you cracked.`
-      : 'The school network is back online. Your team cracked every layer of encryption the intruder left behind.'}</p>
+      : 'The school network is back online. Your team cracked every cipher and code the intruder left behind.'}</p>
 
     <section class="score-card" aria-label="Final score">
       <div class="score-head">
@@ -2120,7 +2365,7 @@ function renderDone(){
       <div id="lbContent"></div>
       <p class="lb-note">${leaderboardNote()}</p>
       <div id="exportDone"></div>
-      <button class="btn ghost" id="viewEventLbBtn" style="margin-top:12px;">View event leaderboard</button>
+      <button class="btn ghost" id="viewEventLbBtn" style="margin-top:12px;">View all scores</button>
     </div>
 
     <details class="answers">
@@ -2133,7 +2378,7 @@ function renderDone(){
     <button class="btn start" id="playAgainBtn" style="margin-top:16px;">Run Mission Again</button>
   `;
   document.getElementById('playAgainBtn').onclick = resetState;
-  document.getElementById('viewEventLbBtn').onclick = ()=> openLeaderboardDialog('event');
+  document.getElementById('viewEventLbBtn').onclick = ()=> openLeaderboardDialog();
 
   const lbContent = document.getElementById('lbContent');
   if(!state.scoreSubmitted){
@@ -2171,6 +2416,7 @@ function launchConfetti(){
   const colors = ['#00E5FF','#FF2145','#E7F6FF','#B45CFF'];
   const wrap = document.createElement('div');
   wrap.style.cssText = 'position:fixed;top:0;left:0;right:0;height:0;z-index:60;pointer-events:none;';
+  wrap.setAttribute('aria-hidden', 'true');
   document.body.appendChild(wrap);
   for(let i=0;i<50;i++){
     const c = document.createElement('div');
@@ -2205,7 +2451,7 @@ function openToolkit(kind, keyword, extra){
 
   if(kind === 'atbashTable'){
     const mirror = c => String.fromCharCode(155 - c.charCodeAt(0));
-    let rows = '<tr><th>Letter</th><th>Mirror</th><th>Letter</th><th>Mirror</th></tr>';
+    let rows = '<tr><th scope="col">Letter</th><th scope="col">Mirror</th><th scope="col">Letter</th><th scope="col">Mirror</th></tr>';
     for(let i = 0; i < 13; i++) rows += `<tr><td class="tk-key">${ABC[i]}</td><td class="tk-letter">${mirror(ABC[i])}</td><td class="tk-key">${ABC[i+13]}</td><td class="tk-letter">${mirror(ABC[i+13])}</td></tr>`;
     const ex = firstFree(ABC, c => lettersInCipher.has(c) || lettersInCipher.has(mirror(c)));
     html = `<h3>Mirror (Atbash) Table</h3>
@@ -2215,17 +2461,17 @@ function openToolkit(kind, keyword, extra){
 
   } else if(kind === 'morseTable'){
     const L = Object.keys(MORSE);
-    let rows = '<tr><th>Letter</th><th>Morse</th><th>Letter</th><th>Morse</th></tr>';
-    for(let i = 0; i < 13; i++) rows += `<tr><td class="tk-key">${L[i]}</td><td class="tk-morse">${MORSE[L[i]]}</td><td class="tk-key">${L[i+13]}</td><td class="tk-morse">${MORSE[L[i+13]]}</td></tr>`;
+    let rows = '<tr><th scope="col">Letter</th><th scope="col">Morse</th><th scope="col">Letter</th><th scope="col">Morse</th></tr>';
+    for(let i = 0; i < 13; i++) rows += `<tr><td class="tk-key">${L[i]}</td><td class="tk-morse">${morseWithSpeech(MORSE[L[i]])}</td><td class="tk-key">${L[i+13]}</td><td class="tk-morse">${morseWithSpeech(MORSE[L[i+13]])}</td></tr>`;
     const ex = firstFree(L, l => groupsInCipher.has(MORSE[l]));
     html = `<h3>Morse Code Chart</h3>
       ${how('each group of dots and dashes in your message is one letter. Find the group in a <b>Morse</b> column; the letter to its left is the decoded letter.')}
-      ${ex ? example(`${MORSE[ex]} is next to ${ex}, so ${MORSE[ex]} decodes to ${ex}.`) : ''}
+      ${ex ? example(`${morseWithSpeech(MORSE[ex])} is next to ${ex}, so ${morseWithSpeech(MORSE[ex])} decodes to ${ex}.`) : ''}
       <table>${rows}</table>`;
 
   } else if(kind === 'binaryTable'){
     const bin = l => l.charCodeAt(0).toString(2).padStart(8, '0');
-    let rows = '<tr><th>Binary</th><th>Decimal</th><th>Letter</th></tr>';
+    let rows = '<tr><th scope="col">Binary</th><th scope="col">Decimal</th><th scope="col">Letter</th></tr>';
     for(const l of ABC) rows += `<tr><td>${bin(l)}</td><td>${l.charCodeAt(0)}</td><td class="tk-letter">${l}</td></tr>`;
     const ex = firstFree(ABC, l => groupsInCipher.has(bin(l)));
     html = `<h3>ASCII Binary Chart</h3>
@@ -2238,8 +2484,8 @@ function openToolkit(kind, keyword, extra){
     const half = (from) => {
       const idx = [...Array(13).keys()].map(i => i + from);
       return `<table class="tk-kw">
-        <tr><td class="tk-rowhead"><span class="tk-long">Cipher (what you see)</span><span class="tk-short">Cipher</span></td>${idx.map(i => `<td class="tk-key">${alpha[i]}</td>`).join('')}</tr>
-        <tr><td class="tk-rowhead"><span class="tk-long">Plain (decoded)</span><span class="tk-short">Plain</span></td>${idx.map(i => `<td class="tk-letter">${ABC[i]}</td>`).join('')}</tr>
+        <tr><th scope="row" class="tk-rowhead"><span class="tk-long">Cipher (what you see)</span><span class="tk-short">Cipher</span></th>${idx.map(i => `<td class="tk-key">${alpha[i]}</td>`).join('')}</tr>
+        <tr><th scope="row" class="tk-rowhead"><span class="tk-long">Plain (decoded)</span><span class="tk-short">Plain</span></th>${idx.map(i => `<td class="tk-letter">${ABC[i]}</td>`).join('')}</tr>
       </table>`;
     };
     const exI = firstFree([...Array(26).keys()], i => alpha[i] === ABC[i] || lettersInCipher.has(alpha[i]));
@@ -2253,9 +2499,9 @@ function openToolkit(kind, keyword, extra){
     const ranks = columnRanks(keyword);
     const len = extra.length || key.length;
     const perCol = Math.max(1, Math.ceil(len / key.length));
-    let rows = '<tr><th class="tk-rowhead">Position</th>' + key.map((c,i) => `<th>${i+1}</th>`).join('') + '</tr>';
-    rows += '<tr><td class="tk-rowhead">Keyword letter</td>' + key.map(c => `<td class="tk-letter">${c}</td>`).join('') + '</tr>';
-    rows += '<tr><td class="tk-rowhead">Column number</td>' + ranks.map(r => `<td class="tk-count">${r}</td>`).join('') + '</tr>';
+    let rows = '<tr><th scope="col" class="tk-rowhead">Position</th>' + key.map((c,i) => `<th scope="col">${i+1}</th>`).join('') + '</tr>';
+    rows += '<tr><th scope="row" class="tk-rowhead">Keyword letter</th>' + key.map(c => `<td class="tk-letter">${c}</td>`).join('') + '</tr>';
+    rows += '<tr><th scope="row" class="tk-rowhead">Column number</th>' + ranks.map(r => `<td class="tk-count">${r}</td>`).join('') + '</tr>';
     const method = perCol === 1 ? steps([
         'Look at the <b>Column number</b> row below.',
         'Write the 1st letter of your ciphertext under column number 1, the 2nd letter under column number 2, and so on.',
@@ -2267,18 +2513,18 @@ function openToolkit(kind, keyword, extra){
       ]);
     const worked = guided && perCol === 1 ? `${sub('Worked example (a different word)')}
       <table class="tk-mini">
-        <tr><td class="tk-rowhead">Keyword letter</td><td>T</td><td>E</td><td>A</td><td>M</td></tr>
-        <tr><td class="tk-rowhead">Column number</td><td class="tk-count">4</td><td class="tk-count">2</td><td class="tk-count">1</td><td class="tk-count">3</td></tr>
-        <tr><td class="tk-rowhead">Letters</td><td class="tk-letter">C</td><td class="tk-letter">O</td><td class="tk-letter">D</td><td class="tk-letter">E</td></tr>
+        <tr><th scope="row" class="tk-rowhead">Keyword letter</th><td>T</td><td>E</td><td>A</td><td>M</td></tr>
+        <tr><th scope="row" class="tk-rowhead">Column number</th><td class="tk-count">4</td><td class="tk-count">2</td><td class="tk-count">1</td><td class="tk-count">3</td></tr>
+        <tr><th scope="row" class="tk-rowhead">Letters</th><td class="tk-letter">C</td><td class="tk-letter">O</td><td class="tk-letter">D</td><td class="tk-letter">E</td></tr>
       </table>
       <p class="tk-how">The ciphertext DOEC: D goes under column number 1, O under 2, E under 3, C under 4. Reading left to right gives CODE.</p>` : '';
     html = `<h3>Columnar Transposition Key (key: ${keyword})</h3>${method}${worked}${sub('Your keyword')}<table>${rows}</table>`;
 
   } else if(kind === 'polybiusTable'){
     const grid = buildPolybiusGrid(keyword);
-    let rows = '<tr><th>Row ↓ / Column →</th>' + [1,2,3,4,5].map(c => `<th>${c}</th>`).join('') + '</tr>';
+    let rows = '<tr><th scope="col">Row ↓ / Column →</th>' + [1,2,3,4,5].map(c => `<th scope="col">${c}</th>`).join('') + '</tr>';
     for(let r = 0; r < 5; r++){
-      rows += `<tr><td class="tk-key">${r+1}</td>` + [0,1,2,3,4].map(c => `<td class="tk-letter">${grid[r*5+c]}</td>`).join('') + '</tr>';
+      rows += `<tr><th scope="row" class="tk-key">${r+1}</th>` + [0,1,2,3,4].map(c => `<td class="tk-letter">${grid[r*5+c]}</td>`).join('') + '</tr>';
     }
     const coords = ['23','32','24','42','34','43','25','52','35','53','14','41','45','54','13','31','12','21','15','51','22','33','44','55','11'];   // middle squares first: clearer examples
     const ex = firstFree(coords, rc => groupsInCipher.has(rc));
@@ -2290,10 +2536,10 @@ function openToolkit(kind, keyword, extra){
   } else if(kind === 'vigenereTable'){
     wide = true;
     const keySet = new Set((keyword || '').toUpperCase().split(''));
-    let rows = '<tr><th>Key ↓</th>' + ABC.map(c => `<th>${c}</th>`).join('') + '</tr>';
+    let rows = '<tr><th scope="col">Key ↓</th>' + ABC.map(c => `<th scope="col">${c}</th>`).join('') + '</tr>';
     for(let r = 0; r < 26; r++){
       const hl = guided && keySet.has(ABC[r]);
-      rows += `<tr${hl ? ' class="tk-hl"' : ''}><td>${ABC[r]}</td>` + ABC.map((_, c) => `<td>${ABC[(r + c) % 26]}</td>`).join('') + '</tr>';
+      rows += `<tr${hl ? ' class="tk-hl"' : ''}><th scope="row">${ABC[r]}</th>` + ABC.map((_, c) => `<td>${ABC[(r + c) % 26]}</td>`).join('') + '</tr>';
     }
     const kx = firstFree(ABC.slice(1), k => keySet.has(k));   // skip A: it doesn't shift, so it makes a poor example
     const cx = firstFree(ABC.slice().reverse(), c => lettersInCipher.has(c));
@@ -2302,7 +2548,7 @@ function openToolkit(kind, keyword, extra){
       ${how('go down the <b>Key</b> column on the left to your keyword letter. Go along that row until you find your ciphertext letter. The letter at the top of that column is the decoded letter.')}
       ${px ? example(`key letter ${kx}, ciphertext letter ${cx}: along row ${kx} to ${cx}, then up to the top of that column, which is ${px}. So ${cx} decodes to ${px}.`) : ''}
       ${guided ? '<p class="tk-note">The rows for your keyword letters are highlighted.</p>' : ''}
-      <div class="tk-scroll"><table>${rows}</table></div>`;
+      <div class="tk-scroll" tabindex="0" role="region" aria-label="Vigenère square (scrollable)"><table>${rows}</table></div>`;
 
   } else if(kind === 'railFenceDiagram'){
     const rails = extra.rails, length = extra.length;
@@ -2311,7 +2557,7 @@ function openToolkit(kind, keyword, extra){
       let rowsHtml = '';
       for(let r = 0; r < rails; r++){
         const count = grid[r].filter(Boolean).length;
-        rowsHtml += `<tr><td class="tk-rowhead">Rail ${r+1}</td>` +
+        rowsHtml += `<tr><th scope="row" class="tk-rowhead">Rail ${r+1}</th>` +
           grid[r].map(v => `<td class="${v && showLetters ? 'tk-letter' : ''}">${v ? (showLetters ? word[v-1] : v) : ''}</td>`).join('') +
           `<td class="tk-count">${count} letter${count === 1 ? '' : 's'}</td></tr>`;
       }
@@ -2340,7 +2586,7 @@ function openToolkit(kind, keyword, extra){
 
   } else if(kind === 'base64Table'){
     const B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-    let rows = '<tr><th>Char</th><th>Value</th><th>6-bit</th><th>Char</th><th>Value</th><th>6-bit</th></tr>';
+    let rows = '<tr><th scope="col">Char</th><th scope="col">Value</th><th scope="col">6-bit</th><th scope="col">Char</th><th scope="col">Value</th><th scope="col">6-bit</th></tr>';
     for(let i = 0; i < 32; i++){
       rows += `<tr><td class="tk-key">${B64[i]}</td><td>${i}</td><td>${i.toString(2).padStart(6,'0')}</td><td class="tk-key">${B64[i+32]}</td><td>${i+32}</td><td>${(i+32).toString(2).padStart(6,'0')}</td></tr>`;
     }
@@ -2354,12 +2600,12 @@ function openToolkit(kind, keyword, extra){
         'Turn each group of 8 bits into a letter, just like the Binary Code stage (01000001 = A, 65).'
       ])}
       ${canShowExample ? example('T0s= → T is 010011, 0 is 110100, s is 101100 → 010011110100101100 → split into 01001111 (O) and 01001011 (K), with 2 spare bits thrown away → OK.') : ''}
-      <div class="tk-scroll"><table>${rows}</table></div>`;
+      <div class="tk-scroll" tabindex="0" role="region" aria-label="Base64 alphabet (scrollable)"><table>${rows}</table></div>`;
   }
   content.classList.toggle('wide', wide);
   content.innerHTML = html + `<button class="btn ghost modal-close" id="closeModal">Close</button>`;
   content.scrollTop = 0;
-  document.getElementById('modalBackdrop').classList.add('show');
+  showModal();
   document.getElementById('closeModal').onclick = closeDialog;
 }
 document.getElementById('modalBackdrop').addEventListener('click', (e)=>{
@@ -2374,12 +2620,12 @@ const RUN_MAX_AGE = 8 * 3600 * 1000;   // older unfinished runs are treated as a
 
 function saveRun(){
   if(!lbStore || !state.level || !state.startTime || state.screen === 'brief') return;
-  if(state.screen === 'done' && state.scoreSubmitted){ clearRun(); return; }
+  if(state.screen === 'done' && (state.scoreSubmitted || isPractice())){ clearRun(); return; }
   try{
     lbStore.setItem(RUN_KEY, JSON.stringify({
       v:1, level:state.level, playerName:state.playerName, answers:state.answers, hintsShown:state.hintsShown,
       screen:state.screen, startTime:state.startTime, endTime:state.endTime,
-      given:state.given, incomplete:state.incomplete
+      given:state.given, incomplete:state.incomplete, mode:state.mode || 'challenge', revealed:state.revealed
     }));
   }catch(e){ console.error('Could not save the current run', e); }
 }
@@ -2399,6 +2645,11 @@ function readRun(){
   if(r.given.some((g,i) => g && !r.answers[i])) return bad();
   r.incomplete = r.incomplete === true;
   if(r.incomplete && r.screen !== 'done') return bad();
+  if(r.mode === undefined) r.mode = 'challenge';   // runs saved before modes existed
+  if(r.mode !== 'practice' && r.mode !== 'challenge') return bad();
+  if(r.revealed === undefined) r.revealed = Array(n).fill(false);
+  if(!Array.isArray(r.revealed) || r.revealed.length !== n || r.revealed.some(v => typeof v !== 'boolean')) return bad();
+  if(r.mode === 'practice' && r.screen === 'done') return bad();
   if(!Number.isFinite(r.startTime) || r.startTime > Date.now() + 60000) return bad();
   const done = r.screen === 'done';
   if(done){
@@ -2428,9 +2679,9 @@ function offerResume(){
   const time = fmtTime((done ? r.endTime : Date.now()) - r.startTime);
   openDialog(`
     <h3>Continue the mission?</h3>
-    <p class="dialog-text"><b>${escapeHtml(r.playerName)}</b> was playing ${L.label}, ${done
+    <p class="dialog-text">${r.mode === 'practice' ? `You were practising ${L.label}, on stage ${r.screen + 1} of ${L.stages.length}.` : `<b>${escapeHtml(r.playerName)}</b> was playing ${L.label}, ${done
       ? (r.incomplete ? `and the run was ended early, but the score hasn't been submitted yet.` : `and finished in ${time}, but the score hasn't been submitted yet.`)
-      : `on stage ${r.screen + 1} of ${L.stages.length}. The clock has kept running: ${time} so far.`}</p>
+      : `on stage ${r.screen + 1} of ${L.stages.length}. The clock has kept running: ${time} so far.`}`}</p>
     <div class="dialog-actions">
       <button class="btn" id="resumeRunBtn">${done ? 'Go to the score' : 'Continue mission'}</button>
       <button class="btn ghost" id="discardRunBtn">Start a new mission</button>
@@ -2448,6 +2699,8 @@ function resumeRun(r){
   state.hintsShown = r.hintsShown.slice();
   state.given = r.given.slice();
   state.incomplete = r.incomplete;
+  state.mode = r.mode;
+  state.revealed = r.revealed.slice();
   state.startTime = r.startTime;
   state.endTime = r.screen === 'done' ? r.endTime : null;
   state.scoreSubmitted = false;
@@ -2469,6 +2722,22 @@ function render(){
   else if(state.screen === 'done') renderDone();
   else renderStage(state.screen);
   saveRun();
+  if(typeof state.screen === 'number'){
+    const list = activeStages(), s = list[state.screen];
+    document.title = `Stage ${state.screen + 1} of ${list.length}: ${s.name} | Breach Protocol`;
+    announce(`Stage ${state.screen + 1} of ${list.length}: ${stageText(s.title, state.screen)}. ${s.category}.`);
+  } else if(state.screen === 'done'){
+    if(isPractice()){
+      document.title = 'Practice complete | Breach Protocol';
+      announce('Practice complete. Well done.');
+    } else {
+      document.title = (state.incomplete ? 'Run ended' : 'Mission complete') + ' | Breach Protocol';
+      const total = document.querySelector('.score-total-num');
+      announce(`${state.incomplete ? 'Run ended' : 'Mission complete'}. Total score ${total ? total.textContent : ''} points.`);
+    }
+  } else {
+    document.title = 'Breach Protocol: Network Recovery Mission';
+  }
 }
 
 /* ============ DIALOGS (in-app, because native pop-ups are blocked in the Claude app sandbox) ============ */
@@ -2477,13 +2746,54 @@ function openDialog(html){
   content.classList.remove('wide');
   content.innerHTML = html;
   content.scrollTop = 0;   // always open at the top (long leaderboards)
-  document.getElementById('modalBackdrop').classList.add('show');
+  showModal();
+}
+// Shared by every dialog and toolkit: label it, hide the page behind it from screen readers and the keyboard,
+// and move focus into it (unless the caller has already focused something inside).
+let dialogOpener = null;
+function showModal(){
+  const backdrop = document.getElementById('modalBackdrop');
+  const content = document.getElementById('modalContent');
+  if(!backdrop.classList.contains('show')){
+    const active = document.activeElement;
+    dialogOpener = active && active !== document.body && !content.contains(active) ? active : null;
+  }
+  const title = content.querySelector('h3');
+  if(title){ title.id = 'dialogTitle'; content.setAttribute('aria-labelledby', 'dialogTitle'); }
+  else content.removeAttribute('aria-labelledby');
+  backdrop.classList.add('show');
+  const shell = document.querySelector('.shell');
+  if(shell){ shell.setAttribute('inert', ''); shell.setAttribute('aria-hidden', 'true'); }
+  setTimeout(() => {
+    if(backdrop.classList.contains('show') && !content.contains(document.activeElement)){
+      try{ content.focus({ preventScroll:true }); }catch(e){ content.focus(); }
+    }
+  }, 0);
 }
 function closeDialog(){
   document.getElementById('modalBackdrop').classList.remove('show');
-  focusAnswer();   // back to the answer box if a stage is showing
+  const shell = document.querySelector('.shell');
+  if(shell){ shell.removeAttribute('inert'); shell.removeAttribute('aria-hidden'); }
+  if(typeof state.screen === 'number' && canAutoFocus()) focusAnswer();   // back to the answer box if a stage is showing
+  else if(dialogOpener && document.body.contains(dialogOpener)){ try{ dialogOpener.focus({ preventScroll:true }); }catch(e){} }
+  dialogOpener = null;
 }
-document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeDialog(); });
+document.addEventListener('keydown', e=>{
+  const backdrop = document.getElementById('modalBackdrop');
+  if(e.key === 'Escape' && backdrop.classList.contains('show')){ closeDialog(); return; }
+  // keep Tab inside an open dialog
+  if(e.key === 'Tab' && backdrop.classList.contains('show')){
+    const content = document.getElementById('modalContent');
+    const items = [...content.querySelectorAll('button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select, a[href], [tabindex]:not([tabindex="-1"])')]
+      .filter(el => el.offsetParent !== null);
+    if(!items.length){ e.preventDefault(); content.focus(); return; }
+    const first = items[0], last = items[items.length - 1];
+    if(e.shiftKey && (document.activeElement === first || document.activeElement === content)){ e.preventDefault(); last.focus(); }
+    else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+  }
+  // facilitator tools from the keyboard: Ctrl+Shift+F (same as tapping the title five times)
+  if(e.ctrlKey && e.shiftKey && !e.altKey && (e.key === 'F' || e.key === 'f')){ e.preventDefault(); openFacilitatorDialog(); }
+});
 
 document.getElementById('restartBtn').onclick = ()=>{
   if(!state.startTime){ closeDialog(); resetState(); return; }   // nothing in progress, no need to ask
@@ -2501,7 +2811,7 @@ document.getElementById('restartBtn').onclick = ()=>{
 };
 
 /* Leaderboard viewer: "Event" tab reads the published leaderboard.json, "This device" tab shows local scores. */
-let lbTab = /^https?:$/.test(location.protocol) ? 'event' : 'device';
+let lbTab = 'device';   // a shared leaderboard only exists where someone has published one
 let lbFetchToken = 0;
 
 function openLeaderboardDialog(tab){
@@ -2510,13 +2820,21 @@ function openLeaderboardDialog(tab){
   openDialog(`
     <h3>Leaderboard</h3>
     <div class="lb-tabs" role="tablist" aria-label="Leaderboard">
-      <button type="button" class="lb-tab" role="tab" id="tabEvent" data-tab="event">Event</button>
+      <button type="button" class="lb-tab" role="tab" id="tabEvent" data-tab="event">Shared</button>
       <button type="button" class="lb-tab" role="tab" id="tabDevice" data-tab="device">This device</button>
     </div>
     <div id="lbTabBody" role="tabpanel"></div>
     <button class="btn ghost modal-close" id="closeLb">Close</button>`);
   document.querySelectorAll('.lb-tab').forEach(btn=>{
     btn.onclick = ()=>{ lbTab = btn.dataset.tab; renderLbTab(); };
+    btn.onkeydown = e=>{
+      if(e.key === 'ArrowRight' || e.key === 'ArrowLeft'){
+        e.preventDefault();
+        lbTab = lbTab === 'event' ? 'device' : 'event';
+        renderLbTab();
+        document.querySelector(`.lb-tab[data-tab="${lbTab}"]`).focus();
+      }
+    };
   });
   document.getElementById('closeLb').onclick = closeDialog;
   renderLbTab();
@@ -2530,6 +2848,8 @@ function renderLbTab(){
     const on = btn.dataset.tab === lbTab;
     btn.classList.toggle('active', on);
     btn.setAttribute('aria-selected', on);
+    btn.setAttribute('tabindex', on ? '0' : '-1');
+    btn.setAttribute('aria-controls', 'lbTabBody');
   });
   if(lbTab === 'device'){
     lbFetchToken++;   // ignore any event fetch still in flight
@@ -2542,7 +2862,7 @@ function renderLbTab(){
     renderExportBox('exportDialog');
     return;
   }
-  body.innerHTML = `<div class="lb-status">Loading the event leaderboard…</div>`;
+  body.innerHTML = `<div class="lb-status">Loading the shared leaderboard…</div>`;
   const token = ++lbFetchToken;
   fetchPublishedLeaderboard().then(r=>{
     if(token !== lbFetchToken || lbTab !== 'event' || !document.getElementById('lbTabBody')) return;
@@ -2555,18 +2875,18 @@ function renderLbTab(){
 function publishedHtml(r){
   const refresh = `<div class="dialog-actions" style="margin-top:12px;"><button class="btn ghost" id="refreshPublished">Refresh</button></div>`;
   if(r.status === 'none'){
-    return `<div class="lb-status">No event leaderboard has been published yet. Scores saved here are under <b>This device</b>.</div>${refresh}`;
+    return `<div class="lb-status">No shared leaderboard has been published here. Scores saved on this device are under <b>This device</b>.</div>${refresh}`;
   }
   if(r.status === 'invalid'){
-    return `<div class="lb-status">The published leaderboard file couldn't be read. The event team should download a fresh file from the master device and upload it again.</div>${refresh}`;
+    return `<div class="lb-status">The published leaderboard file couldn't be read. The organisers should download a fresh file and upload it again.</div>${refresh}`;
   }
   if(r.status === 'error'){
-    return `<div class="lb-status">The event leaderboard couldn't be loaded. Check the internet connection, or use <b>This device</b> to see scores saved here.</div>${refresh}`;
+    return `<div class="lb-status">The shared leaderboard couldn't be loaded. Check the internet connection, or use <b>This device</b> to see scores saved here.</div>${refresh}`;
   }
   const n = r.entries.length;
   return `
-    <p class="lb-note" style="margin:0 0 10px;">Updated ${fmtUpdated(r.updated)}${n ? `, ${n} ${n===1?'score':'scores'}` : ''}. The event team updates this during the day, so the newest games may not be on it yet.</p>
-    ${n ? renderLeaderboardRows(r.entries, null, Infinity) : '<div class="lb-status">The event leaderboard is empty right now.</div>'}
+    <p class="lb-note" style="margin:0 0 10px;">Updated ${fmtUpdated(r.updated)}${n ? `, ${n} ${n===1?'score':'scores'}` : ''}. The organisers update this from time to time, so the newest games may not be on it yet.</p>
+    ${n ? renderLeaderboardRows(r.entries, null, Infinity) : '<div class="lb-status">The shared leaderboard is empty right now.</div>'}
     ${refresh}`;
 }
 
@@ -2585,7 +2905,7 @@ function refreshAfterBoardChange(){ if(state.screen === 'done') render(); }
 
 /* ---------- facilitator controls for the run in progress ---------- */
 function runSectionHtml(){
-  if(typeof state.screen !== 'number' || !state.level) return '';
+  if(typeof state.screen !== 'number' || !state.level || isPractice()) return '';
   const idx = state.screen, L = LEVELS[state.level], n = L.stages.length;
   const solved = solvedCount();
   const elapsed = fmtTime(Date.now() - state.startTime);
@@ -2675,6 +2995,12 @@ function openFacilitatorDialog(){
     <div class="feedback" id="labelFeedback" aria-live="polite"></div>
     <p class="dialog-text small">Shown next to every new score from this laptop, so teams with the same name can be told apart. Letters, numbers and dashes, up to 6.</p>
     <div class="fac-divider"></div>
+    <p class="dialog-label">Event mode</p>
+    <p class="dialog-text small">Event mode is <b>${isEventMode() ? 'on' : 'off'}</b>${eventModeFromUrl() ? ' for this visit (the link includes ?event)' : ''}. Turn it on for competition days: Challenge only, team callsigns, and the facilitator rules on the start screen. Leave it off for the website, where players can choose Practice or Challenge.</p>
+    <div class="dialog-actions">
+      <button class="btn ghost" id="eventModeBtn">${eventModeSaved() ? 'Turn event mode off on this device' : 'Turn event mode on for this device'}</button>
+    </div>
+    <div class="fac-divider"></div>
     <label class="dialog-label" for="importCodeInput">Paste a leaderboard code from another device</label>
     <textarea id="importCodeInput" class="dialog-input import-input" rows="4" spellcheck="false" autocomplete="off" placeholder="BP1z..."></textarea>
     <div class="feedback" id="importFeedback" aria-live="polite"></div>
@@ -2683,8 +3009,8 @@ function openFacilitatorDialog(){
       <button class="btn ghost" id="closeFac">Close</button>
     </div>
     <div class="fac-divider"></div>
-    <p class="dialog-label">Event leaderboard on GitHub</p>
-    <p class="dialog-text small">Download this device's scores as <b>leaderboard.json</b>, then upload it to the GitHub repository to update the event leaderboard that everyone sees.</p>
+    <p class="dialog-label">Shared leaderboard</p>
+    <p class="dialog-text small">Download this device's scores as <b>leaderboard.json</b>, then upload it next to the game on the website to update the shared leaderboard that everyone sees.</p>
     <div class="feedback" id="publishFeedback" aria-live="polite"></div>
     <div class="dialog-actions">
       <button class="btn" id="downloadPubBtn">Download leaderboard file</button>
@@ -2701,6 +3027,11 @@ function openFacilitatorDialog(){
   document.getElementById('closeFac').onclick = closeDialog;
   document.getElementById('openClearBtn').onclick = openClearDialog;
   wireRunSection();
+  document.getElementById('eventModeBtn').onclick = ()=>{
+    setEventMode(!eventModeSaved());
+    if(state.screen === 'brief'){ state.mode = null; renderBrief(); }
+    openFacilitatorDialog();
+  };
   const labelInput = document.getElementById('labelInput');
   const saveLabel = ()=>{
     const label = setDeviceLabel(labelInput.value);
@@ -2726,7 +3057,7 @@ function openFacilitatorDialog(){
     if(r.status !== 'ok'){
       pubFeedback.className = 'feedback err';
       pubFeedback.textContent = r.status === 'none'
-        ? 'No event leaderboard has been published yet.'
+        ? 'No shared leaderboard has been published here yet.'
         : r.status === 'invalid'
           ? "The published leaderboard.json couldn't be read. Upload a fresh file from the master device."
           : "The published leaderboard couldn't be loaded. Check the internet connection.";
@@ -2759,12 +3090,11 @@ function showPublishInstructions(count){
   openDialog(`
     <h3>Leaderboard file downloaded</h3>
     <p class="dialog-text">${count === 0
-      ? '<span style="color:var(--red)">This file has no scores. Uploading it will empty the event leaderboard.</span>'
+      ? '<span style="color:var(--red)">This file has no scores. Uploading it will empty the shared leaderboard.</span>'
       : `The file contains ${count === 1 ? '1 score' : `${count} scores`}.`}</p>
     <ol class="dialog-steps">
-      <li>In the GitHub repository, click <b>Add file</b>, then <b>Upload files</b>.</li>
-      <li>Drag in <b>leaderboard.json</b> and click <b>Commit changes</b>.</li>
-      <li>The event leaderboard updates in a minute or two.</li>
+      <li>Upload <b>leaderboard.json</b> to the same folder as the game on the website. On GitHub: <b>Add file</b>, then <b>Upload files</b>, then <b>Commit changes</b>.</li>
+      <li>The shared leaderboard updates once the website shows the new file (a minute or two on GitHub).</li>
     </ol>
     <p class="dialog-text small">If your browser saved it as something like <b>leaderboard (1).json</b>, rename it to <b>leaderboard.json</b> before uploading, or the game won't find it.</p>
     <div class="dialog-actions">
