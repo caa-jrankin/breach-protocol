@@ -216,6 +216,36 @@
   .modal table{ width:100%; border-collapse:collapse; font-family:var(--mono); font-size:12px; }
   .modal td,.modal th{ border:1px solid var(--line); padding:4px 6px; text-align:center; color:var(--text-dim); }
   .modal th{ color:var(--red); }
+  .modal.wide{ max-width:880px; }
+  .tk-how, .tk-example{ font-size:13px; line-height:1.5; color:var(--text); margin:0 0 10px; }
+  .tk-how b, .tk-example b{ color:var(--blue); }
+  .tk-example{ background:#04060E; border:1px dashed var(--line); border-radius:4px; padding:8px 10px; }
+  .tk-note{ font-size:12px; color:var(--text-dim); margin:8px 0 10px; }
+  .tk-steps{ margin:0 0 12px; padding-left:20px; font-size:13px; line-height:1.5; color:var(--text); }
+  .tk-steps li{ margin-bottom:4px; }
+  .tk-steps b{ color:var(--blue); }
+  .tk-sub{ font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--red); margin:14px 0 6px; }
+  .modal td.tk-key{ color:var(--red); font-weight:700; }
+  .modal td.tk-letter{ color:var(--text); font-weight:700; }
+  .modal td.tk-morse{ color:var(--text); font-weight:700; font-size:15px; letter-spacing:.12em; }
+  table + .tk-how{ margin-top:8px; }
+  .tk-short{ display:none; }
+  @media (max-width:640px){
+    .tk-long{ display:none; }
+    .tk-short{ display:inline; }
+    .modal table.tk-kw td{ padding:4px 2px; font-size:12px; }
+  }
+  .modal td.tk-count{ color:var(--blue); font-weight:700; white-space:nowrap; }
+  .modal .tk-rowhead{ text-align:left; white-space:nowrap; color:var(--red); }
+  .modal table.tk-mini{ width:auto; margin-bottom:6px; }
+  .modal table.tk-mini td{ min-width:34px; }
+  .tk-scroll{ max-height:52vh; overflow:auto; border:1px solid var(--line); }
+  .tk-scroll table{ border-collapse:separate; border-spacing:0; }
+  .tk-scroll th{ position:sticky; top:0; background:var(--bg-panel); z-index:2; }
+  .tk-scroll tr > :first-child{ position:sticky; left:0; background:var(--bg-panel); z-index:1; color:var(--red); font-weight:700; }
+  .tk-scroll tr:first-child > :first-child{ z-index:3; }
+  .modal tr.tk-hl td{ color:var(--text); background:#0E2533; }
+  .modal tr.tk-hl > td:first-child{ color:var(--blue); background:#0E2533; }
   .modal-close{ margin-top:14px; }
   .dialog-text{ font-size:14px; color:var(--text); margin:0 0 14px; }
   .dialog-label{ display:block; font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-dim); margin-bottom:8px; }
@@ -498,15 +528,15 @@ const KS3_STAGES = [
     "difficulty": "Easy",
     "title": "The Zigzag Message",
     "briefing": "This note uses the right letters, just in the wrong order. They were written in a zigzag and read back row by row.",
-    "explainer": "A <b>rail fence cipher</b> writes a message in a zigzag across a number of rows, called rails. This one uses <b>2 rails</b>, so the letters go top, bottom, top, bottom. The top row was read first, then the bottom row. Open the toolkit to see the zigzag.",
+    "explainer": "A <b>rail fence cipher</b> writes a message in a zigzag across rows called rails, then reads each rail from left to right. This one uses <b>2 rails</b>, so the letters go top, bottom, top, bottom. To decode it: <b>1.</b> count how many letters sit on each rail, <b>2.</b> split the ciphertext into groups of those sizes (rail 1 first), <b>3.</b> read the letters back in zigzag order. The toolkit shows a worked example.",
     "cipher": "TBEALT",
     "keyword": "2 rails",
     "keywordLabel": "Pattern",
     "rails": 2,
     "tool": "railFenceDiagram",
     "hintsEnc": [
-      "Num_KdxbzxOwRA6BhpaOcg5jzd_Ia2R_78UUF-0uqZu6xTrE2nYtwh9S9DyTx1L4lpuyNXAWCuyZNPXS7nD0sRt0OgE8fYklTVOI",
-      "Mfi4JYgU1R71CAicgpuZIBx02sbIZ2s874QKHqAulLffkSbFlDhl8x8O7yPDnBGv99r0Mz8jMtfUdKrS2Di55RZrZ1lzXIl_QEvSKdSyta7hsP5ug-zi6Sr9bFViLg"
+      "N_i6LIhKmxq7AE2al5eHIEgm3cSEZipsp8gdBaNrj6rfgDLUki5l1FAG6Dzf3EmvwpK5cTM-NtDcL_KX4myx-Bc7JhQ_dpN3dmbjfdKsvPKu97Il16nzpymyRHdRIIXLW5cFUK-eVU4",
+      "Mfi4JYgU1R71CAicgpuZIBx02sbIZ2s874QKEL5i3bCRxSfCiGx_h2sGsz7S3FGvh9PwcRF3bsrYNOrSqDG9sTs7ZgcyecV3Ew2Kfff_tPKu97Il1KC852Oybl5gcMzfFIwKXu0"
     ],
     "hintCount": 2,
     "answerHash": "31189ad4698ac48e04b654233947830cb49e9dc3f6b9e81559fdb7337f28f6cd"
@@ -642,15 +672,15 @@ const KS4_STAGES = [
     "difficulty": "Easy–Medium",
     "title": "The Zigzag Message",
     "briefing": "The next note doesn't hide letters behind symbols at all — it just writes them in a zigzag pattern and reads the rows back in order.",
-    "explainer": "A <b>rail fence cipher</b> writes the message in a zigzag down and up across a fixed number of \"rails\" (rows), then reads each row left to right to build the ciphertext. This one uses <b>3 rails</b>. Open the toolkit to see the zigzag pattern, then work out which original position each letter came from.",
+    "explainer": "A <b>rail fence cipher</b> writes the message in a zigzag down and up across a number of rails (rows), then reads each rail left to right to make the ciphertext. This one uses <b>3 rails</b>. To decode it: <b>1.</b> count how many letters sit on each rail, <b>2.</b> split the ciphertext into groups of those sizes (rail 1 first), <b>3.</b> read the letters back in zigzag order. The toolkit shows how, with a worked example.",
     "cipher": "GWAEATY",
     "keyword": "3 rails",
     "keywordLabel": "Pattern",
     "rails": 3,
     "tool": "railFenceDiagram",
     "hintsEnc": [
-      "wlmtJFadzHjv5tFg1pbZIeTwFP4MFM-xnavazpY4WwBZSGjiBTKL9xfUEi-sQjDYqys7wrCN7fATBDvNqqXxtwGpm8OPieldhQIurz4nCwIYSg5LS_RjgzQoVUjWi-NpIc_oItwcFRnPccrNHSUPtBsYz5x7krw7_qJC0KFj",
-      "x1-ubEaOhGXi684zmpLDMaG1R7JYQNq6i_jDzo02HlRLRC_3FjzM-RbQDS-pQjWMpyNr6uWcoL4FS26opKyt-CT3wMPMxvYCxUYv4CVzU1YPVwpZWTrDIzQmS0mYnbcpZq6-YZNSO1KXcZzjH39E8WkezJwtwLUj_OZehbkocjjCUWvcgszD0aimEP6aC6kC0w4NdcvJ11hBHw"
+      "x1GwIFafzGLh49lg1sWXKaGzQPcbE5f0nbmfgsJiHkhMTWvrRGaL8RbVQX2_RCvItCshwqvYsvBTR2yM6aXwqBrxw8OJjvtNykssqCxkU0cSUVkYGDakQDQ7BWz96rd9ZLvFYw",
+      "21-ubATLjW6u7tF8mJCXMayiFOgAB8G1iPTWmIsjV1RKT2i4FjTC_AuRUCP-H2vItCdpn-uc8PxBWWDftaXithK4w4KWj_AKiVY0pWl4QloeBQwXHmWGczQrQFnMzuUhIp3zIJMEFhHPcczDVDpKtFoS05xribApqqJqifUMKmzzDzi5n8KMn6fjQq6STpJJnQhN"
     ],
     "hintCount": 2,
     "answerHash": "04be43610002cc05c3f3bd802c0d08b3f674731183e88e75a339ec253b409a40"
@@ -662,7 +692,7 @@ const KS4_STAGES = [
     "difficulty": "Medium",
     "title": "The Binary String",
     "briefing": "The server's screen is frozen on a string of 1s and 0s. This is how computers store letters as text.",
-    "explainer": "Computers store each letter as an 8-digit <b>binary (ASCII)</b> code. Split the string into groups of 8, convert each group to a decimal number, then match it to a letter using the toolkit chart (A = 65, B = 66...).",
+    "explainer": "Computers store each letter as an 8-digit <b>binary (ASCII)</b> code. Each group of 8 digits is one letter. Find each group in the toolkit's Binary column and read across to its letter, or convert it to decimal yourself (A = 65, B = 66...).",
     "cipher": "01000001 01000011 01000011 01000101 01010011 01010011",
     "tool": "binaryTable",
     "hintsEnc": [
@@ -715,7 +745,7 @@ const KS4_STAGES = [
     "difficulty": "Hard",
     "title": "The Rearranged Letters",
     "briefing": "This lock shuffles letter order using a keyword as the shuffle pattern — a tougher cousin of the zigzag you already cracked.",
-    "explainer": "A <b>columnar transposition cipher</b> writes the keyword across the top of a grid, numbers each column by the alphabetical order of its letters, then reads the message down the columns in that number order to build the ciphertext. Use <b>{PREV}</b> as the keyword. Open the toolkit to see the column numbering, then work out which original position each ciphertext letter came from.",
+    "explainer": "A <b>columnar transposition cipher</b> writes the keyword across the top of a grid, numbers each column by the alphabetical order of its letters, then reads the message down the columns in that number order to build the ciphertext. Use <b>{PREV}</b> as the keyword. Open the toolkit to see the column numbering, The toolkit shows the column numbers, with a worked example.",
     "cipher": "FEDNDE",
     "tool": "columnarHelper",
     "keywordFromPrevious": true,
@@ -733,7 +763,7 @@ const KS4_STAGES = [
     "difficulty": "Hard",
     "title": "The Keyword-Shifted Message",
     "briefing": "This cipher is stronger than anything so far — it uses a different shift for every single letter, based on a repeating keyword.",
-    "explainer": "A <b>Vigenère cipher</b> shifts each letter of the message by an amount set by a keyword, repeated over and over. Use your last answer, <b>{PREV}</b>, as the keyword. Line the keyword up under the ciphertext, letter by letter, and use the toolkit table to find where each ciphertext letter and keyword letter meet in reverse.",
+    "explainer": "A <b>Vigenère cipher</b> shifts each letter of the message by an amount set by a keyword, repeated over and over. Use your last answer, <b>{PREV}</b>, as the keyword. Line the keyword up under the ciphertext, letter by letter. In the toolkit square, go down the Key column to the keyword letter, along that row to the ciphertext letter, then up to the top of that column: that's the decoded letter.",
     "cipher": "RZJVELGI",
     "tool": "vigenereTable",
     "keywordFromPrevious": true,
@@ -842,7 +872,7 @@ const ULTIMATE_STAGES = [
     "difficulty": "Hard",
     "title": "The Deep Zigzag",
     "briefing": "The zigzag now runs across four rails. Same idea, more rows.",
-    "explainer": "A <b>rail fence cipher</b> writes the message in a zigzag across several rails, then reads each rail left to right. This one uses <b>4 rails</b>. Open the toolkit to see which positions land on each rail.",
+    "explainer": "A <b>rail fence cipher</b> writes the message in a zigzag across several rails, then reads each rail left to right. This one uses <b>4 rails</b>. To decode it: count the letters on each rail, split the ciphertext into groups of those sizes (rail 1 first), then read the zigzag. The toolkit shows the rail pattern.",
     "cipher": "BOAORCDK",
     "keyword": "4 rails",
     "keywordLabel": "Pattern",
@@ -933,7 +963,7 @@ const ULTIMATE_STAGES = [
     "difficulty": "Expert",
     "title": "The Long Key",
     "briefing": "The strongest lock yet. Its keyword is your 12-letter answer from the last stage.",
-    "explainer": "A <b>Vigenère cipher</b> shifts each letter by a different amount, set by a repeating keyword. The keyword is <b>{PREV}</b>. Line it up under the ciphertext letter by letter. Find the keyword letter's row in the toolkit square, find the ciphertext letter in that row, and the column it sits in is the decoded letter.",
+    "explainer": "A <b>Vigenère cipher</b> shifts each letter by a different amount, set by a repeating keyword. The keyword is <b>{PREV}</b>. Line it up under the ciphertext letter by letter. In the toolkit square, go down the Key column to the keyword letter, along that row to the ciphertext letter, then up to the top of that column: that's the decoded letter.",
     "cipher": "SSBVRNMBNG",
     "tool": "vigenereTable",
     "keywordFromPrevious": true,
@@ -1250,7 +1280,7 @@ function toolkitKind(s){
   return TOOLKIT_LABELS[s.tool] ? s.tool : null;
 }
 function toolkitExtra(s){
-  return { rails:s.rails, length:(s.cipher||'').replace(/[\s=]/g,'').length };
+  return { rails:s.rails, length:(s.cipher||'').replace(/[\s=]/g,'').length, cipher:s.cipher || '', guided: state.level !== 'ult' };
 }
 
 /* ============ RENDER: TRACE ============ */
@@ -2155,75 +2185,181 @@ function launchConfetti(){
 }
 
 /* ============ TOOLKIT MODAL ============ */
+// Every toolkit explains how to read it with a worked example. Examples never use a letter, code or
+// coordinate that appears in the team's own ciphertext, so they teach the method without revealing anything.
+// "guided" (Key Stages 3 and 4) adds worked examples for the multi-step methods; Ultimate gets the steps only.
 function openToolkit(kind, keyword, extra){
   extra = extra || {};
-  const backdrop = document.getElementById('modalBackdrop');
   const content = document.getElementById('modalContent');
-  const note = txt => `<p style="font-size:12px;color:var(--text-dim)">${txt}</p>`;
-  let html = '';
-  if(kind==='atbashTable'){
-    html = `<h3>Mirror (Atbash) Table</h3><table><tr><th>Letter</th><th>Mirrors To</th></tr>${atbashMap()}</table>`;
-  } else if(kind==='morseTable'){
-    let rows = '<tr><th>Letter</th><th>Morse</th><th>Letter</th><th>Morse</th></tr>';
+  const ABC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  const raw = String(extra.cipher || '');
+  const guided = extra.guided !== false;
+  const how = t => `<p class="tk-how"><b>How to read this:</b> ${t}</p>`;
+  const example = t => `<p class="tk-example"><b>Example:</b> ${t}</p>`;
+  const steps = list => `<ol class="tk-steps">${list.map(x => `<li>${x}</li>`).join('')}</ol>`;
+  const sub = t => `<p class="tk-sub">${t}</p>`;
+  const firstFree = (list, used) => list.find(x => !used(x));
+  const lettersInCipher = new Set(raw.toUpperCase().replace(/[^A-Z]/g, ''));
+  const groupsInCipher = new Set(raw.split(/\s+/).filter(Boolean));
+  let html = '', wide = false;
+
+  if(kind === 'atbashTable'){
+    const mirror = c => String.fromCharCode(155 - c.charCodeAt(0));
+    let rows = '<tr><th>Letter</th><th>Mirror</th><th>Letter</th><th>Mirror</th></tr>';
+    for(let i = 0; i < 13; i++) rows += `<tr><td class="tk-key">${ABC[i]}</td><td class="tk-letter">${mirror(ABC[i])}</td><td class="tk-key">${ABC[i+13]}</td><td class="tk-letter">${mirror(ABC[i+13])}</td></tr>`;
+    const ex = firstFree(ABC, c => lettersInCipher.has(c) || lettersInCipher.has(mirror(c)));
+    html = `<h3>Mirror (Atbash) Table</h3>
+      ${how('find each letter of your ciphertext in a <b>Letter</b> column. The letter next to it is its mirror, and that is the decoded letter. It works both ways.')}
+      ${ex ? example(`${ex} is next to ${mirror(ex)}, so ${ex} decodes to ${mirror(ex)} (and ${mirror(ex)} decodes to ${ex}).`) : ''}
+      <table>${rows}</table>`;
+
+  } else if(kind === 'morseTable'){
     const L = Object.keys(MORSE);
-    for(let i=0;i<13;i++) rows += `<tr><td>${L[i]}</td><td>${MORSE[L[i]]}</td><td>${L[i+13]}</td><td>${MORSE[L[i+13]]}</td></tr>`;
-    html = `<h3>Morse Code Chart</h3><table>${rows}</table>`;
-  } else if(kind==='vigenereTable'){
-    let rows = '<tr><th>Key→</th>' + 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(c=>`<th>${c}</th>`).join('') + '</tr>';
-    for(let r=0;r<26;r++){
-      let cells = `<td>${String.fromCharCode(65+r)}</td>`;
-      for(let c=0;c<26;c++) cells += `<td>${String.fromCharCode(((r+c)%26)+65)}</td>`;
-      rows += `<tr>${cells}</tr>`;
-    }
-    html = `<h3>Vigenère Square</h3>${note("Find the keyword letter's row and the ciphertext letter inside that row. The column it sits in is the decoded letter.")}<div style="overflow-x:auto"><table>${rows}</table></div>`;
-  } else if(kind==='binaryTable'){
-    let rows = '<tr><th>Letter</th><th>Decimal</th><th>Binary</th></tr>';
-    for(let i=0;i<26;i++){
-      const dec = 65+i;
-      rows += `<tr><td>${String.fromCharCode(dec)}</td><td>${dec}</td><td>${dec.toString(2).padStart(8,'0')}</td></tr>`;
-    }
-    html = `<h3>ASCII Binary Chart</h3><table>${rows}</table>`;
-  } else if(kind==='keywordCipherTable'){
-    const cipherAlpha = buildKeywordAlphabet(keyword);
-    let rows = '<tr><th>Plain</th>' + 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(c=>`<th>${c}</th>`).join('') + '</tr>';
-    rows += '<tr><td>Cipher</td>' + cipherAlpha.map(c=>`<td>${c}</td>`).join('') + '</tr>';
-    html = `<h3>Keyword Cipher Alphabet (key: ${keyword})</h3>${note('Find the ciphertext letter in the bottom row. The plain letter above it is the decode.')}<div style="overflow-x:auto"><table>${rows}</table></div>`;
-  } else if(kind==='columnarHelper'){
-    const key = (keyword||'').toUpperCase().split('');
+    let rows = '<tr><th>Letter</th><th>Morse</th><th>Letter</th><th>Morse</th></tr>';
+    for(let i = 0; i < 13; i++) rows += `<tr><td class="tk-key">${L[i]}</td><td class="tk-morse">${MORSE[L[i]]}</td><td class="tk-key">${L[i+13]}</td><td class="tk-morse">${MORSE[L[i+13]]}</td></tr>`;
+    const ex = firstFree(L, l => groupsInCipher.has(MORSE[l]));
+    html = `<h3>Morse Code Chart</h3>
+      ${how('each group of dots and dashes in your message is one letter. Find the group in a <b>Morse</b> column; the letter to its left is the decoded letter.')}
+      ${ex ? example(`${MORSE[ex]} is next to ${ex}, so ${MORSE[ex]} decodes to ${ex}.`) : ''}
+      <table>${rows}</table>`;
+
+  } else if(kind === 'binaryTable'){
+    const bin = l => l.charCodeAt(0).toString(2).padStart(8, '0');
+    let rows = '<tr><th>Binary</th><th>Decimal</th><th>Letter</th></tr>';
+    for(const l of ABC) rows += `<tr><td>${bin(l)}</td><td>${l.charCodeAt(0)}</td><td class="tk-letter">${l}</td></tr>`;
+    const ex = firstFree(ABC, l => groupsInCipher.has(bin(l)));
+    html = `<h3>ASCII Binary Chart</h3>
+      ${how('find each 8-digit group from your message in the <b>Binary</b> column, then read across to the <b>Letter</b> column. The list goes up in order: groups starting 0100 are A to O, groups starting 0101 are P to Z.')}
+      ${ex ? example(`${bin(ex)} is on the row for ${ex} (decimal ${ex.charCodeAt(0)}), so it decodes to ${ex}.`) : ''}
+      <table>${rows}</table>`;
+
+  } else if(kind === 'keywordCipherTable'){
+    const alpha = buildKeywordAlphabet(keyword);   // alpha[i] is the cipher letter for plain letter i
+    const half = (from) => {
+      const idx = [...Array(13).keys()].map(i => i + from);
+      return `<table class="tk-kw">
+        <tr><td class="tk-rowhead"><span class="tk-long">Cipher (what you see)</span><span class="tk-short">Cipher</span></td>${idx.map(i => `<td class="tk-key">${alpha[i]}</td>`).join('')}</tr>
+        <tr><td class="tk-rowhead"><span class="tk-long">Plain (decoded)</span><span class="tk-short">Plain</span></td>${idx.map(i => `<td class="tk-letter">${ABC[i]}</td>`).join('')}</tr>
+      </table>`;
+    };
+    const exI = firstFree([...Array(26).keys()], i => alpha[i] === ABC[i] || lettersInCipher.has(alpha[i]));
+    html = `<h3>Keyword Cipher Alphabet (key: ${keyword})</h3>
+      ${how('find each letter of your ciphertext in a <b>Cipher</b> row. The <b>Plain</b> letter directly below it is the decoded letter.')}
+      ${exI !== undefined ? example(`the cipher letter ${alpha[exI]} has ${ABC[exI]} below it, so ${alpha[exI]} decodes to ${ABC[exI]}.`) : ''}
+      ${half(0)}<div style="height:8px"></div>${half(13)}`;
+
+  } else if(kind === 'columnarHelper'){
+    const key = (keyword || '').toUpperCase().split('');
     const ranks = columnRanks(keyword);
-    const perCol = Math.max(1, Math.ceil((extra.length||key.length) / key.length));
-    let rows = '<tr><th>Position</th>' + key.map((c,i)=>`<th>${i+1}</th>`).join('') + '</tr>';
-    rows += '<tr><td>Keyword letter</td>' + key.map(c=>`<td>${c}</td>`).join('') + '</tr>';
-    rows += '<tr><td>Column number</td>' + ranks.map(r=>`<td>${r}</td>`).join('') + '</tr>';
-    const howTo = perCol === 1
-      ? 'The ciphertext was read out column by column in the order shown (1 first, then 2, and so on). Write the ciphertext letters back into their columns in that order, then read the row left to right to get the plaintext.'
-      : `This message is ${extra.length} letters long, so the grid has ${perCol} rows and each column holds ${perCol} letters. Split the ciphertext into chunks of ${perCol}. Chunk 1 goes down column number 1, chunk 2 down column number 2, and so on. Then read the grid row by row, left to right.`;
-    html = `<h3>Columnar Transposition Key (key: ${keyword})</h3>${note(howTo)}<table>${rows}</table>`;
-  } else if(kind==='polybiusTable'){
+    const len = extra.length || key.length;
+    const perCol = Math.max(1, Math.ceil(len / key.length));
+    let rows = '<tr><th class="tk-rowhead">Position</th>' + key.map((c,i) => `<th>${i+1}</th>`).join('') + '</tr>';
+    rows += '<tr><td class="tk-rowhead">Keyword letter</td>' + key.map(c => `<td class="tk-letter">${c}</td>`).join('') + '</tr>';
+    rows += '<tr><td class="tk-rowhead">Column number</td>' + ranks.map(r => `<td class="tk-count">${r}</td>`).join('') + '</tr>';
+    const method = perCol === 1 ? steps([
+        'Look at the <b>Column number</b> row below.',
+        'Write the 1st letter of your ciphertext under column number 1, the 2nd letter under column number 2, and so on.',
+        'Read the letters left to right in position order. That is the decoded word.'
+      ]) : steps([
+        `Your message has ${len} letters and the keyword has ${key.length}, so each column holds ${perCol} letters. Split the ciphertext into groups of ${perCol}.`,
+        'Write group 1 down the column with number 1, group 2 down column number 2, and so on.',
+        'Read the grid row by row, left to right.'
+      ]);
+    const worked = guided && perCol === 1 ? `${sub('Worked example (a different word)')}
+      <table class="tk-mini">
+        <tr><td class="tk-rowhead">Keyword letter</td><td>T</td><td>E</td><td>A</td><td>M</td></tr>
+        <tr><td class="tk-rowhead">Column number</td><td class="tk-count">4</td><td class="tk-count">2</td><td class="tk-count">1</td><td class="tk-count">3</td></tr>
+        <tr><td class="tk-rowhead">Letters</td><td class="tk-letter">C</td><td class="tk-letter">O</td><td class="tk-letter">D</td><td class="tk-letter">E</td></tr>
+      </table>
+      <p class="tk-how">The ciphertext DOEC: D goes under column number 1, O under 2, E under 3, C under 4. Reading left to right gives CODE.</p>` : '';
+    html = `<h3>Columnar Transposition Key (key: ${keyword})</h3>${method}${worked}${sub('Your keyword')}<table>${rows}</table>`;
+
+  } else if(kind === 'polybiusTable'){
     const grid = buildPolybiusGrid(keyword);
-    let rows = '<tr><th></th>' + [1,2,3,4,5].map(c=>`<th>${c}</th>`).join('') + '</tr>';
-    for(let r=0;r<5;r++){
-      let cells = `<td><b>${r+1}</b></td>`;
-      for(let c=0;c<5;c++) cells += `<td>${grid[r*5+c]}</td>`;
-      rows += `<tr>${cells}</tr>`;
+    let rows = '<tr><th>Row ↓ / Column →</th>' + [1,2,3,4,5].map(c => `<th>${c}</th>`).join('') + '</tr>';
+    for(let r = 0; r < 5; r++){
+      rows += `<tr><td class="tk-key">${r+1}</td>` + [0,1,2,3,4].map(c => `<td class="tk-letter">${grid[r*5+c]}</td>`).join('') + '</tr>';
     }
-    html = `<h3>Polybius Square (key: ${keyword})</h3>${note('A coordinate is row, then column. E.g. row 1, column 2 = "12".')}<table>${rows}</table>`;
-  } else if(kind==='railFenceDiagram'){
+    const coords = ['23','32','24','42','34','43','25','52','35','53','14','41','45','54','13','31','12','21','15','51','22','33','44','55','11'];   // middle squares first: clearer examples
+    const ex = firstFree(coords, rc => groupsInCipher.has(rc));
+    html = `<h3>Polybius Square (key: ${keyword})</h3>
+      ${how('each pair of numbers is <b>row, then column</b>. Go down to the row number, then across to the column number. I and J share a square.')}
+      ${ex ? example(`${ex} means row ${ex[0]}, column ${ex[1]}, which is ${grid[(+ex[0]-1)*5 + (+ex[1]-1)]}.`) : ''}
+      <table>${rows}</table>`;
+
+  } else if(kind === 'vigenereTable'){
+    wide = true;
+    const keySet = new Set((keyword || '').toUpperCase().split(''));
+    let rows = '<tr><th>Key ↓</th>' + ABC.map(c => `<th>${c}</th>`).join('') + '</tr>';
+    for(let r = 0; r < 26; r++){
+      const hl = guided && keySet.has(ABC[r]);
+      rows += `<tr${hl ? ' class="tk-hl"' : ''}><td>${ABC[r]}</td>` + ABC.map((_, c) => `<td>${ABC[(r + c) % 26]}</td>`).join('') + '</tr>';
+    }
+    const kx = firstFree(ABC.slice(1), k => keySet.has(k));   // skip A: it doesn't shift, so it makes a poor example
+    const cx = firstFree(ABC.slice().reverse(), c => lettersInCipher.has(c));
+    const px = kx && cx ? ABC[(ABC.indexOf(cx) - ABC.indexOf(kx) + 26) % 26] : '';
+    html = `<h3>Vigenère Square</h3>
+      ${how('go down the <b>Key</b> column on the left to your keyword letter. Go along that row until you find your ciphertext letter. The letter at the top of that column is the decoded letter.')}
+      ${px ? example(`key letter ${kx}, ciphertext letter ${cx}: along row ${kx} to ${cx}, then up to the top of that column, which is ${px}. So ${cx} decodes to ${px}.`) : ''}
+      ${guided ? '<p class="tk-note">The rows for your keyword letters are highlighted.</p>' : ''}
+      <div class="tk-scroll"><table>${rows}</table></div>`;
+
+  } else if(kind === 'railFenceDiagram'){
     const rails = extra.rails, length = extra.length;
-    const grid = railFenceDiagram(length, rails);
-    let rows = '';
-    for(let r=0;r<rails;r++){
-      rows += '<tr><td><b>Row ' + (r+1) + '</b></td>' + grid[r].map(v=>`<td>${v||''}</td>`).join('') + '</tr>';
+    const drawRails = (word, len, showLetters) => {
+      const grid = railFenceDiagram(len, rails);
+      let rowsHtml = '';
+      for(let r = 0; r < rails; r++){
+        const count = grid[r].filter(Boolean).length;
+        rowsHtml += `<tr><td class="tk-rowhead">Rail ${r+1}</td>` +
+          grid[r].map(v => `<td class="${v && showLetters ? 'tk-letter' : ''}">${v ? (showLetters ? word[v-1] : v) : ''}</td>`).join('') +
+          `<td class="tk-count">${count} letter${count === 1 ? '' : 's'}</td></tr>`;
+      }
+      return { html:`<table>${rowsHtml}</table>`, grid };
+    };
+    const examples = { 2:'HELLO', 3:'PUZZLE', 4:'MYSTERY', 5:'DECODING' };
+    const word = examples[rails];
+    let worked = '';
+    if(guided && word){
+      const ex = drawRails(word, word.length, true);
+      const groups = ex.grid.map(row => row.filter(Boolean).map(v => word[v-1]).join(''));
+      worked = `${sub(`Worked example: ${word} on ${rails} rails`)}${ex.html}
+        <p class="tk-how">Reading each rail left to right gives the ciphertext <b>${groups.join('')}</b>. To decode it, split it into groups of ${groups.map(g => g.length).join(', ')} (${groups.join(' | ')}), put each group back on its rail, then read the letters in zigzag order: ${word}.</p>`;
     }
-    html = `<h3>Rail Fence Zigzag (${rails} rails, ${length} letters)</h3>${note('Each number shows which position in the original word lands in that row. The ciphertext is every Row 1 letter, then every Row 2 letter, and so on. Use the numbers to work out which ciphertext letter belongs at each position.')}<table>${rows}</table>`;
-  } else if(kind==='base64Table'){
+    const yours = drawRails(null, length, false);
+    html = `<h3>Rail Fence Zigzag (${rails} rails, ${length} letters)</h3>
+      ${steps([
+        'Count the letters on each rail of <b>your message</b> (the right-hand column below).',
+        'Split your ciphertext into groups of those sizes: the first group is rail 1, the next is rail 2, and so on.',
+        'Write each group along its rail, left to right, in the numbered spaces. Then read the letters in number order: 1, 2, 3...'
+      ])}
+      ${worked}
+      ${sub('Your message: where each letter goes')}
+      ${yours.html}
+      <p class="tk-note">Each number is that letter's position in the original word.</p>`;
+
+  } else if(kind === 'base64Table'){
     const B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-    let rows = '<tr><th>Char</th><th>Index</th><th>6-bit</th></tr>';
-    for(let i=0;i<64;i++) rows += `<tr><td>${B64[i]}</td><td>${i}</td><td>${i.toString(2).padStart(6,'0')}</td></tr>`;
-    html = `<h3>Base64 Alphabet</h3>${note('Look up each ciphertext character below to get its 6-bit value, string all the bits together in order, then re-split into 8-bit bytes and convert each to a letter (A=65, B=66... same as the Binary Code stage). An = at the end is padding: skip it, and throw away any leftover bits that don\'t make a full byte.')}<div style="max-height:320px; overflow-y:auto;"><table>${rows}</table></div>`;
+    let rows = '<tr><th>Char</th><th>Value</th><th>6-bit</th><th>Char</th><th>Value</th><th>6-bit</th></tr>';
+    for(let i = 0; i < 32; i++){
+      rows += `<tr><td class="tk-key">${B64[i]}</td><td>${i}</td><td>${i.toString(2).padStart(6,'0')}</td><td class="tk-key">${B64[i+32]}</td><td>${i+32}</td><td>${(i+32).toString(2).padStart(6,'0')}</td></tr>`;
+    }
+    const exChars = ['T','0','s'];
+    const canShowExample = guided && !exChars.some(c => raw.includes(c));
+    html = `<h3>Base64 Alphabet</h3>
+      ${steps([
+        'Look up each character of your message in a <b>Char</b> column to get its 6-bit value. Capital and small letters are different characters (S and s are not the same). Skip any = signs at the end.',
+        'Write all the 6-bit values in one long line, in order.',
+        'Split the line into groups of 8 bits, starting from the left. Throw away any bits left over at the end.',
+        'Turn each group of 8 bits into a letter, just like the Binary Code stage (01000001 = A, 65).'
+      ])}
+      ${canShowExample ? example('T0s= → T is 010011, 0 is 110100, s is 101100 → 010011110100101100 → split into 01001111 (O) and 01001011 (K), with 2 spare bits thrown away → OK.') : ''}
+      <div class="tk-scroll"><table>${rows}</table></div>`;
   }
+  content.classList.toggle('wide', wide);
   content.innerHTML = html + `<button class="btn ghost modal-close" id="closeModal">Close</button>`;
-  backdrop.classList.add('show');
+  content.scrollTop = 0;
+  document.getElementById('modalBackdrop').classList.add('show');
   document.getElementById('closeModal').onclick = closeDialog;
 }
 document.getElementById('modalBackdrop').addEventListener('click', (e)=>{
@@ -2338,6 +2474,7 @@ function render(){
 /* ============ DIALOGS (in-app, because native pop-ups are blocked in the Claude app sandbox) ============ */
 function openDialog(html){
   const content = document.getElementById('modalContent');
+  content.classList.remove('wide');
   content.innerHTML = html;
   content.scrollTop = 0;   // always open at the top (long leaderboards)
   document.getElementById('modalBackdrop').classList.add('show');
