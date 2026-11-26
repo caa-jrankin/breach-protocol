@@ -428,6 +428,19 @@
   .modal:focus{ outline:none; }
   .modal:focus-visible{ outline:2px solid var(--blue); outline-offset:-2px; }
   .tk-scroll:focus-visible{ outline:2px solid var(--blue); outline-offset:2px; }
+  @media (forced-colors: active){
+    .morse .m-dot, .morse .m-dash{ forced-color-adjust:none; background:CanvasText; box-shadow:none; }
+    .morse-light{ forced-color-adjust:none; background:Canvas; border:2px solid CanvasText; box-shadow:none; }
+    .morse-light.on{ background:Highlight; border-color:Highlight; box-shadow:none; }
+    .node.done{ forced-color-adjust:none; background:Highlight; color:HighlightText; border-color:Highlight; box-shadow:none; }
+    .node.active{ forced-color-adjust:none; background:CanvasText; color:Canvas; border-color:CanvasText; box-shadow:none; }
+    .wire{ forced-color-adjust:none; background:GrayText; }
+    .wire .fill{ forced-color-adjust:none; background:Highlight; box-shadow:none; }
+    .level-card.selected{ border:3px solid Highlight; box-shadow:none; }
+    .modal tr.tk-hl > td, .modal tr.tk-hl > th{ forced-color-adjust:none; background:Highlight !important; color:HighlightText !important; }
+    .lb-row.me{ border-left:4px solid Highlight; outline:1px solid Highlight; }
+    .lb-tab.active{ border-bottom:3px solid Highlight; }
+  }
   @media (prefers-reduced-motion: reduce){
     .node, .wire .fill, .confetti, .glitch, .level-card, .btn{ transition:none !important; animation:none !important; }
     .confetti{ display:none; }
@@ -1634,6 +1647,7 @@ function showNameWarning(){
 }
 // Pull names from the published shared leaderboard (if online) so clashes with other devices are caught too.
 function loadPublishedNames(){
+  if(!isEventMode()) return;   // shared leaderboards are an event feature; avoids a "not found" request on the website
   if(Date.now() - publishedNamesFetchedAt < 60000) return;
   publishedNamesFetchedAt = Date.now();
   fetchPublishedLeaderboard(true).then(r=>{   // quiet: offline is normal for downloaded copies
