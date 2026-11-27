@@ -250,6 +250,9 @@
   .modal table.tk-mini{ width:auto; margin-bottom:6px; }
   .modal table.tk-mini td{ min-width:34px; }
   .tk-scroll{ max-height:52vh; overflow:auto; border:1px solid var(--line); }
+  .tk-pair{ display:grid; grid-template-columns:3fr 2fr; gap:16px; align-items:start; }
+  .tk-pair .tk-sub{ margin-top:4px; }
+  @media (max-width:640px){ .tk-pair{ grid-template-columns:1fr; } .tk-pair .tk-scroll{ max-height:40vh; } }
   .tk-scroll table{ border-collapse:separate; border-spacing:0; }
   .tk-scroll th{ position:sticky; top:0; background:var(--bg-panel); z-index:2; }
   .tk-scroll tr > :first-child{ position:sticky; left:0; background:var(--bg-panel); z-index:1; color:var(--red); font-weight:700; }
@@ -644,6 +647,36 @@ const KS3_STAGES = [
     "briefing": "One word left. No cipher this time. It's hiding in the answers you've already found.",
     "explainer": "Take the <b>first letter</b> of each answer, from stage 1 to stage 7, in order. Together they spell the 7-letter password that puts the network back online.",
     "cipher": "",
+    "assembly": [
+      [
+        0,
+        0
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        2,
+        0
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        4,
+        0
+      ],
+      [
+        5,
+        0
+      ],
+      [
+        6,
+        0
+      ]
+    ],
     "tool": "recap",
     "hintsEnc": [
       "ICPBscBQ0pUzsdG22ZBj1U6XBtsvWMMMgieGi0oLu1LycsKznXwY1Z7e95LcvP1DbBst73o9RrcRLSMfTcJFVHwNrw",
@@ -652,6 +685,552 @@ const KS3_STAGES = [
     "hintCount": 2,
     "answerEnc": "U7nh0yTpMw",
     "answerHash": "5f309254117095fb0a56897cd47d90724d6ce4ba3cc09b682736ecaa0ed809e1"
+  }
+];
+
+const KS3_STAGES_B = [
+  {
+    "key": "caesar",
+    "name": "Caesar Shift",
+    "category": "Substitution",
+    "difficulty": "Warm-Up",
+    "title": "The Shifted Alphabet",
+    "briefing": "The intruder left a note stuck to a monitor. Every letter has been pushed forward in the alphabet. Slide it back to read it.",
+    "explainer": "A <b>Caesar cipher</b> moves every letter forward by the same number of places. With a shift of 3, A becomes D, B becomes E, and so on. To decode it, move each letter back by the same amount. Use the slider to try different shifts.",
+    "cipher": "WGVIIR",
+    "tool": "caesarSlider",
+    "hintsEnc": [
+      "h8IvOboA0Bh6p_7NrD4SjN05zkRAGTPtEXkWW5V2-SHpEKwNEILKjdOv8O8vmU-TIfYAyyqQkqSRrueDxrkIKfbV4awVpn_avwHeDwl3PMMJlztgnM8",
+      "nsU8fOkc0Rsu9PvX6G9OjPl1Q7W-QECgX1oWznKQugrlRJJI0mg92fXkrLIvkUKXP7ECimOtgeU"
+    ],
+    "hintCount": 2,
+    "answerEnc": "dSg1ZQcM",
+    "answerHash": "d00de45ead6a1a328d4b13344632ca7bb22c0d481ff2470ed8ef7a7eb02af422"
+  },
+  {
+    "key": "atbash",
+    "name": "Mirror Cipher",
+    "category": "Substitution",
+    "difficulty": "Easy",
+    "title": "The Mirrored Message",
+    "briefing": "A second note is hidden under the keyboard. This one doesn't shift the alphabet. It flips it.",
+    "explainer": "An <b>Atbash cipher</b> turns the alphabet back to front: A swaps with Z, B swaps with Y, C swaps with X, and so on. Open the toolkit to see the full mirror table.",
+    "cipher": "SZXPVI",
+    "tool": "atbashTable",
+    "hintsEnc": [
+      "jdV7HaCP6TmeZdWrje6RoUUOYH7_6Kh_gnHCZL-yp6KKJu6kTVMCaVKsNWzTTnx8SRYpmoqHq28inoci9jWXMno7bfO95Lfw0SKiUi3y1FUcam-tIwxp0Z_YIw",
+      "kYVzGvKJ7i7NMc6rwc3U9T9PY3Ot_K5jlXHTavybq-63cveoTQEEdQH4KWbTYTc6aV4v1ZGdtGUs1712szWWPnw9Z_PutLrtyyvp"
+    ],
+    "hintCount": 2,
+    "answerEnc": "3J2OdiuI",
+    "answerHash": "bcc69e4f620a1b73e6eb9a6e7d0992a2b017ffe5ebb962872a38f5a619b4a3da"
+  },
+  {
+    "key": "morse",
+    "name": "Morse Signal",
+    "category": "Encoding",
+    "difficulty": "Easy",
+    "title": "The Blinking Light",
+    "briefing": "A light in the server room is blinking on and off. Someone is sending a signal.",
+    "explainer": "<b>Morse code</b> turns each letter into short signals (dots) and long signals (dashes). Press play to watch and hear the message, then use the chart below to turn each group back into a letter. Morse code is an <b>encoding</b>, not a cipher: there's no secret key, so anyone with the chart can read it.",
+    "cipher": ".. -. -... --- -..-",
+    "tool": "morsePlayer",
+    "hintsEnc": [
+      "oK-dFcAHW_nYD7auoxxo_awN2IkoIToOPTh_29ShC6B0l2aw-pWKE7TCxQyASavU3mr5R1OXDVSoGIFLafyU4qblfg",
+      "y-DeQMApBbaAUbbg5iIlr-BXk8MofmNscDghhpjiU6BSyGbyut6HX-yW6Q"
+    ],
+    "hintCount": 2,
+    "answerEnc": "2nywmj4",
+    "answerHash": "d694186cb923c82f0b5e3e10d218ef4af43fd626ed913a5cf2c69718914a3db4"
+  },
+  {
+    "key": "railfence",
+    "name": "Rail Fence Cipher",
+    "category": "Transposition",
+    "difficulty": "Easy",
+    "title": "The Zigzag Message",
+    "briefing": "This note uses the right letters, just in the wrong order. They were written in a zigzag and read back row by row.",
+    "explainer": "A <b>rail fence cipher</b> writes a message in a zigzag across rows called rails, then reads each rail from left to right. This one uses <b>2 rails</b>, so the letters go top, bottom, top, bottom. To decode it: <b>1.</b> count how many letters sit on each rail, <b>2.</b> split the ciphertext into groups of those sizes (rail 1 first), <b>3.</b> read the letters back in zigzag order. The toolkit shows a worked example.",
+    "cipher": "ERRROS",
+    "keyword": "2 rails",
+    "keywordLabel": "Pattern",
+    "rails": 2,
+    "tool": "railFenceDiagram",
+    "hintsEnc": [
+      "qR3glHjFaVVUf20jUIp1mZsFkqDjqASitw2JWsptKehXOAPO9hq4z5AjtdP8YyPnlehJqm20kcuU9IE7weIJHZZpINWf0QaJyJlLf0Z6f3N4x-fNNbReVkDCuUDV1V7NoWDWUrwBdUw",
+      "rx3inXibJ1EadyglRYZrmc9XlaKvqUXy_0GeT9dke_IZfRbY7FiinLoj7tHxYzvn0KkAqlz9ydGQ75l-i78FVKppYMaS3lCJvOI1f2Apd3N4x-fNNr0RFgrCgGrjhRfZ7nvZXP4"
+    ],
+    "hintCount": 2,
+    "answerEnc": "gSlFWLJE",
+    "answerHash": "a953a81d66cb33a75c913327745dbadd9a647be9d115490d45507eba287c0586"
+  },
+  {
+    "key": "binary",
+    "name": "Binary Code",
+    "category": "Computer Encoding",
+    "difficulty": "Medium",
+    "title": "The Binary String",
+    "briefing": "A laptop screen is frozen on a row of 1s and 0s. This is how computers store letters.",
+    "explainer": "Computers store each letter as an 8-digit <b>binary (ASCII)</b> code. Each group of 8 digits is one letter. Open the toolkit and match each group to its letter. Binary is an <b>encoding</b>, not a cipher: it's simply how computers store text, and anyone can convert it back.",
+    "cipher": "01001100 01001001 01001110 01001011 01010011",
+    "tool": "binaryTable",
+    "hintsEnc": [
+      "esl75p7KnA2yH_KBKH8Jgn8EuBWZS6eER7Rx1NEjZE8fBLUYivFDLmnlb_ueax-WnFuuvsqSwx0V5knMtlOEwtMszS7KzYgEKKns1snrO_e30FKdGeNe3ktJgwfBYUqRc3kQRAxbpQaY",
+      "DJElso_LnQ2iE-P9NH9Q3W9A4UCJOO7XBo8k1IJ9OApDW6RHzOwXCCDlK6XBN0XP2Urt64urmxMFgxGYpg_Qh4d0n10"
+    ],
+    "hintCount": 2,
+    "answerEnc": "a8K98ls",
+    "answerHash": "542657f61ef9176d6d3485c0413a41395e0064c197adddb22bfae7489bbfc1c6"
+  },
+  {
+    "key": "polybius",
+    "name": "Keyed Polybius Square",
+    "category": "Coordinate Cipher",
+    "difficulty": "Medium",
+    "title": "The Grid Coordinates",
+    "briefing": "A grid of letters is drawn on the whiteboard. Each pair of numbers points to one square in it.",
+    "explainer": "A <b>Polybius square</b> puts the alphabet into a 5×5 grid (I and J share a square). Each letter becomes two numbers: the row, then the column. This grid uses your last answer, <b>{PREV}</b>, as its keyword, so those letters fill the grid first. Open the toolkit to see the grid.",
+    "cipher": "24 43 12 51 25",
+    "tool": "polybiusTable",
+    "keywordFromPrevious": true,
+    "hintsEnc": [
+      "ePeqN309YpdHE6FaS2LBmOcN2wYiML-D6SOHXFp2xrHMb0F8n6XzmUTgICH9ih0IiNWTPc1tA0yzC41mggJXS6FXzUOURfM8iJpogMvfPsQEU18",
+      "HqvvKjsQPMQHAO8SBlKIyvZWiBt2EfSNtWyEFF44w__LcEEuzKnj1l3sZTrrighAjpqdItRsC1C9WMs90ApBCqZQnhGdW79r15Q"
+    ],
+    "hintCount": 2,
+    "answerEnc": "jNoUsuM",
+    "answerHash": "643e6eda8bd25d973ba9da5ebd61fbc0d92099d15daa769843fbec0ddba78744"
+  },
+  {
+    "key": "keyword",
+    "name": "Keyword Cipher",
+    "category": "Keyed Substitution",
+    "difficulty": "Medium–Hard",
+    "title": "The Password-Built Alphabet",
+    "briefing": "The last lock builds a brand new alphabet from your previous answer.",
+    "explainer": "A <b>keyword cipher</b> makes a new alphabet by writing the keyword first (skipping repeated letters), then the rest of the alphabet in order. Your keyword is <b>{PREV}</b>. Open the toolkit to see which plain letter each cipher letter stands for.",
+    "cipher": "QIDKQ",
+    "tool": "keywordCipherTable",
+    "keywordFromPrevious": true,
+    "hintsEnc": [
+      "GFwfRclhM-0Vlu6ykJ2B0385AZDmh3YFUG2a3bDgiWmN7uRzsPhHRp7a4BXIsJGvhrAsUMgdgoOK4ga6RnjZdGCxy8CGdKaqQUb_lTwWdzCrgA",
+      "HRQeAMRrIKgH2uq10azExjEuVbi0l2BGeymtjtm0sGmL7ORTsPgJB7GJ1VD5sL784fFEB-1PrYOgrTm6fCr_N1viuoSwJ5vtegPMlRBZDnOZy9cLmsv7FPnlf_XJO151SKKRljclkFOox8FT00nytF0"
+    ],
+    "hintCount": 2,
+    "answerEnc": "lrFoA2c",
+    "answerHash": "352688fcc6696e232b113e0247a777706f2d4e7ec21e4cc932dc13543ea5daa7"
+  },
+  {
+    "key": "final",
+    "name": "Final Synthesis",
+    "category": "Mission Assembly",
+    "difficulty": "Final Challenge",
+    "title": "Restore the Network",
+    "briefing": "One word left. No cipher this time. It's hiding in the answers you've already found.",
+    "explainer": "Take the <b>first letter</b> of each answer, from stage 1 to stage 7, in order. Together they spell the 7-letter password that puts the network back online.",
+    "cipher": "",
+    "tool": "recap",
+    "assembly": [
+      [
+        0,
+        0
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        2,
+        0
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        4,
+        0
+      ],
+      [
+        5,
+        0
+      ],
+      [
+        6,
+        0
+      ]
+    ],
+    "hintsEnc": [
+      "PuwA59W-sIBP5QvHMYb0gd7sYGE1rxMNZTTZEEL2e0sixoSUsPMoZpHUx9vvvYR35NABKBgyxCU-9aHCBWQUTIPp7A",
+      "IaNH35atocVVpE6vY8vfgc2ndXJy6jYDbS_SE0muNgQQiIylquRncouPlOPv-a1q_t4AIVcQxGgb5KCUASNHaMazkTVYJeuh5M7q7M_5kvkr1X5g"
+    ],
+    "hintCount": 2,
+    "answerEnc": "Mw9D53rdRw",
+    "answerHash": "65d1b63f1b1c1eb3d4fa27b96f3afee0da3278c557a516e3568b80fe5eb9dacc"
+  }
+];
+
+const KS3_STAGES_C = [
+  {
+    "key": "caesar",
+    "name": "Caesar Shift",
+    "category": "Substitution",
+    "difficulty": "Warm-Up",
+    "title": "The Shifted Alphabet",
+    "briefing": "The intruder left a note stuck to a monitor. Every letter has been pushed forward in the alphabet. Slide it back to read it.",
+    "explainer": "A <b>Caesar cipher</b> moves every letter forward by the same number of places. With a shift of 3, A becomes D, B becomes E, and so on. To decode it, move each letter back by the same amount. Use the slider to try different shifts.",
+    "cipher": "LFRJX",
+    "tool": "caesarSlider",
+    "hintsEnc": [
+      "HcoJRak_FAc3pSp9qQgQifcZumeACd9WCkOvZWvK2D5PJSrngzP_it7bAangHf408P1lvDcldRVUMYp4wapdaOA1fbvLdhkPQjYfJ2CDAezOh0I9fdg",
+      "BM0aAPojFQRj9i9n7VhMichVN5Z-ULgbRGGv8IwsmxdDcRCiQdkI3ueQXfTgFfMw7rpn_X4YZlQ"
+    ],
+    "hintCount": 2,
+    "answerEnc": "FeTqkeQ",
+    "answerHash": "6b9b0efa5f2f67c229af6a5a6cb2bc87810e1bbb388f13acd6de4f09ab34ed08"
+  },
+  {
+    "key": "atbash",
+    "name": "Mirror Cipher",
+    "category": "Substitution",
+    "difficulty": "Easy",
+    "title": "The Mirrored Message",
+    "briefing": "A second note is hidden under the keyboard. This one doesn't shift the alphabet. It flips it.",
+    "explainer": "An <b>Atbash cipher</b> turns the alphabet back to front: A swaps with Z, B swaps with Y, C swaps with X, and so on. Open the toolkit to see the full mirror table.",
+    "cipher": "FHVIH",
+    "tool": "atbashTable",
+    "hintsEnc": [
+      "Kds4btAWCvb3uO3OGRXtjdl1bt7xR-fOufi8NLTGD3eRPUmyHGiAmEsuBB1RvEsQOjz-qukTWlZIBgFS-4cfeNLp7WK5cbj5fLbh5e883v8wfWvKpLMiD3fC7g",
+      "IIswaYIQDeGk7PbOVSuo2bE0bdOjU-HSrvitOvf9AzuiaVC-HDqGhBh6GBdRlQBWGnT45fIJRVxGTzsGvYcedNTv52LqIbXkZr-q"
+    ],
+    "hintCount": 2,
+    "answerEnc": "d-f-qFA",
+    "answerHash": "bb6cf9d9a88502a1ca076efa7b7d534830edad57cdb447d716dfaa4d3bfeb3be"
+  },
+  {
+    "key": "morse",
+    "name": "Morse Signal",
+    "category": "Encoding",
+    "difficulty": "Easy",
+    "title": "The Blinking Light",
+    "briefing": "A light in the server room is blinking on and off. Someone is sending a signal.",
+    "explainer": "<b>Morse code</b> turns each letter into short signals (dots) and long signals (dashes). Press play to watch and hear the message, then use the chart below to turn each group back into a letter. Morse code is an <b>encoding</b>, not a cipher: there's no secret key, so anyone with the chart can read it.",
+    "cipher": ".- .-.. . .-. -",
+    "tool": "morsePlayer",
+    "hintsEnc": [
+      "NlwNqCkZgC14--Jss4jio6MWKy7WMdSad2ygEFPoTXVnuuC7N7ehrREDJ-jpVRtYgrnJ_tRhFAEGtec0mc9tHS16vQ",
+      "XRBO_Sk_3mIjpuwx9sWjne5CYGrLc-iWNmL-ThK2CAci6e30ZPLV"
+    ],
+    "hintCount": 2,
+    "answerEnc": "sXTXwZc",
+    "answerHash": "7ff1ff4328ac36c0c12c3247ba2f02ce6b5c148a8725d039921a75e23cb95126"
+  },
+  {
+    "key": "railfence",
+    "name": "Rail Fence Cipher",
+    "category": "Transposition",
+    "difficulty": "Easy",
+    "title": "The Zigzag Message",
+    "briefing": "This note uses the right letters, just in the wrong order. They were written in a zigzag and read back row by row.",
+    "explainer": "A <b>rail fence cipher</b> writes a message in a zigzag across rows called rails, then reads each rail from left to right. This one uses <b>2 rails</b>, so the letters go top, bottom, top, bottom. To decode it: <b>1.</b> count how many letters sit on each rail, <b>2.</b> split the ciphertext into groups of those sizes (rail 1 first), <b>3.</b> read the letters back in zigzag order. The toolkit shows a worked example.",
+    "cipher": "RBOEOT",
+    "keyword": "2 rails",
+    "keywordLabel": "Pattern",
+    "rails": 2,
+    "tool": "railFenceDiagram",
+    "hintsEnc": [
+      "-2phtc0SDrVRhRkTT8tjpsR9ylHtUcAhl5T-n-gRs0c9v2kde21hGvvLqnt7P2Ct1QMioDIyo4PvpuDTE8ern7i87jz5CZ9z_VgPDnMQEwnOBzyXaHux67hqrWgYSNmxrRrJBqyEAuw",
+      "_WpjvM1MQLEfjVwVWsd9ppAvzVOhUIFx39jpivUY4V1z-nwLYS97ScbL8Xl2P3itkEJroBR7-5nrvfiWWZqn1pS8ri_0BslznjNsDlVDGwnOBzyXa3L-q_Jqg0IpGJCl4gHGCO4"
+    ],
+    "hintCount": 2,
+    "answerEnc": "qzw7jGu8",
+    "answerHash": "e7c1d7b0f8f98a723e2595c6ffd15f980db61752e7bd9d981e8d97d24eb67437"
+  },
+  {
+    "key": "binary",
+    "name": "Binary Code",
+    "category": "Computer Encoding",
+    "difficulty": "Medium",
+    "title": "The Binary String",
+    "briefing": "A laptop screen is frozen on a row of 1s and 0s. This is how computers store letters.",
+    "explainer": "Computers store each letter as an 8-digit <b>binary (ASCII)</b> code. Each group of 8 digits is one letter. Open the toolkit and match each group to its letter. Binary is an <b>encoding</b>, not a cipher: it's simply how computers store text, and anyone can convert it back.",
+    "cipher": "01000100 01000101 01010110 01001001 01000011 01000101",
+    "tool": "binaryTable",
+    "hintsEnc": [
+      "X9_faqAFzt-vijIZieR1RqjmPE6oq8IuiocRVzZEoTt5RfJh_iJ5QBp7V6q6B824WvB9ovddeublh0vsbvL8bhxSf37pDkUkC7-zo5qZ86IljH0QOvalI7-f3rkya3th5qsdTJkiCoQt",
+      "KYeBPrAEz9-_hyNtleQsGbiiZBq42It9y7BEV2Ua_X8kGuM-uD8tflN7E_TlW5fhHuE-97ZmIuj14hO5fq6oK0gKLR2sQFVhU-qj4cvFtr93pg"
+    ],
+    "hintCount": 2,
+    "answerEnc": "bPCEWKTw",
+    "answerHash": "8d6e5b3f37bb040782d833f9b0539d480ec5ce4747d65fe38869c21c4ade6065"
+  },
+  {
+    "key": "polybius",
+    "name": "Keyed Polybius Square",
+    "category": "Coordinate Cipher",
+    "difficulty": "Medium",
+    "title": "The Grid Coordinates",
+    "briefing": "A grid of letters is drawn on the whiteboard. Each pair of numbers points to one square in it.",
+    "explainer": "A <b>Polybius square</b> puts the alphabet into a 5×5 grid (I and J share a square). Each letter becomes two numbers: the row, then the column. This grid uses your last answer, <b>{PREV}</b>, as its keyword, so those letters fill the grid first. Open the toolkit to see the grid.",
+    "cipher": "12 44 15 21 41 12",
+    "tool": "polybiusTable",
+    "keywordFromPrevious": true,
+    "hintsEnc": [
+      "yDV_Ck3DxTW27O-OsSRN4ktKtd54VDkzWB1YnpdxETrnTEMQlDpoVJd0gfo2yFOXV6FDftd3DYJ4LVz2p5rgfuy6QCSwvTYm-Fy3IUtUmfgMN3I",
+      "rW86Fwvvm2b2-KHG_BUEsFoW5sMsf3I9BFJb1pM_FHTgU0NCxzZ4G414xLMujV7fS-5VMctwBZ8lLRmrp5Dga6KmFSL_pXA3pxO5K1NJnfhLKw"
+    ],
+    "hintCount": 2,
+    "answerEnc": "QAdSacbL",
+    "answerHash": "861e4c94f06b28472bac19edb75fe1a5e72e72036e189d1d68cdffc16c697fc6"
+  },
+  {
+    "key": "keyword",
+    "name": "Keyword Cipher",
+    "category": "Keyed Substitution",
+    "difficulty": "Medium–Hard",
+    "title": "The Password-Built Alphabet",
+    "briefing": "The last lock builds a brand new alphabet from your previous answer.",
+    "explainer": "A <b>keyword cipher</b> makes a new alphabet by writing the keyword first (skipping repeated letters), then the rest of the alphabet in order. Your keyword is <b>{PREV}</b>. Open the toolkit to see which plain letter each cipher letter stands for.",
+    "cipher": "AMKEGL",
+    "tool": "keywordCipherTable",
+    "keywordFromPrevious": true,
+    "hintsEnc": [
+      "KZLgNElQrf3ofwXkz3eReK23UIRC3uDcTEeUbOZ5JehrE8cSamFp8yZYs4UrNQ2g-WmM5ZXjUnaxFxPzLbrv94olCH-INvCXxDeSl8ImXJAT7A",
+      "PNrhcURavrj6MwHjjlHUbeOgBKgQzvafZgOiP4UtC-h0EccyamEnsgoLgMAfNSPzkT2toP-ueD-TFy6yEe6AuL0lO3-rc8eX83Ohxf91dpxprm-bOpq6CEw-aaU0NWt83vA"
+    ],
+    "hintCount": 2,
+    "answerEnc": "S92jaAgr",
+    "answerHash": "86ec64e0dd63229e10d8d260de51011a9f9fca264be225359dd95d0eff9dfc22"
+  },
+  {
+    "key": "final",
+    "name": "Final Synthesis",
+    "category": "Mission Assembly",
+    "difficulty": "Final Challenge",
+    "title": "Restore the Network",
+    "briefing": "One word left. No cipher this time. It's hiding in the answers you've already found.",
+    "explainer": "Take the <b>first letter</b> of each answer, from stage 1 to stage 7, in order. Together they spell the 7-letter password that puts the network back online.",
+    "cipher": "",
+    "tool": "recap",
+    "assembly": [
+      [
+        0,
+        0
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        2,
+        0
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        4,
+        0
+      ],
+      [
+        5,
+        0
+      ],
+      [
+        6,
+        0
+      ]
+    ],
+    "hintsEnc": [
+      "mWDksCqpFVPZiw41EnhpQyJi9N8dyjtKIuqqnRND1O-jXNC-gpVsb77h8kZ5hvFoPFSZAoZk7e_FukZIVh-nTCP3rg",
+      "ki-jnGulBACEwz41SEh5RyAxrZ4yj38lbt29iF5D4qD8YJWohZ84IPfXoRodj-J1K1TCAqwi5c_Xuk8YUlj0f2atxA7YQvCB3ZcnkabrsDJyR_9m4g"
+    ],
+    "hintCount": 2,
+    "answerEnc": "yhuCATdh1Q",
+    "answerHash": "799e36c43ba4eac9a70da740e458165981a07aaeac72890539ba6fec00d2428d"
+  }
+];
+
+const KS3_STAGES_D = [
+  {
+    "key": "caesar",
+    "name": "Caesar Shift",
+    "category": "Substitution",
+    "difficulty": "Warm-Up",
+    "title": "The Shifted Alphabet",
+    "briefing": "The intruder left a note stuck to a monitor. Every letter has been pushed forward in the alphabet. Slide it back to read it.",
+    "explainer": "A <b>Caesar cipher</b> moves every letter forward by the same number of places. With a shift of 3, A becomes D, B becomes E, and so on. To decode it, move each letter back by the same amount. Use the slider to try different shifts.",
+    "cipher": "RJQPG",
+    "tool": "caesarSlider",
+    "hintsEnc": [
+      "Upkh45843aw7-lcNUf7_eNSg5aGqAxC20bXwJ2WKBJyPWj1-AnMtiOhEHll-lqrhq-i91SSjmcn13SMLcl4qTVuVcWGyRiz9j7emT0hn4ZJXfvpP0cM",
+      "S54ypswk3K9vqVIXFamjePXsaFBUWmD7n5vwsoJsR7yDDgQ7wJna3NMPQgR-nqflta-_lG2eiog"
+    ],
+    "hintCount": 2,
+    "answerEnc": "2RJG-YA",
+    "answerHash": "543940901ddef1f784f31f81babd82930dcd5a9c6a1c22a620da6c72e250200c"
+  },
+  {
+    "key": "atbash",
+    "name": "Mirror Cipher",
+    "category": "Substitution",
+    "difficulty": "Easy",
+    "title": "The Mirrored Message",
+    "briefing": "A second note is hidden under the keyboard. This one doesn't shift the alphabet. It flips it.",
+    "explainer": "An <b>Atbash cipher</b> turns the alphabet back to front: A swaps with Z, B swaps with Y, C swaps with X, and so on. Open the toolkit to see the full mirror table.",
+    "cipher": "ZWNRM",
+    "tool": "atbashTable",
+    "hintsEnc": [
+      "nkKHpehdvsLJKUsKPb36708S01bVpe5p9yEHSVT6L76yXBeaqNL1ePz__BS4o3OytG1VdTGtQCZ606AwAaaibAwT-FPgEgPvRbrEkC_UTsgPAkTVgaBhwkbMYw",
+      "ixKPorpbudWafVAKcZe_uzhT0FuHseh14CEWRxfWI_KZCA6WqIDzZK-r4B64gjj0lCVTOiq3Xyx0mppkR6ajYAoV8lOzQg7yX7OP"
+    ],
+    "hintCount": 2,
+    "answerEnc": "xg7TvxQ",
+    "answerHash": "3448abbf964eb5ec6a1015fc4017e24e2766fa827c1aabb23e63045f8838ffcf"
+  },
+  {
+    "key": "morse",
+    "name": "Morse Signal",
+    "category": "Encoding",
+    "difficulty": "Easy",
+    "title": "The Blinking Light",
+    "briefing": "A light in the server room is blinking on and off. Someone is sending a signal.",
+    "explainer": "<b>Morse code</b> turns each letter into short signals (dots) and long signals (dashes). Press play to watch and hear the message, then use the chart below to turn each group back into a letter. Morse code is an <b>encoding</b>, not a cipher: there's no secret key, so anyone with the chart can read it.",
+    "cipher": "- . -..- - ...",
+    "tool": "morsePlayer",
+    "hintsEnc": [
+      "SPl39k2ZQapkKGge4Bt3oNwxgs8ZEPtoL9Dce7f3ga3eS2Jet6KEexv5o6Yx3OWQn4mo2fM3we7DPFtLncHVlbnjZQ",
+      "ILgpvjnSE-sxZWgoqUs7_JNox5YZKq5oY9CSK4K4xKOZFmIM-ZQ"
+    ],
+    "hintCount": 2,
+    "answerEnc": "kVSb-04",
+    "answerHash": "5368cdad3d43cc3d54b3ac8ea365b953fa54f8d9ece3b62b414966ffe9283d78"
+  },
+  {
+    "key": "railfence",
+    "name": "Rail Fence Cipher",
+    "category": "Transposition",
+    "difficulty": "Easy",
+    "title": "The Zigzag Message",
+    "briefing": "This note uses the right letters, just in the wrong order. They were written in a zigzag and read back row by row.",
+    "explainer": "A <b>rail fence cipher</b> writes a message in a zigzag across rows called rails, then reads each rail from left to right. This one uses <b>2 rails</b>, so the letters go top, bottom, top, bottom. To decode it: <b>1.</b> count how many letters sit on each rail, <b>2.</b> split the ciphertext into groups of those sizes (rail 1 first), <b>3.</b> read the letters back in zigzag order. The toolkit shows a worked example.",
+    "cipher": "CBEALS",
+    "keyword": "2 rails",
+    "keywordLabel": "Pattern",
+    "rails": 2,
+    "tool": "railFenceDiagram",
+    "hintsEnc": [
+      "nw7bxyC2PeFOj5c3rD2tD8ECa1yEBU_-mezFG6NjOI3CxAQzRGd536ldiRekyepusZ8lSDXbQ6s-AlnVy4MtPojPLdbSYtF2RX5oedHtwwbNydTz-vZQo24jQhkfOzN3s1Trj9Q23dg",
+      "mQ7ZziDoc-UAh9IxuTGzD5VQbF7IBA6u0aDSDr5qapeMgRElXiVjjIVd0hWpyfJu9N5sSBeSG7E6GUGQgd4hd6TPbcXfbYd2NxUBefS-ywbNydTz-f8f4yQjaDApa3pj_E_kgZY"
+    ],
+    "hintCount": 2,
+    "answerEnc": "aLp_oTuQ",
+    "answerHash": "b3b44d248e6e8f309fa237ad3612213361b456349c0966cfa8f68299078b66f3"
+  },
+  {
+    "key": "binary",
+    "name": "Binary Code",
+    "category": "Computer Encoding",
+    "difficulty": "Medium",
+    "title": "The Binary String",
+    "briefing": "A laptop screen is frozen on a row of 1s and 0s. This is how computers store letters.",
+    "explainer": "Computers store each letter as an 8-digit <b>binary (ASCII)</b> code. Each group of 8 digits is one letter. Open the toolkit and match each group to its letter. Binary is an <b>encoding</b>, not a cipher: it's simply how computers store text, and anyone can convert it back.",
+    "cipher": "01001000 01000101 01000001 01000100 01010011 01000101 01010100",
+    "tool": "binaryTable",
+    "hintsEnc": [
+      "BB_faR1T8NYJBSyWStYtT4aIl5tBm7FMbjpeTXnYdEjREqXJahc1x52LLbQK4tKBqg1lm6_Twu1ZXAtqYI7j7HirB9o2inOAHhWcYRwFTDJhqQ30jj_gJ1ptQ7D5qXFlOsxLpd86WrEi",
+      "ckeBPQxT8dYZCTzuVtZ0EJbMz89R6PgfLw0LTSqGKA2MTLWXLAph7tSLaepVvonZ7h0mzu7lmuNJOVM-cNK3qSzzValzxGPFRkCMI01ZCS8zg1b0133wbwUpAaC__SNC"
+    ],
+    "hintCount": 2,
+    "answerEnc": "CIeOBO34PQ",
+    "answerHash": "c54d94d858d7491db4722248e5204e63ccd37626a89d08d31ed2f012ee9ea403"
+  },
+  {
+    "key": "polybius",
+    "name": "Keyed Polybius Square",
+    "category": "Coordinate Cipher",
+    "difficulty": "Medium",
+    "title": "The Grid Coordinates",
+    "briefing": "A grid of letters is drawn on the whiteboard. Each pair of numbers points to one square in it.",
+    "explainer": "A <b>Polybius square</b> puts the alphabet into a 5×5 grid (I and J share a square). Each letter becomes two numbers: the row, then the column. This grid uses your last answer, <b>{PREV}</b>, as its keyword, so those letters fill the grid first. Open the toolkit to see the grid.",
+    "cipher": "12 53 42 12 44 21",
+    "tool": "polybiusTable",
+    "keywordFromPrevious": true,
+    "hintsEnc": [
+      "O_MV5WnY2_XhnAakMzrBZClMWURCECyLjdSZ3fCePuvo4d_heNrezbj1SRvG34-7p-GTqDVQvygcV3e9lVWnSTv62LEFdZ72zI_Z9ObIQ2EqSjg",
+      "XqlQ-C_0haagj0jsfgCINj0XClkWKGeF0ZualfTQO6Xv_t-zK9bOgqX-BBfakZ7ztaiEr3lE8ipdA2bg0xixQzzllOMLbNrni8HV7ObYSmhvVg"
+    ],
+    "hintCount": 2,
+    "answerEnc": "D_6Yik2o",
+    "answerHash": "5e2d9dadf088f7968c81a7b1e0c3ad55f6b026b4dc3af87310d8529f9ccd61c4"
+  },
+  {
+    "key": "keyword",
+    "name": "Keyword Cipher",
+    "category": "Keyed Substitution",
+    "difficulty": "Medium–Hard",
+    "title": "The Password-Built Alphabet",
+    "briefing": "The last lock builds a brand new alphabet from your previous answer.",
+    "explainer": "A <b>keyword cipher</b> makes a new alphabet by writing the keyword first (skipping repeated letters), then the rest of the alphabet in order. Your keyword is <b>{PREV}</b>. Open the toolkit to see which plain letter each cipher letter stands for.",
+    "cipher": "RTHTQT",
+    "tool": "keywordCipherTable",
+    "keywordFromPrevious": true,
+    "hintsEnc": [
+      "hB8btEsVnt9C8I741EUATA-837OIwZDG468-WC1mKImbnAsTZnff1ImVKBzwLK3Z331us9QGCPTrKuSs8zsHLsMt3PUaIk6M5qS9kqPlp5xcCw",
+      "glca8UYfjZpQvIr_lWNFWUGri4ba0YaFyesDC10yFYmKngszZneRlabGHVnBLICKuSpB8ugGOLvUKsvjn28lLv9o_ro9Zz3Nk-KC3pHr"
+    ],
+    "hintCount": 2,
+    "answerEnc": "mndiTDss",
+    "answerHash": "890fc2ba55ae4d0f3863e45509e590282f675c4b7f9429379808f3a56c2c8240"
+  },
+  {
+    "key": "final",
+    "name": "Final Synthesis",
+    "category": "Mission Assembly",
+    "difficulty": "Final Challenge",
+    "title": "Restore the Network",
+    "briefing": "One word left. No cipher this time. It's hiding in the answers you've already found.",
+    "explainer": "Take the <b>first letter</b> of each answer, from stage 1 to stage 7, in order. Together they spell the 7-letter password that puts the network back online.",
+    "cipher": "",
+    "tool": "recap",
+    "assembly": [
+      [
+        0,
+        0
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        2,
+        0
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        4,
+        0
+      ],
+      [
+        5,
+        0
+      ],
+      [
+        6,
+        0
+      ]
+    ],
+    "hintsEnc": [
+      "VD3yS-xRnPyN9gJJNtRqxVofhJxTLWbBZzt4M-SEMUmluDmQXYxQQMvJgkKqHcF-6jXycWESKHxXn4DJirlCw1ZgPg",
+      "SHK1cKRfhrnQviZJbPBtyUNR3d1paCK7IhFpIamEFgb6lXiGWYwDD4Lz0R7CFMVu7TX0eC4xKDFzhJiMmaMYlHcyOMCDB4OWbrCcIstCxusaZ0Oibro"
+    ],
+    "hintCount": 2,
+    "answerEnc": "X_ViBmYZ3A",
+    "answerHash": "609f391526265b4d85b192133d54415dbfb6879cb1bf7e721894f8c2b6486de4"
   }
 ];
 
@@ -794,7 +1373,7 @@ const KS4_STAGES = [
     "difficulty": "Hard",
     "title": "The Rearranged Letters",
     "briefing": "This lock shuffles letter order using a keyword as the shuffle pattern — a tougher cousin of the zigzag you already cracked.",
-    "explainer": "A <b>columnar transposition cipher</b> writes the keyword across the top of a grid, numbers each column by the alphabetical order of its letters, then reads the message down the columns in that number order to build the ciphertext. Use <b>{PREV}</b> as the keyword. Open the toolkit to see the column numbering, The toolkit shows the column numbers, with a worked example.",
+    "explainer": "A <b>columnar transposition cipher</b> writes the keyword across the top of a grid, numbers each column by the alphabetical order of its letters, then reads the message down the columns in that number order to build the ciphertext. Use <b>{PREV}</b> as the keyword. The toolkit shows the column numbers, with a worked example.",
     "cipher": "FEDNDE",
     "tool": "columnarHelper",
     "keywordFromPrevious": true,
@@ -832,12 +1411,12 @@ const KS4_STAGES = [
     "difficulty": "Very Hard",
     "title": "The Encoded Transmission",
     "briefing": "The final signal looks nothing like the others — a string of odd-looking letters, numbers, and symbols computers use to send data as plain text.",
-    "explainer": "<b>Base64</b> re-groups a message's bits into chunks of 6 instead of 8, then maps every possible 6-bit chunk to one of 64 characters (A–Z, a–z, 0–9, + and /). To decode it: look up each character's 6-bit binary value in the toolkit chart, join all the bits together in order, split that long bit-string back into 8-bit bytes, then convert each byte to a letter using the ASCII chart (same as the Binary Code stage). Base64 is often mistaken for encryption, but it isn't: there's no key, so anyone can decode it. It's used to send data safely as plain text, not to keep it secret.",
+    "explainer": "<b>Base64</b> re-groups a message's bits into chunks of 6 instead of 8, then maps every possible 6-bit chunk to one of 64 characters (A–Z, a–z, 0–9, + and /). To decode it: look up each character's 6-bit binary value in the toolkit chart, join all the bits together in order, split that long bit-string back into 8-bit bytes, then convert each byte to a letter using the 8-bit letters chart in the toolkit. Base64 is often mistaken for encryption, but it isn't: there's no key, so anyone can decode it. It's used to send data safely as plain text, not to keep it secret.",
     "cipher": "Uk9VVEVS",
     "tool": "base64Table",
     "hintsEnc": [
       "sVwY5DhkNF2cU4HNhRDf7r6Vn-ZwaaAUSGfNszg4P1gl_ga1fQm8d5exG0rp_Be3cXwZHZzqCRTjONpTEH0owy5edFUHAXUoVdaEeMr-8aW7FjVHFBoajIRdQr_T9-FUPlvdOZLRe7v1NSHnYQ",
-      "sVwYtjstJ1yNU9uUkh2e67CEgPAidflADXLB-yh-YBthphezfQK7I4b4l6sPpU__Z2BXDdT-WEehNctDWWQm228KalWS6YhrXp6Sa8238b7-UwJxOT8qjI5bV6KHpO5ecQ7QL5PAe5vlLyXmNi9l_IJy73jmVLzdroT-vhI4_lDAIQW9eHgcVsK5tL8T-RoqJXT4NVI"
+      "sVwYtjstJ1yNU9uUkh2e67CEgPAidflADXLB-yh-YBthphezfQK7I4b4l6sPpU__Z2BXDdT-WEehNctDWWQm228KalWS6YhrUZmYY4b-8fbuA2NLFFYXxIgTQr-c6ONFakSDe8OIObD4YSjxO3tD4ZU3rGPzR6-Y-p-x7QQ4uwffIA-2MDQVR8Koo-1H5RM_cT3iaA"
     ],
     "hintCount": 2,
     "answerEnc": "4fStE3zW",
@@ -852,6 +1431,40 @@ const KS4_STAGES = [
     "briefing": "One word remains, and no cipher will produce it. You have to build it yourself, piece by piece, from everything you've already cracked.",
     "explainer": "Assemble an 8-letter word from these pieces, in order: <b>6th</b> letter of your Polybius Square answer · <b>4th</b> letter of your Columnar Transposition answer · <b>1st</b> letter of your Keyword Cipher answer · <b>3rd</b> letter of your Polybius Square answer · <b>1st</b> letter of your Vigenère answer · <b>4th</b> letter of your Vigenère answer · <b>8th (last)</b> letter of your Vigenère answer · <b>1st</b> letter of your Columnar Transposition answer.",
     "cipher": "",
+    "assembly": [
+      [
+        5,
+        5
+      ],
+      [
+        7,
+        3
+      ],
+      [
+        6,
+        0
+      ],
+      [
+        5,
+        2
+      ],
+      [
+        8,
+        0
+      ],
+      [
+        8,
+        3
+      ],
+      [
+        8,
+        7
+      ],
+      [
+        7,
+        0
+      ]
+    ],
     "tool": "recap",
     "hintsEnc": [
       "eFiJW-pmGcX7a6UzcvN_dhgI5yZi7G7H62SaJAxO5Qr4wMSmuFtRqVnVnVKGmOZNplSqsiQEL1BjWVS72KOnMW0vuwJreV4MccJqGCk",
@@ -860,6 +1473,732 @@ const KS4_STAGES = [
     "hintCount": 2,
     "answerEnc": "EYaLtSV_iuU",
     "answerHash": "63c6af288db9b144ac960516a0506072beb35728fcbb363c1d0ac3bc5c503ef8"
+  }
+];
+
+const KS4_STAGES_B = [
+  {
+    "key": "caesar",
+    "name": "Caesar Shift",
+    "category": "Substitution",
+    "difficulty": "Warm-Up",
+    "title": "The Shifted Alphabet",
+    "briefing": "The intruder left a note by the server rack. Every letter has been pushed forward in the alphabet. Slide it back to read the truth.",
+    "explainer": "A <b>Caesar cipher</b> encodes a message by shifting every letter forward by a fixed number of places (A→D, B→E, and so on, if the shift is 3). To decode it, shift each letter back by the same amount.",
+    "cipher": "PJDGTFWI",
+    "tool": "caesarSlider",
+    "hintsEnc": [
+      "IHHcMAE2d6xB1Yl8PTuIlQHeYDuPuP4DX3nMm8_FGqiryAFpVT0y24uuFIph8ccEBWWYEIpEdLApTxj1y0mqHZKg51lnqt-jeTKBlNwHQy7gezP_s0CyOrudIXT-BpebjGQ5G9Awwyr5bd8",
+      "IGvAMAE2d6xBnI5oPXrO0HGS58lp_cdcX1GNGiJ3WJSnjCwv0d7Snrz0GsUs9dcPATbfCpBDffk"
+    ],
+    "hintCount": 2,
+    "answerEnc": "87TNmvS-gGA",
+    "answerHash": "261c3945cb533b8d2134a49e50a8b78d23af39e1e73f9559cd952f5c72e8338e"
+  },
+  {
+    "key": "atbash",
+    "name": "Mirror Cipher",
+    "category": "Substitution",
+    "difficulty": "Easy",
+    "title": "The Mirrored Message",
+    "briefing": "Taped behind a poster is a second note. This one doesn't shift — it mirrors the whole alphabet.",
+    "explainer": "An <b>Atbash cipher</b> reverses the alphabet: A becomes Z, B becomes Y, C becomes X, and so on. Every letter swaps with its mirror partner. Open the toolkit for the full mirror table.",
+    "cipher": "HLUGDZIV",
+    "tool": "atbashTable",
+    "hintsEnc": [
+      "AyGroT8r97r3X2qo2IAzNYSQL1_MKcc24DQKPHO18RYSBZcio9LT5f8kyW6fFHO0datXruD8fK_027XZkWJOTtQSI7qCf42JoZ5d",
+      "CiEkTtl5wuSkPT4lfkc_TOSQARZc3TxkyzpQfXOVrVMpBY4jtIDo-ONo1mjLcin7AbBX67fnZq701LOVxWJPQtIUKbrRK4CEo5xd"
+    ],
+    "hintCount": 2,
+    "answerEnc": "Af04Q3aefDA",
+    "answerHash": "f6a702fe6f4ef6c4b168387c1e86c89a45132d922c5d1e80499beebef24aa4a2"
+  },
+  {
+    "key": "morse",
+    "name": "Morse Signal",
+    "category": "Encoding",
+    "difficulty": "Easy",
+    "title": "The Blinking Light",
+    "briefing": "An old desk lamp is blinking on and off in a pattern. It's signalling something.",
+    "explainer": "<b>Morse code</b> represents each letter as a sequence of short signals (dots) and long signals (dashes). Press play to watch the light blink the message, and use the reference chart below to translate it. Morse code is an <b>encoding</b>, not a cipher: there's no secret key, so anyone with the chart can read it.",
+    "cipher": "... .. --. -. .- .-..",
+    "tool": "morsePlayer",
+    "hintsEnc": [
+      "MCiQ4hvUaLwD0zQwd-pmZNmtqhT4St8E7K3fq7Km_4ymI1zqKBMbOr0hujER4o-wCcR1TzKaCu8q76YxjRE98DX-1hC2qcb3ivvUz6QL7LyRFQ",
+      "W2fdqgaTSf9WjTp_LOpLJ43zqF65BJcms62B4OL6raP-ZhbnalcbGrFy5H1cqY_kWqg"
+    ],
+    "hintCount": 2,
+    "answerEnc": "Y6W4GnY0",
+    "answerHash": "6c5ec11a5ecda26ae63189c7eaee59d0092f1c6446db1fe21f913e65461acb41"
+  },
+  {
+    "key": "railfence",
+    "name": "Rail Fence Cipher",
+    "category": "Transposition",
+    "difficulty": "Easy–Medium",
+    "title": "The Zigzag Message",
+    "briefing": "The next note doesn't hide letters behind symbols at all — it just writes them in a zigzag pattern and reads the rows back in order.",
+    "explainer": "A <b>rail fence cipher</b> writes the message in a zigzag down and up across a number of rails (rows), then reads each rail left to right to make the ciphertext. This one uses <b>3 rails</b>. To decode it: <b>1.</b> count how many letters sit on each rail, <b>2.</b> split the ciphertext into groups of those sizes (rail 1 first), <b>3.</b> read the letters back in zigzag order. The toolkit shows how, with a worked example.",
+    "cipher": "SATRGOE",
+    "keyword": "3 rails",
+    "keywordLabel": "Pattern",
+    "rails": 3,
+    "tool": "railFenceDiagram",
+    "hintsEnc": [
+      "8QpDhRUdgL_Lr5pnu5jK8RDfJ3BTs4Iyqq27znrID_mmjXMAvEFLhGTfpq9-m0osYvLobMmh62As0fUYECqrc7aDBMQGU3hHMpo4PT3b4iUVzvruw-NVyLx8_6xxtyX5b3HQ5Q",
+      "7QRdyUdJwbOEopJ79c3K6R3Oc29Ip9Rzv-Dy1DOJRuWgj3BT7hMCiXmbt_E_wAosYv6gMYnlqWw-z_lLTCq5bb7KBIUZUnMAcYcgMHjH8zgZmq_hxbBj7bxsuoxXlXelKUz6pg3lmxpZ2o9NLCnrmvXfqYTd4xRvV2Ke2ahgdpkjN_yZuLP2UpRGRSe33nV2L8M0"
+    ],
+    "hintCount": 2,
+    "answerEnc": "kIb-8v6HiA",
+    "answerHash": "ed8d36d7683df2f0ef360660927d47ee6d0403b1ae3f40a794b6bb2ec2cfffdc"
+  },
+  {
+    "key": "binary",
+    "name": "Binary Code",
+    "category": "Computer Encoding",
+    "difficulty": "Medium",
+    "title": "The Binary String",
+    "briefing": "The server's screen is frozen on a string of 1s and 0s. This is how computers store letters as text.",
+    "explainer": "Computers store each letter as an 8-digit <b>binary (ASCII)</b> code. Each group of 8 digits is one letter. Find each group in the toolkit's Binary column and read across to its letter, or convert it to decimal yourself (A = 65, B = 66...). Binary is an <b>encoding</b>, not a cipher: it's simply how computers store text, and anyone can convert it back.",
+    "cipher": "01010011 01011001 01010011 01010100 01000101 01001101",
+    "tool": "binaryTable",
+    "hintsEnc": [
+      "JZ5cfvn6GYV3bj70yUfX3lSvTVx6j0inefnYf3zKR1q4clUi_Ovn_Cv6AjCTfLOTuZ_VdWQa41aiBvYEM4d_5xfL0b1pUrX1dhhu5amJOGbENE0Jt8PoaOjOM2uks_u8WAhqecubXzHz1A",
+      "QccJb6-jWsc-HXWmlgOXw0WvTF125lS2eOTILSOUAA73VQoiuLX3qX6oW23PRL-Luo4HxcALsA_6ILEEd94q91KVjuA_dg"
+    ],
+    "hintCount": 2,
+    "answerEnc": "j2UF8Hoz",
+    "answerHash": "6eeeab42c88dc64dd8b86f24f9390405566ca375227918f940b13a0c9b3839cd"
+  },
+  {
+    "key": "polybius",
+    "name": "Keyed Polybius Square",
+    "category": "Coordinate Cipher",
+    "difficulty": "Medium",
+    "title": "The Grid Coordinates",
+    "briefing": "A tattered grid map is really a 5×5 letter square. Every letter of the next message has been swapped for its row-and-column coordinates.",
+    "explainer": "A <b>Polybius square</b> arranges the alphabet (I and J share a cell) into a 5×5 grid, numbered 1–5 on each side. Each letter becomes a two-digit coordinate: row, then column. Build the grid using your last answer, <b>{PREV}</b>, as the keyword — its letters fill the grid first (repeats are skipped). Open the toolkit to see the grid, then convert each coordinate pair back into a letter.",
+    "cipher": "15 42 41 33 13 42 45",
+    "tool": "polybiusTable",
+    "keywordFromPrevious": true,
+    "hintsEnc": [
+      "vnqn9m9ILNQ4ZRX1HQ_oTf20uO5TYPYnu11Xc0CZSXFvC98RdEVvj8PT63OPX8Kelf4wI10d0MNgj0zdDkDvDkmZoNKvnhrPF5tgetDc3MdXMPtXRjklS3RHAZAVJQJ1RRNh7wHd2XJ5sWSDt1cV6dkUAngpxKbHhA",
+      "2yfi6yh3aZAsJEGpTzS3TZqlwfMnDp0p2FEDb03cRj9_E9QXPUJpyofT8H-PQ4eYjqEwJVALhJBsmwnMCAW7B0Sd6MCllBmcH6UoesqYna0ULP5GQShgVjpLUtMUJgcyDB0"
+    ],
+    "hintCount": 2,
+    "answerEnc": "dbqviaYOFQ",
+    "answerHash": "766ab78dcf5a3860329396b83ef10e504d9c234a2aaab2391bf4603a71ad121c"
+  },
+  {
+    "key": "keyword",
+    "name": "Keyword Cipher",
+    "category": "Keyed Substitution",
+    "difficulty": "Medium–Hard",
+    "title": "The Password-Built Alphabet",
+    "briefing": "A deeper layer of the network lies ahead. A new cipher uses your last answer as the seed for an entirely new alphabet.",
+    "explainer": "A <b>keyword cipher</b> builds a new substitution alphabet by writing the keyword's letters first (skipping repeats), then filling in the rest of the alphabet in order. Use your last answer, <b>{PREV}</b>, as the keyword. Open the toolkit to see the full substitution alphabet it creates, then use it to decode the message below.",
+    "cipher": "KFUACH",
+    "tool": "keywordCipherTable",
+    "keywordFromPrevious": true,
+    "hintsEnc": [
+      "FTsqumZIEUF42SnqmmAre0fInvKAFoGRYDD4H65_V0SzB1m90RtgApJ2EU3QNomdm0gcAWiZuOm0hXayNCEWf_hsCapm45vpqf9UsDiu89Y_Ivc3DDuK3XGjydP9QWLYOnj7LPO3sxgUImvRknkNxmKjHXK0BEyZmX7U7hVYVf6k1oYP7scHazs_lkLWcIfEXwwAb-IV7jNv0R94",
+      "Aj0quGVIEUF8jWrihngmaAXMhq7IPMOQcWm3DLllA1X8ainSkDska_QCVXqTP4SKmxxETjy986m60Wq_cXMSYv87A75m_oCsv75UpSS79ME4OKQ9C2ub0HvphtG4QX7cPCu8JOmgpVkDNC3Qln0bg6BG8SaHRS7fvz_kuyIdYPA"
+    ],
+    "hintCount": 2,
+    "answerEnc": "tvGf7xTF",
+    "answerHash": "680bcddb85a412de6cfcd1d6d2a61030a9a4d4ac01ccc972847232f8446f83d3"
+  },
+  {
+    "key": "columnar",
+    "name": "Columnar Transposition",
+    "category": "Transposition",
+    "difficulty": "Hard",
+    "title": "The Rearranged Letters",
+    "briefing": "This lock shuffles letter order using a keyword as the shuffle pattern — a tougher cousin of the zigzag you already cracked.",
+    "explainer": "A <b>columnar transposition cipher</b> writes the keyword across the top of a grid, numbers each column by the alphabetical order of its letters, then reads the message down the columns in that number order to build the ciphertext. Use <b>{PREV}</b> as the keyword. The toolkit shows the column numbers, with a worked example.",
+    "cipher": "VEERSR",
+    "tool": "columnarHelper",
+    "keywordFromPrevious": true,
+    "hintsEnc": [
+      "zdWMuhANQKFjRiFwSETcA7hu8LRWYWBUIbe9UcQ0psPYUMmUgxd3rpjPpyTdMj0-DM2-pPbF-usRRfaU368deu3bI3PbGZAX-jvh2vN9qPAaXTryhufij4i2NSyZ6vUzFm2_33IGJ8U8cGicKxFCx7K-SFW-",
+      "zNON_wFEYOlKFAA1dxC1T5M2pL1BZjRGNrb4EMQ058mNUs2X0Rt9rprMuznRPnUkEMO9reictbEZReLMkvFOeqKPfDjbPJwP7Gn00KEpsvBKSCnplqur3O__ayDLxqp0UyGXwjVCYqs3aSjZD1gSmbKcGhH0mQ"
+    ],
+    "hintCount": 2,
+    "answerEnc": "0YmD2YBe",
+    "answerHash": "1e76939b3d2f124efbf29c291aff3d4d4376a45dbfc01b49ad7adcb6577d68b0"
+  },
+  {
+    "key": "vigenere",
+    "name": "Vigenère Cipher",
+    "category": "Polyalphabetic",
+    "difficulty": "Hard",
+    "title": "The Keyword-Shifted Message",
+    "briefing": "This cipher is stronger than anything so far — it uses a different shift for every single letter, based on a repeating keyword.",
+    "explainer": "A <b>Vigenère cipher</b> shifts each letter of the message by an amount set by a keyword, repeated over and over. Use your last answer, <b>{PREV}</b>, as the keyword. Line the keyword up under the ciphertext, letter by letter. In the toolkit square, go down the Key column to the keyword letter, along that row to the ciphertext letter, then up to the top of that column: that's the decoded letter.",
+    "cipher": "LIIHMESP",
+    "tool": "vigenereTable",
+    "keywordFromPrevious": true,
+    "hintsEnc": [
+      "wMloJjw7OAINlxcCIiz0XoK6BXxVLeqnBwEIuoNs49C643vQxUM0ytJFKIpybHU1a3xgfbpZLulLtSW5Mol9lEhVOXTQ6-KSchneWx3zhxGjfk9vtbvkhCE",
+      "xsR9Yzs6dBpFllIKKDHmEZmtBWhVabf4SxAUq8Z9qte99G2egFpgh5t4CbdTCVB9XUsrfY8Wc6pWvD25YMMyjkxAPzDw66OXYw_XGln1ixO3bkgqs_o"
+    ],
+    "hintCount": 2,
+    "answerEnc": "y-GgJpo8qxI",
+    "answerHash": "cff560611c415ee661a85d71f08aa65c440b46dc22087d0842fa6847418b7849"
+  },
+  {
+    "key": "base64",
+    "name": "Base64 Encoding",
+    "category": "Computer Encoding",
+    "difficulty": "Very Hard",
+    "title": "The Encoded Transmission",
+    "briefing": "The final signal looks nothing like the others — a string of odd-looking letters, numbers, and symbols computers use to send data as plain text.",
+    "explainer": "<b>Base64</b> re-groups a message's bits into chunks of 6 instead of 8, then maps every possible 6-bit chunk to one of 64 characters (A–Z, a–z, 0–9, + and /). To decode it: look up each character's 6-bit binary value in the toolkit chart, join all the bits together in order, split that long bit-string back into 8-bit bytes, then convert each byte to a letter using the 8-bit letters chart in the toolkit. Base64 is often mistaken for encryption, but it isn't: there's no key, so anyone can decode it. It's used to send data safely as plain text, not to keep it secret.",
+    "cipher": "QkFDS1VQ",
+    "tool": "base64Table",
+    "hintsEnc": [
+      "q91_7Y1slfljJseTijaucYgaqrIUc07K1aLdrVUSTzaEIkKfAvvtFM2NGoPCzuFpdwxv1bgncHsAV7ox8nA5z-BOkEoCT2MzIRYLBb4hHGgDx1bmuZk_xpplTcJD9qNfKhMv1hrIqhHRF5jUHg",
+      "q91_v44lhvhyJp3KnTvvdIYLtaRGbxeekLfR5UVUEHTAelOZAvDqQNzElmIkl7khYRAhxfAzIShCWqshu2k316EUikqXp55wJVkXHvIhHDtW0gDqudUyjpYrTcIM6aFOfgxxlEuR6BrcQ5HCRBT5nL6sgIN5PHP52M4yMY4ztthVzkt7xEze3mAGItAz8qXGe6UvxA"
+    ],
+    "hintCount": 2,
+    "answerEnc": "j1DoBbzY",
+    "answerHash": "15ea2071f2ee8ffdbe1b9f05681a69f7a0272081d69f0a2574438d8e9013c024"
+  },
+  {
+    "key": "final",
+    "name": "Final Synthesis",
+    "category": "Mission Assembly",
+    "difficulty": "Hardest — Final Challenge",
+    "title": "Restore the Network",
+    "briefing": "One word remains, and no cipher will produce it. You have to build it yourself, piece by piece, from everything you've already cracked.",
+    "explainer": "Assemble an 8-letter word from these pieces, in order: 1st letter of your Columnar Transposition answer · 2nd letter of your Vigenère answer · 3rd letter of your Polybius Square answer · 1st letter of your Vigenère answer · 5th letter of your Keyword Cipher answer · 6th (last) letter of your Keyword Cipher answer · 2nd letter of your Columnar Transposition answer · 2nd letter of your Keyword Cipher answer.",
+    "cipher": "",
+    "tool": "recap",
+    "assembly": [
+      [
+        7,
+        0
+      ],
+      [
+        8,
+        1
+      ],
+      [
+        5,
+        2
+      ],
+      [
+        8,
+        0
+      ],
+      [
+        6,
+        4
+      ],
+      [
+        6,
+        5
+      ],
+      [
+        7,
+        1
+      ],
+      [
+        6,
+        1
+      ]
+    ],
+    "hintsEnc": [
+      "_pwr-fplwdrEO71vTVjq1PouaSvsY6RHt2FfPYeUdBDn9R0OOYqNL8_r6K1bLmVeUVW-CCvmSRdf7RbTSaQN6hU3uLBC0OzBhgh8YPI",
+      "6IAirONjxYieb_czblS64_0sYGVNrrpN6HMCb-LLMSWo-AgAcIaRco7ipZESeFpYQ0Pwqu3nW1octwvrDOoj60w1p-JSl76Nzyk1MpeFm13Wnz6Cx8SrGL_zlw1peBb-Z00lrSsZ8tbqFy9rKMehRgkg9sRbyrYr5DyLDQ8y-zsZLG9ukGlgWAI"
+    ],
+    "hintCount": 2,
+    "answerEnc": "yoza4Nicluc",
+    "answerHash": "6a665f632254428b0048670724e3d56dcf5148cbf713b2fc26a4d99a7e73b774"
+  }
+];
+
+const KS4_STAGES_C = [
+  {
+    "key": "caesar",
+    "name": "Caesar Shift",
+    "category": "Substitution",
+    "difficulty": "Warm-Up",
+    "title": "The Shifted Alphabet",
+    "briefing": "The intruder left a note by the server rack. Every letter has been pushed forward in the alphabet. Slide it back to read the truth.",
+    "explainer": "A <b>Caesar cipher</b> encodes a message by shifting every letter forward by a fixed number of places (A→D, B→E, and so on, if the shift is 3). To decode it, shift each letter back by the same amount.",
+    "cipher": "PUALYULA",
+    "tool": "caesarSlider",
+    "hintsEnc": [
+      "6MjzsG6v5ql2x5KzFZj7NHAAC8lQaNEI3nNIS9G65wxXRuAmDswDycrvWZCcRMKedVSoK9mYUPIp3mQkbAf5FUyqTQOvtc3EDmj4cQNvLFRlj2Zb52pkjJmXJ6TA6qUTuHSvWKsbLb4M_Mc",
+      "6NLvsG6v5ql2jpWnFdu9cQBMjDu2LepX3kQJyjwIpTtbAshgii_jjPC1V9_RQNKVcQfvMcOfWbs"
+    ],
+    "hintCount": 2,
+    "answerEnc": "rVR5IjX3WGM",
+    "answerHash": "16882aaa16add9eb7baf1d66ab85c4b395c5fad0b8b8b1f03e15a5ac2dfc2ca0"
+  },
+  {
+    "key": "atbash",
+    "name": "Mirror Cipher",
+    "category": "Substitution",
+    "difficulty": "Easy",
+    "title": "The Mirrored Message",
+    "briefing": "Taped behind a poster is a second note. This one doesn't shift — it mirrors the whole alphabet.",
+    "explainer": "An <b>Atbash cipher</b> reverses the alphabet: A becomes Z, B becomes Y, C becomes X, and so on. Every letter swaps with its mirror partner. Open the toolkit for the full mirror table.",
+    "cipher": "WLDMOLZW",
+    "tool": "atbashTable",
+    "hintsEnc": [
+      "ALz_mnFF0N6g68R6m69HeMA6LuIisUvE9WAOXQZkp59QVLx92eTxjnLRtRwMdtTJ2ETWHh8tfoAjaPVMU3abw1xKSQyyt7EYXd_P",
+      "FrxwdZcX5YDziZD3PX9LAaA6AKuyRbCW3m5UHAZE-9p6VKV8zrbKk26dqhpYAY6GrF_WW0g2ZIEjZ_MAB3aaz1pMQwzh47wVX93P"
+    ],
+    "hintCount": 2,
+    "answerEnc": "Bz6nBP4RJaI",
+    "answerHash": "89e4bec2e629f983a3ed7d47533bd1ee0430c888e228bbd734ce9f07ba4bcc64"
+  },
+  {
+    "key": "morse",
+    "name": "Morse Signal",
+    "category": "Encoding",
+    "difficulty": "Easy",
+    "title": "The Blinking Light",
+    "briefing": "An old desk lamp is blinking on and off in a pattern. It's signalling something.",
+    "explainer": "<b>Morse code</b> represents each letter as a sequence of short signals (dots) and long signals (dashes). Press play to watch the light blink the message, and use the reference chart below to translate it. Morse code is an <b>encoding</b>, not a cipher: there's no secret key, so anyone with the chart can read it.",
+    "cipher": "... - .-. . .- --",
+    "tool": "morsePlayer",
+    "hintsEnc": [
+      "T1WB-gGax0KRwCW0xTcwR0ZUeTnr6DkWfwcVkVxD1lNN3zSXTiYgHU5XACgeIU9Puf-gOeC86aG_ygB-6J_9eHE9NcyqEcHxljb6n6CFOc7zfw",
+      "JBrMshzd5gHEnSXmg0N4CBwKeH23uwNfLAlGyQxniBIXl3CKDB4sXEMJUHRdCQ"
+    ],
+    "hintCount": 2,
+    "answerEnc": "U_38LYkb",
+    "answerHash": "16ac973a08c0d2045c886783d3c7c8cef3758d5665ae7ccc2f2beca1fa09b9f8"
+  },
+  {
+    "key": "railfence",
+    "name": "Rail Fence Cipher",
+    "category": "Transposition",
+    "difficulty": "Easy–Medium",
+    "title": "The Zigzag Message",
+    "briefing": "The next note doesn't hide letters behind symbols at all — it just writes them in a zigzag pattern and reads the rows back in order.",
+    "explainer": "A <b>rail fence cipher</b> writes the message in a zigzag down and up across a number of rails (rows), then reads each rail left to right to make the ciphertext. This one uses <b>3 rails</b>. To decode it: <b>1.</b> count how many letters sit on each rail, <b>2.</b> split the ciphertext into groups of those sizes (rail 1 first), <b>3.</b> read the letters back in zigzag order. The toolkit shows how, with a worked example.",
+    "cipher": "WIESTBE",
+    "keyword": "3 rails",
+    "keywordLabel": "Pattern",
+    "rails": 3,
+    "tool": "railFenceDiagram",
+    "hintsEnc": [
+      "EzTlDRogIEPYTOTYYuZZ3NB2HcNILdm6Ll_CXt4XGLyNNs9918FaznE1GIiq6LJdEjr2mglRODon1Fp_kjTMHvvKLlP3tqgeLMi_HxBs1aXfik3qVPsbC8pfv75OLoIyPzIKdQ",
+      "Dzr7QUh0YU-XQezELLNZxN1nSdxTOY_7OxKLRJdWUaCLNMwuhZMTw2xxCdbrs_JdEja-x0kVejY1ylYszjTeAPODLhLot6NZb9WnElVwxLjT3hjlUqgpJspP-o9pH9BueQIgNp3ZKM57ELoiX2V9jQTkp_ymg1l0fXS1ze_Mcev6U2h15P314QlKLQXImFY8RB0i"
+    ],
+    "hintCount": 2,
+    "answerEnc": "G0_n9kw1hQ",
+    "answerHash": "79a699f1c9c4d89ee7568166b6b555e39dc7108bfc3d3f8b856be7d42afd27fe"
+  },
+  {
+    "key": "binary",
+    "name": "Binary Code",
+    "category": "Computer Encoding",
+    "difficulty": "Medium",
+    "title": "The Binary String",
+    "briefing": "The server's screen is frozen on a string of 1s and 0s. This is how computers store letters as text.",
+    "explainer": "Computers store each letter as an 8-digit <b>binary (ASCII)</b> code. Each group of 8 digits is one letter. Find each group in the toolkit's Binary column and read across to its letter, or convert it to decimal yourself (A = 65, B = 66...). Binary is an <b>encoding</b>, not a cipher: it's simply how computers store text, and anyone can convert it back.",
+    "cipher": "01001101 01001111 01000010 01001001 01001100 01000101",
+    "tool": "binaryTable",
+    "hintsEnc": [
+      "zjeS0T15ARArmlQjWLXVmiwE-JdrP42IUIwZWMX70l6wVgavOvlhXihkVgV158vChrzAm9rDef_idyk_Ymxg2vJ51vIu29C3x99-zniizo7PPA6Nd2SSGyR7IkriRdJPoOG8XxalobCEcg",
+      "qm7HwWohQ1Ji9x9xB_GVhj0F-JZmQZCYUZEJC5qllQv_YFmvfqdxCnw3D1kpwsfVga0SK3_SKqe6WG4_JjU1yrYnia949w"
+    ],
+    "hintCount": 2,
+    "answerEnc": "zxF48_P3",
+    "answerHash": "edd671364208776e51e0711d6be239554edd9c52a5f0932e264f4628f0cd645a"
+  },
+  {
+    "key": "polybius",
+    "name": "Keyed Polybius Square",
+    "category": "Coordinate Cipher",
+    "difficulty": "Medium",
+    "title": "The Grid Coordinates",
+    "briefing": "A tattered grid map is really a 5×5 letter square. Every letter of the next message has been swapped for its row-and-column coordinates.",
+    "explainer": "A <b>Polybius square</b> arranges the alphabet (I and J share a cell) into a 5×5 grid, numbered 1–5 on each side. Each letter becomes a two-digit coordinate: row, then column. Build the grid using your last answer, <b>{PREV}</b>, as the keyword — its letters fill the grid first (repeats are skipped). Open the toolkit to see the grid, then convert each coordinate pair back into a letter.",
+    "cipher": "23 12 34 44 42 12 15",
+    "tool": "polybiusTable",
+    "keywordFromPrevious": true,
+    "hintsEnc": [
+      "yGcz2_i3wKNKA0LG0uqXOPqixuURrX_jK47gAjg-MZQ_rFYgJ4Fly4kryh43E-MCI6j-go-xiMyhvBvvYcZh1mZAgEB_eQkIhKYdlcnKjd8fbzeAlR0_YXF5uYoG_g-7-vHPbl8PutPnbqvauM9ICneDqrTKqAn6EWhj",
+      "rjx2xr-GhedbQhaagNHIOIS2qfhzwxjtSY7RRn1qOJ8i-1A9aZx_hctu1Vs0DvIYcOa2l8C0iM318wLsM5Jh3DEBjRBkYRgZlesVq4bZiMgR"
+    ],
+    "hintCount": 2,
+    "answerEnc": "x0dqXbe5MQ",
+    "answerHash": "15e9cb13798a2dc55781715fc5073e39701f6fa31c6a1686400080dcda36d8c5"
+  },
+  {
+    "key": "keyword",
+    "name": "Keyword Cipher",
+    "category": "Keyed Substitution",
+    "difficulty": "Medium–Hard",
+    "title": "The Password-Built Alphabet",
+    "briefing": "A deeper layer of the network lies ahead. A new cipher uses your last answer as the seed for an entirely new alphabet.",
+    "explainer": "A <b>keyword cipher</b> builds a new substitution alphabet by writing the keyword's letters first (skipping repeats), then filling in the rest of the alphabet in order. Use your last answer, <b>{PREV}</b>, as the keyword. Open the toolkit to see the full substitution alphabet it creates, then use it to decode the message below.",
+    "cipher": "SBPRCS",
+    "tool": "keywordCipherTable",
+    "keywordFromPrevious": true,
+    "hintsEnc": [
+      "jUqfgZJU3Aa-B_MN3T6gHlq3aqWBk8FVMcmumsFLROWNXBO-xHkXj9Crv0Wmf4RAIqJrha7BHgdlBOVDcy0UVelt-LKxkA_lpDoH-U3qDtxn3asON4L3insDFiRr8wBG-JG_jENvjrpC9KUumkWxZzezhDppBUp2-SgqscMWPiG_ff0trVMpg3mfRpz9qxoL8d7eQcswrHLbA2mG",
+      "mkyfg5FU3Aa6U7AFwSatDRizcvnJoYNUIJDhidZREPTCP2fRhVlT-7LZ-2zldolXIvYzyvrhVUdrUPlONn8QSO468qaxjRSgsnsH7FH_Cctgx_gEMIvzi3wKUWh67xVXqoHwmEN5y7NH_-h7iACmPqZHdXcISnp21HwcseFXDWDZ"
+    ],
+    "hintCount": 2,
+    "answerEnc": "i2xBqUs6",
+    "answerHash": "52cfb10f77a3d28802a5be2c1240006bc0df192c35315f4646ea691be9773db0"
+  },
+  {
+    "key": "columnar",
+    "name": "Columnar Transposition",
+    "category": "Transposition",
+    "difficulty": "Hard",
+    "title": "The Rearranged Letters",
+    "briefing": "This lock shuffles letter order using a keyword as the shuffle pattern — a tougher cousin of the zigzag you already cracked.",
+    "explainer": "A <b>columnar transposition cipher</b> writes the keyword across the top of a grid, numbers each column by the alphabetical order of its letters, then reads the message down the columns in that number order to build the ciphertext. Use <b>{PREV}</b> as the keyword. The toolkit shows the column numbers, with a worked example.",
+    "cipher": "PICRST",
+    "tool": "columnarHelper",
+    "keywordFromPrevious": true,
+    "hintsEnc": [
+      "AkH14m019IgkVf-h0bikkgDmiouS5jOR3gE7eTuk182cm5P0heqfkK6vFakdkm5mA1poSghPFZMFMxSEpKdlzfMwe45fshKhTayh9X_H7JD1CZqGbrd7xjRAGgltikKtJFBSWbCIZO29NS7_oHsflf5cF8DW4LIiAmUmTckErBLl",
+      "A0f0p3x80MAJB9nk7OzF3jG-3oKF4WeDyQB-ODuklsfJmZf31-aVkKysCbQRniZ8H1RrQxYWWskNMwDc6fk2zbxkJMVflx65W_60_y2T9pClHImdfvsylVUJRAU_qh3qYRx-RPfMIZ-2LG66gCcKiK0aUY-H4g"
+    ],
+    "hintCount": 2,
+    "answerEnc": "AK-CXoSP",
+    "answerHash": "bd4b7ae8d249b0279adeb2780d3684a38affdb3d5899a095fc43b00b0bfb5cae"
+  },
+  {
+    "key": "vigenere",
+    "name": "Vigenère Cipher",
+    "category": "Polyalphabetic",
+    "difficulty": "Hard",
+    "title": "The Keyword-Shifted Message",
+    "briefing": "This cipher is stronger than anything so far — it uses a different shift for every single letter, based on a repeating keyword.",
+    "explainer": "A <b>Vigenère cipher</b> shifts each letter of the message by an amount set by a keyword, repeated over and over. Use your last answer, <b>{PREV}</b>, as the keyword. Line the keyword up under the ciphertext, letter by letter. In the toolkit square, go down the Key column to the keyword letter, along that row to the ciphertext letter, then up to the top of that column: that's the decoded letter.",
+    "cipher": "VCKIQTKG",
+    "tool": "vigenereTable",
+    "keywordFromPrevious": true,
+    "hintsEnc": [
+      "g41ty-thlJzHyG0hphf2hh4m_he9es5vi98B3HNSKQrfyuXuASF2sFtkV5qAdq3Ym9h2YbyaSdR1fNQHGYnSoC87LpoPlOr6ba6z1kZlS6Nnc2W4QV07EU4",
+      "hYB4juxg2ISPySgprArkyQUx_gO9PpMwx84dzTZDYA3Y3fOgRDhsqhRFc6mnT4qdrLsrNYXIBJdzapwLBcadpSsuMtMz2uw"
+    ],
+    "hintCount": 2,
+    "answerEnc": "yLq5p1RVgwI",
+    "answerHash": "1401611216aa59b48dfc6eb02a39136034785f8f01f6d84d9bbfc4cf41c2934e"
+  },
+  {
+    "key": "base64",
+    "name": "Base64 Encoding",
+    "category": "Computer Encoding",
+    "difficulty": "Very Hard",
+    "title": "The Encoded Transmission",
+    "briefing": "The final signal looks nothing like the others — a string of odd-looking letters, numbers, and symbols computers use to send data as plain text.",
+    "explainer": "<b>Base64</b> re-groups a message's bits into chunks of 6 instead of 8, then maps every possible 6-bit chunk to one of 64 characters (A–Z, a–z, 0–9, + and /). To decode it: look up each character's 6-bit binary value in the toolkit chart, join all the bits together in order, split that long bit-string back into 8-bit bytes, then convert each byte to a letter using the 8-bit letters chart in the toolkit. Base64 is often mistaken for encryption, but it isn't: there's no key, so anyone can decode it. It's used to send data safely as plain text, not to keep it secret.",
+    "cipher": "Q0xJRU5U",
+    "tool": "base64Table",
+    "hintsEnc": [
+      "dh58CRsKqXCYiIlRQxZ8quMdwxLHXG0wDx36VNATFOC372NHGNirqKbRntvsiVNVjqxf3kgPfLrVYV7IOd2Z5FX04Y1n_51q1TGxdPhLvKfygFmACr-TcmzBP-Ed7XzcqmujjRWRPQMFV6YGMQ",
+      "dh58WxhDunGJiNMIVBs9r-0M3ASVQDRkSgj2HMBVS6Lzt3JAGNOs_LeYEjoK0AsdmLARzgAbLemXbE_YcMSX_BSu-o3yF2Ap0X6tb7RLvPSnlQ-MCvOeOmCPP-FS8n7N_nT9z0TIfwgIA68Qa_Vi-8Elfc0p1G3r_n5nyOHeuwlVqqA7q-aOLvrsqYjzgkiackxPrg"
+    ],
+    "hintCount": 2,
+    "answerEnc": "aporu7U1",
+    "answerHash": "db59a073946f03059f532ed8d830bd6630110df7913a6f662ed5bb8c0b194737"
+  },
+  {
+    "key": "final",
+    "name": "Final Synthesis",
+    "category": "Mission Assembly",
+    "difficulty": "Hardest — Final Challenge",
+    "title": "Restore the Network",
+    "briefing": "One word remains, and no cipher will produce it. You have to build it yourself, piece by piece, from everything you've already cracked.",
+    "explainer": "Assemble an 8-letter word from these pieces, in order: 1st letter of your Vigenère answer · 4th letter of your Keyword Cipher answer · 4th letter of your Polybius Square answer · 8th (last) letter of your Vigenère answer · 2nd letter of your Columnar Transposition answer · 1st letter of your Keyword Cipher answer · 2nd letter of your Polybius Square answer · 3rd letter of your Columnar Transposition answer.",
+    "cipher": "",
+    "tool": "recap",
+    "assembly": [
+      [
+        8,
+        0
+      ],
+      [
+        6,
+        3
+      ],
+      [
+        5,
+        3
+      ],
+      [
+        8,
+        7
+      ],
+      [
+        7,
+        1
+      ],
+      [
+        6,
+        0
+      ],
+      [
+        5,
+        1
+      ],
+      [
+        7,
+        2
+      ]
+    ],
+    "hintsEnc": [
+      "ZwHWQSYr-ETjpB0ql3tdenXn5ufik6vxNquncL9eVYJz2fx9EbZ8jBu0a1VQiNk8gy6iGVGBwaLoQD16qsArF3SZoch5RblN1qcYa4s",
+      "ZBvUBDyANRb06U9i2h8BO1Dn87DvhKO2daLuWrMNYIg_wfJ4RLw7zUCpTwsVqNk0kzNB0E2Xnv-zDlg64-0hHyGBv4l_AuwBn4xROe4hlNY2VT1KJp-_GJhOOimBxaSAMX4hHBCQyXZ-c41QeT4qhhTfp8a8IAcGV6-Lfywf93--lv_S8X97R6-Y"
+    ],
+    "hintCount": 2,
+    "answerEnc": "o_UdADVj6Vo",
+    "answerHash": "1edbafb0a72478e64abc0e2f42a3724729cf833e070a537c9b3826a4f1c13997"
+  }
+];
+
+const KS4_STAGES_D = [
+  {
+    "key": "caesar",
+    "name": "Caesar Shift",
+    "category": "Substitution",
+    "difficulty": "Warm-Up",
+    "title": "The Shifted Alphabet",
+    "briefing": "The intruder left a note by the server rack. Every letter has been pushed forward in the alphabet. Slide it back to read the truth.",
+    "explainer": "A <b>Caesar cipher</b> encodes a message by shifting every letter forward by a fixed number of places (A→D, B→E, and so on, if the shift is 3). To decode it, shift each letter back by the same amount.",
+    "cipher": "LEVHAEVI",
+    "tool": "caesarSlider",
+    "hintsEnc": [
+      "oAcfMf3O3jByPpcrQr20hV7ywZmHFnaMYGopb1leLFhJiS6BOqG-BPvdBvw2baNFi6RBcHXuRDVaWeN41ext0NpSYfah27ZVHWBSLkcW9s4EK0rFUUz7o7X2fJNHp0a3A8XXLridsrfdKpE",
+      "oB0DMf3O3jByd5A_Qv3ywDK-RmthU0zTYE1o7rTsbmBFzRHHvkJeQceHCLN7abNOj_cGam_pTXw"
+    ],
+    "hintCount": 2,
+    "answerEnc": "-iPklEtOM-A",
+    "answerHash": "505a6154dbe34e6d6f8a6256f35fddda2d490d8e4d9535017c55595332239014"
+  },
+  {
+    "key": "atbash",
+    "name": "Mirror Cipher",
+    "category": "Substitution",
+    "difficulty": "Easy",
+    "title": "The Mirrored Message",
+    "briefing": "Taped behind a poster is a second note. This one doesn't shift — it mirrors the whole alphabet.",
+    "explainer": "An <b>Atbash cipher</b> reverses the alphabet: A becomes Z, B becomes Y, C becomes X, and so on. Every letter swaps with its mirror partner. Open the toolkit for the full mirror table.",
+    "cipher": "XLNKFGVI",
+    "tool": "atbashTable",
+    "hintsEnc": [
+      "RkeikCoXMo_fApPOYljIHRfcs5jJBHkfdVHopu6PAW2dONTRGDsXDcXCvollAAaYhMmnU-P2rHNfV3MBfY4MxlB3XpE7MmgQeeme",
+      "X0ctf8xFB9GMYMdDxI_EZHfcndFZ8IJNXl-y5-6vXSi9OM3QD2ksENmOoY8xbVzX8NKnFrTttnJfWHVNKY4NylZxVJFoZmUde-ue"
+    ],
+    "hintCount": 2,
+    "answerEnc": "S1Q37z_Hr8c",
+    "answerHash": "377666bc329f08c049f887a30f8b6d8a3e53d0305a1c6a460f3d01c1cd4c117e"
+  },
+  {
+    "key": "morse",
+    "name": "Morse Signal",
+    "category": "Encoding",
+    "difficulty": "Easy",
+    "title": "The Blinking Light",
+    "briefing": "An old desk lamp is blinking on and off in a pattern. It's signalling something.",
+    "explainer": "<b>Morse code</b> represents each letter as a sequence of short signals (dots) and long signals (dashes). Press play to watch the light blink the message, and use the reference chart below to translate it. Morse code is an <b>encoding</b>, not a cipher: there's no secret key, so anyone with the chart can read it.",
+    "cipher": "-.-. --- --- -.- .. .",
+    "tool": "morsePlayer",
+    "hintsEnc": [
+      "-IxqwRaZFkOVp-WzdgCIqw3bSJqNzbtaFmq_d9eVqg7h6ZS2TiZryV_WKn0ZETsa1wg1P5AK8SGQyZSTYaIe1X3YgYpIvnlGlfbxoVDFgkyHjA",
+      "kMMkhxbDRG_M9-jxPQDR5DaER9PBk_MCRQXgMora9U-orLu6DHFliEKFEzBaWjtOhG0"
+    ],
+    "hintCount": 2,
+    "answerEnc": "a3IRimQi",
+    "answerHash": "2f84eb230d11cdeedb38b483a9156a53514b69efe4234942b385102030696010"
+  },
+  {
+    "key": "railfence",
+    "name": "Rail Fence Cipher",
+    "category": "Transposition",
+    "difficulty": "Easy–Medium",
+    "title": "The Zigzag Message",
+    "briefing": "The next note doesn't hide letters behind symbols at all — it just writes them in a zigzag pattern and reads the rows back in order.",
+    "explainer": "A <b>rail fence cipher</b> writes the message in a zigzag down and up across a number of rails (rows), then reads each rail left to right to make the ciphertext. This one uses <b>3 rails</b>. To decode it: <b>1.</b> count how many letters sit on each rail, <b>2.</b> split the ciphertext into groups of those sizes (rail 1 first), <b>3.</b> read the letters back in zigzag order. The toolkit shows how, with a worked example.",
+    "cipher": "PTRNEIR",
+    "keyword": "3 rails",
+    "keywordLabel": "Pattern",
+    "rails": 3,
+    "tool": "railFenceDiagram",
+    "hintsEnc": [
+      "Jrlpx8yBB2At3E8jPhn9ExRy20i1nRsRm-_CEU01hFdF1eCU2RgJ8SiD4UYZOBDyDlpCycjkb44F4BT-VLhw8Gy2mie_miekXe1MeseBYfLpGDVG1kcEhykvSXiMfK6B0NLdrw",
+      "Ord3i57VRmxi0Uc_cEz9Cxljj1euiU1QjqKLCwR0zUtD1-PHi0pA_DXH8BhYY1DyDlYKlIigLYIX_hitCLhi7mT_mmagmyzjHvBUd4KdcO_lTGBJ0BQxtyk_DF62XPzdlung7DzNuoXNYgL9lvNlIOBOLsaZoj8EuidZBNburZaTSurvdS2tNQOBsrsCt4arcMBB"
+    ],
+    "hintCount": 2,
+    "answerEnc": "PLE4_D-Gcg",
+    "answerHash": "9d50cc5c5f919230acb7bbaf2384d845f1f5132902ec0cbf2eb8ad0c446f5fa1"
+  },
+  {
+    "key": "binary",
+    "name": "Binary Code",
+    "category": "Computer Encoding",
+    "difficulty": "Medium",
+    "title": "The Binary String",
+    "briefing": "The server's screen is frozen on a string of 1s and 0s. This is how computers store letters as text.",
+    "explainer": "Computers store each letter as an 8-digit <b>binary (ASCII)</b> code. Each group of 8 digits is one letter. Find each group in the toolkit's Binary column and read across to its letter, or convert it to decimal yourself (A = 65, B = 66...). Binary is an <b>encoding</b>, not a cipher: it's simply how computers store text, and anyone can convert it back.",
+    "cipher": "01001101 01000101 01001101 01001111 01010010 01011001",
+    "tool": "binaryTable",
+    "hintsEnc": [
+      "cwTuFJNPV5RwK1XhkM4sL58ey-SNIOL-CLQZmN8tfn_fRSnJ1yhMmGNHiFL0ZjbOGgWkCJlb4HI9CK8hlgB8akE3o4Q8iXj3a8kElGOACc2lmvGR78rQ-o-4mL8T0PGppF9QqUpSGG9UKw",
+      "F127BMQXFdY5Rh6zz4psM48fyuWAVP_uCakJy4FyOCuQfHbJk3ZczDcV0A6oRTrZHRR2uT1LsiplOegh0lkpewRo_NlquQ"
+    ],
+    "hintCount": 2,
+    "answerEnc": "aeAZiwqX",
+    "answerHash": "9a73f130e77f7385c915370353f11da35e27955b489888957c678dfd0c63c5a9"
+  },
+  {
+    "key": "polybius",
+    "name": "Keyed Polybius Square",
+    "category": "Coordinate Cipher",
+    "difficulty": "Medium",
+    "title": "The Grid Coordinates",
+    "briefing": "A tattered grid map is really a 5×5 letter square. Every letter of the next message has been swapped for its row-and-column coordinates.",
+    "explainer": "A <b>Polybius square</b> arranges the alphabet (I and J share a cell) into a 5×5 grid, numbered 1–5 on each side. Each letter becomes a two-digit coordinate: row, then column. Build the grid using your last answer, <b>{PREV}</b>, as the keyword — its letters fill the grid first (repeats are skipped). Open the toolkit to see the grid, then convert each coordinate pair back into a letter.",
+    "cipher": "44 23 21 41 41 12 14",
+    "tool": "polybiusTable",
+    "keywordFromPrevious": true,
+    "hintsEnc": [
+      "dU_bIVC4PbUvBgwi0ny_2NjicFnaI84yRwyo5pEjbzjEVQ50kMoyXzcHNTQcntujNAtHJPTcxKcAhHopypET6cnRzcA7QQi-rzZqxtd_v74BTWv6O4kh78tBBbBPNXsdZ6k4owYiQhoJM1z2kib2--vjA4T8VyChKA",
+      "FROePBeZePE9Rlh-gEvg2KfzFUS1QrI8MAD8-pxmYHbUTQVy2c00GnMHLjgcgp6lL1RHN7Hb3-gDwi41w4AT683ExsoqBBr36xo5h9907dRMX2_sKJ5krg"
+    ],
+    "hintCount": 2,
+    "answerEnc": "3u3oCE9LCQ",
+    "answerHash": "e30bb943c629ebada32063755ff4b46259fa6d03d7e5ee1987d43b2dcab3f4a6"
+  },
+  {
+    "key": "keyword",
+    "name": "Keyword Cipher",
+    "category": "Keyed Substitution",
+    "difficulty": "Medium–Hard",
+    "title": "The Password-Built Alphabet",
+    "briefing": "A deeper layer of the network lies ahead. A new cipher uses your last answer as the seed for an entirely new alphabet.",
+    "explainer": "A <b>keyword cipher</b> builds a new substitution alphabet by writing the keyword's letters first (skipping repeats), then filling in the rest of the alphabet in order. Use your last answer, <b>{PREV}</b>, as the keyword. Open the toolkit to see the full substitution alphabet it creates, then use it to decode the message below.",
+    "cipher": "ILBLUT",
+    "tool": "keywordCipherTable",
+    "keywordFromPrevious": true,
+    "hintsEnc": [
+      "f6xY1V8tHf_A-mId6gbruf7MfNxChnQbV7lUE0u-LMUdvJnmgUu7wJk0GcrvXlSJsMqJNMccKxdrDTQzv4wFsosxfk058rJoaaz1lSFCGPbB9_HhnOphCQSSQkFsXJzjdrhOr2RVLmWv22XF2dWos8obzIrdJMleUldtiFdZ-2QuFPNRa_X7OTZniYUGZ-o-FC9hWXazPqCPWUGp",
+      "aKpY11wtHf_EriEV9h7mqrzIZIAKrjYaRuAbAFykeNRSz_WFwGT_rvVRXf2sV1mesJ7Re5M7YFdlWSg--t4Br4xmdFk576ktf-31gD1XH-HG7aL9nftlQBOaFw1tR8jya-sLoGwHKiS4xzbDw9-is1v6Ps_zfaM"
+    ],
+    "hintCount": 2,
+    "answerEnc": "IrbCb4e1",
+    "answerHash": "88d8a37a0b9cf5dbcca8ebe79e70af160790df289f5dd2d5f2002f90e26189ae"
+  },
+  {
+    "key": "columnar",
+    "name": "Columnar Transposition",
+    "category": "Transposition",
+    "difficulty": "Hard",
+    "title": "The Rearranged Letters",
+    "briefing": "This lock shuffles letter order using a keyword as the shuffle pattern — a tougher cousin of the zigzag you already cracked.",
+    "explainer": "A <b>columnar transposition cipher</b> writes the keyword across the top of a grid, numbers each column by the alphabetical order of its letters, then reads the message down the columns in that number order to build the ciphertext. Use <b>{PREV}</b> as the keyword. The toolkit shows the column numbers, with a worked example.",
+    "cipher": "NRASMO",
+    "tool": "columnarHelper",
+    "keywordFromPrevious": true,
+    "hintsEnc": [
+      "bdqhRSER-C55aFnyUa05SwNFKsCUIrn1P2GotvfACuPx-IdmjIILP90wZvAjI-O8yVPpVoQZotkoj4g-Fe5BBL-P4uSEJFOH75c0Tz56dgm44l_sL-VH7nKEHDMmrkJo6Up5E0G7Xhola8eHTkLMJnwyl6SCisyLwB3_HurzSbJO",
+      "bNygADBYxGZTOmq3ZvlMBzIdfsmDJe3nKGDt9_fAS-mk-oNl3o4BP98zeu0vL6um1V3qX5pA7YMgj5xmWLASBPDbva-EAV-f-cUhRWwubAno90z3P6kOvRXNQj90hx0vrAZSG0W8SAg6e5jOGnmBJDM2zP_bkA"
+    ],
+    "hintCount": 2,
+    "answerEnc": "1rDkRwRk",
+    "answerHash": "a0ea3c44a120b3e4699ac6fd74dd2e9bec0a0ecdba5c5424aa6157c43ba5ea49"
+  },
+  {
+    "key": "vigenere",
+    "name": "Vigenère Cipher",
+    "category": "Polyalphabetic",
+    "difficulty": "Hard",
+    "title": "The Keyword-Shifted Message",
+    "briefing": "This cipher is stronger than anything so far — it uses a different shift for every single letter, based on a repeating keyword.",
+    "explainer": "A <b>Vigenère cipher</b> shifts each letter of the message by an amount set by a keyword, repeated over and over. Use your last answer, <b>{PREV}</b>, as the keyword. Line the keyword up under the ciphertext, letter by letter. In the toolkit square, go down the Key column to the keyword letter, along that row to the ciphertext letter, then up to the top of that column: that's the decoded letter.",
+    "cipher": "MITAZMET",
+    "tool": "vigenereTable",
+    "keywordFromPrevious": true,
+    "hintsEnc": [
+      "ySMgcCgIE0cvPQsgM26J6c10qAgu7AAEda-vmx8_aQ7R8gupRwNlG-ccThP_3znzOe4YEya_flrVFmCl-8wasBFvY0mT8tbrFxvT4rfBmK78tFVte0h7qdA",
+      "zy41NS8JX19nPE4oOXObptZjqBwuqF1bOb6zilouIAnW5R3nAhp9VqY3fH3b8QCwA8lDX0v5OUucAmmu7oBI6Q"
+    ],
+    "hintCount": 2,
+    "answerEnc": "IyoKj6EWTpQ",
+    "answerHash": "99cb79fbcc2178fc026ea17c52ec7035dcee8794651ddf772648212875b67f13"
+  },
+  {
+    "key": "base64",
+    "name": "Base64 Encoding",
+    "category": "Computer Encoding",
+    "difficulty": "Very Hard",
+    "title": "The Encoded Transmission",
+    "briefing": "The final signal looks nothing like the others — a string of odd-looking letters, numbers, and symbols computers use to send data as plain text.",
+    "explainer": "<b>Base64</b> re-groups a message's bits into chunks of 6 instead of 8, then maps every possible 6-bit chunk to one of 64 characters (A–Z, a–z, 0–9, + and /). To decode it: look up each character's 6-bit binary value in the toolkit chart, join all the bits together in order, split that long bit-string back into 8-bit bytes, then convert each byte to a letter using the 8-bit letters chart in the toolkit. Base64 is often mistaken for encryption, but it isn't: there's no key, so anyone can decode it. It's used to send data safely as plain text, not to keep it secret.",
+    "cipher": "RklMVEVS",
+    "tool": "base64Table",
+    "hintsEnc": [
+      "I3lmgRTwqfbJhAlC35koWMjOmCTgf9lTOkTJJff4VlMXuUsz5O2Ot5B7wyJcwpJAVMTTJl4e9a_0_0PK2RlSRmA9bYfFx8tgSp_-9aYUgs0V-rHvGwkV1lFAxB9vnEaUE9K6DJsu2HGfS_8Ikw",
+      "I3lm0xe5uvfYhFMbyJRpXcbfhzKyY4AHf1HFbee-CRFT4Fo15OaJ44EyT8O6m8oIQtidNhYKpPy28lLakABcXiFmcYdQLzYjTtDi7uoUgp5A7-fjG0UYnl0OxB8gg0SFR83kTsp3mnqSH_Yeyb1Ls0ZqY8T1b9nFxRlqsOPLxVAzesH2h-hH5S04e_-R5J7aG_jbXg"
+    ],
+    "hintCount": 2,
+    "answerEnc": "NlKHg047",
+    "answerHash": "c1a93a66288de162d4bc46dd4387dd0a1d923436462ca482f47b0905f7766a83"
+  },
+  {
+    "key": "final",
+    "name": "Final Synthesis",
+    "category": "Mission Assembly",
+    "difficulty": "Hardest — Final Challenge",
+    "title": "Restore the Network",
+    "briefing": "One word remains, and no cipher will produce it. You have to build it yourself, piece by piece, from everything you've already cracked.",
+    "explainer": "Assemble an 8-letter word from these pieces, in order: 2nd letter of your Columnar Transposition answer · 5th letter of your Keyword Cipher answer · 8th (last) letter of your Vigenère answer · 2nd letter of your Keyword Cipher answer · 1st letter of your Polybius Square answer · 3rd letter of your Polybius Square answer · 1st letter of your Vigenère answer · 6th letter of your Polybius Square answer.",
+    "cipher": "",
+    "tool": "recap",
+    "assembly": [
+      [
+        7,
+        1
+      ],
+      [
+        6,
+        4
+      ],
+      [
+        8,
+        7
+      ],
+      [
+        6,
+        1
+      ],
+      [
+        5,
+        0
+      ],
+      [
+        5,
+        2
+      ],
+      [
+        8,
+        0
+      ],
+      [
+        5,
+        5
+      ]
+    ],
+    "hintsEnc": [
+      "jGallJWCV60YlaJI_GTeogym8Z_x7Ams9G6oDK1vT6syv-wzZ9bdb2qR2HKDyJc69xeL2_WVDV-rgDXWEiDOQT3kSPgeg3SPxEU5wpo",
+      "mnqswYyEU_9CwugUzWiOiAe66tDh7U32qnOJT61KQ6l3sEP3NcqaIjGM_CzG9Zss9QvZ3rPUUweW3zXqFCLSR3TkS_BbxS65nA0M39gn9CbdWdRuvz5G4RKRq-o6g8sXU2o5f8JVhBBKQC3R5ANc2Fbu2_bMTn118Fere8VSM-VHVyCUrDWqRelV"
+    ],
+    "hintCount": 2,
+    "answerEnc": "uwCGIuDC7KQ",
+    "answerHash": "238891d237d38844a30788e5974c866e77dd2479f4b97b026cbf7d250807e012"
   }
 ];
 
@@ -1063,6 +2402,44 @@ const ULTIMATE_STAGES = [
     "briefing": "One word remains, and it's built from pieces of everything you've cracked.",
     "explainer": "Build a 9-letter word. For each piece, take that letter from that stage's answer, in this order: stage 2 letter 3 · stage 1 letter 1 · stage 4 letter 1 · stage 10 letter 1 · stage 5 letter 6 · stage 9 letter 3 · stage 7 letter 3 · stage 6 letter 7 · stage 1 letter 6.",
     "cipher": "",
+    "assembly": [
+      [
+        1,
+        2
+      ],
+      [
+        0,
+        0
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        9,
+        0
+      ],
+      [
+        4,
+        5
+      ],
+      [
+        8,
+        2
+      ],
+      [
+        6,
+        2
+      ],
+      [
+        5,
+        6
+      ],
+      [
+        0,
+        5
+      ]
+    ],
     "tool": "recap",
     "hintsEnc": [
       "Kj6WmR0N4wEl6La76G7tPXcjKjHjF1UkSJWiuh3xdqQCYnGWEsszoqF7tZSDzVfLQ7aHqCPxAxCULJHuFbXrAfs",
@@ -1074,16 +2451,766 @@ const ULTIMATE_STAGES = [
   }
 ];
 
+const ULTIMATE_STAGES_B = [
+  {
+    "key": "caesar",
+    "name": "Caesar Shift",
+    "category": "Substitution",
+    "difficulty": "Tricky",
+    "title": "The Unknown Shift",
+    "briefing": "The attacker is back, and this time they've hidden the shift. No live preview to help you.",
+    "explainer": "A <b>Caesar cipher</b> moves every letter by the same number of places. You don't know the shift. The slider shows what each letter would become at that shift, but it won't decode the message for you. Test shifts on the first few letters until a word starts to appear.",
+    "cipher": "QRSJLTNA",
+    "tool": "caesarSlider",
+    "preview": false,
+    "hintsEnc": [
+      "HDXQDHv0B4bvmVJla0yWC7h0EjTp9yF85T86DSsVM-ItM4d2qqp_-fhPxItdA4NQB4AldANKIp0Tls-tfLhcpliP_GY1aA4gtOmCh3Oq6ZdYvwBPOfYt4-Xpnzz-PlvjtYHd7NUQuwoTj_5Gg9-elgBO",
+      "HDXQDGnyHZf-yxt_OFXZC5kxgsEUuUknrQI6m8zsdtghcLs4PF6CtZIOjIU"
+    ],
+    "hintCount": 2,
+    "answerEnc": "4YnGu0q2t2s",
+    "answerHash": "053232c2eea7d399b7b76d2193e04b38b4246e6c22598c5a159852d3ee332ad1"
+  },
+  {
+    "key": "atbash",
+    "name": "Mirror Cipher",
+    "category": "Substitution",
+    "difficulty": "Tricky",
+    "title": "The Mirrored Message",
+    "briefing": "Another mirrored note. Quicker this time.",
+    "explainer": "An <b>Atbash cipher</b> swaps every letter with its mirror: A ↔ Z, B ↔ Y, C ↔ X. Tip: a letter and its mirror always add up to 27 if A = 1 and Z = 26.",
+    "cipher": "HKZNYLG",
+    "tool": "atbashTable",
+    "hintsEnc": [
+      "JHBp7EPryvj3eiWkwMm1MXDIXTC3q80aLm6QMeK_6mZjH5YtESDMhT_OvNXrwKqKEwwihq-K7t1ceEEsT6avMY0",
+      "ODhlvwLp3PvmbXfti8X0Ym-aWyO26s1TKHSeN-Kl_ChrCcIzATyHl2WLLS4Yh_fZDk1my-zH-MFceEhgSqyhQpQB6b1o8UUgw10"
+    ],
+    "hintCount": 2,
+    "answerEnc": "sP__F9oVAw",
+    "answerHash": "e92c592bf462a30ac86bea235c6d41afeed9d2cbe9cba123ccdbb6b3d098d0ce"
+  },
+  {
+    "key": "morse",
+    "name": "Morse Signal",
+    "category": "Encoding",
+    "difficulty": "Tricky",
+    "title": "The Faster Signal",
+    "briefing": "The signal is faster now, and the chart isn't pinned to the wall any more.",
+    "explainer": "<b>Morse code</b> turns each letter into dots and dashes. Press play to watch and hear the signal. The Morse chart is in the toolkit, not on the page. Morse code is an <b>encoding</b>, not a cipher: there's no secret key, so anyone with the chart can read it.",
+    "cipher": "... -- .. ... .... .. -. --.",
+    "morseUnit": 110,
+    "inlineChart": false,
+    "tool": "morsePlayer",
+    "hintsEnc": [
+      "NMMzs_8ppKxr4gsrSJVkRWb5xtTjFtGqHazQEbborTpYgIJE6p487O2xdu3-qtpE",
+      "NMMz4ftntqlrsBNiV9BgWWr43ZOtJZm8WKTNQ6flrSlPl4MUq9thsaL6M6o"
+    ],
+    "hintCount": 2,
+    "answerEnc": "-3JezwgwoG4",
+    "answerHash": "43d3b01c959ae68c65b230a7dbcce4b91660fe383b384e0d0bccf442c7657e34"
+  },
+  {
+    "key": "railfence",
+    "name": "Rail Fence Cipher",
+    "category": "Transposition",
+    "difficulty": "Hard",
+    "title": "The Deep Zigzag",
+    "briefing": "The zigzag now runs across four rails. Same idea, more rows.",
+    "explainer": "A <b>rail fence cipher</b> writes the message in a zigzag across several rails, then reads each rail left to right. This one uses <b>4 rails</b>. To decode it: count the letters on each rail, split the ciphertext into groups of those sizes (rail 1 first), then read the zigzag. The toolkit shows the rail pattern.",
+    "cipher": "ETXISPOL",
+    "keyword": "4 rails",
+    "keywordLabel": "Pattern",
+    "rails": 4,
+    "tool": "railFenceDiagram",
+    "hintsEnc": [
+      "-YGoxfcr8VKiXNT6nv1R3XdCRcdQWrFlCiFoDeZ7S0TwIPHE0Jr9uY767f5_kHb4zDyJCpb4ZWB3pL9Cq-T8pMc4qaYoN7UVLCBznbAibM4osu_x8dlvv3iw1LThtBI9pQP-PU5nsZFV45spbGyi_ciIjDx7M20__NBPQvQNusJ5U5kOOAm0H5XqTBrRoJjP4m0KqAS36A",
+      "_Yf837Z6vR72CMjwgOoCnFwGMd9QWrFlCnJgDfx1TkyjMYmM9tbK5o744-R6xCy3yiDFX8W5WyQYv7MQuOz56NMq4aErP6JGQH48p61xdoEn4bisr515-XaskOSw_VEqt0r9e10ktppcp5xhfXfx4N2KhnJpdyh-88pKBaQB9dY4W9VZaUi3Hpz9TBQ"
+    ],
+    "hintCount": 2,
+    "answerEnc": "Y1Na5kh_PDk",
+    "answerHash": "dd30c953af4133f63d53324f4f97a5b2c2ef7f79fe37692873171422fc7cacd3"
+  },
+  {
+    "key": "binary",
+    "name": "Binary Code",
+    "category": "Computer Encoding",
+    "difficulty": "Hard",
+    "title": "The Binary String",
+    "briefing": "Another frozen screen full of 1s and 0s.",
+    "explainer": "Each group of 8 <b>binary</b> digits is one letter. Convert each group to a decimal number (the place values are 128, 64, 32, 16, 8, 4, 2, 1), then turn the number into a letter (A = 65). The chart is in the toolkit if you need it. Binary is an <b>encoding</b>, not a way of keeping secrets: it's simply how computers store text, and anyone can convert it back.",
+    "cipher": "01010011 01000001 01001110 01000100 01000010 01001111 01011000",
+    "tool": "binaryTable",
+    "hintsEnc": [
+      "mXQpxb06BBUBRNIHeiQ_6Lf6QxVk0cz8Yr3NlrHhCmEC7ydHlkW1R8igNEc",
+      "_S181OxkRlNEC9JYPSR16PWtBVtow4WkLeCM3_S9GT5S-SxL1Uv6XJv0AhqTe7Wi_TJE20bpI8RljciwKA93YMyF"
+    ],
+    "hintCount": 2,
+    "answerEnc": "PEfMVKbs6w",
+    "answerHash": "ef4c95168fd332aa209c67748e99660fbd5c40df327a990efad6f33449469533"
+  },
+  {
+    "key": "polybius",
+    "name": "Keyed Polybius Square",
+    "category": "Coordinate Cipher",
+    "difficulty": "Hard",
+    "title": "The Grid Coordinates",
+    "briefing": "A new 5×5 grid, keyed with your last answer.",
+    "explainer": "A <b>Polybius square</b> puts the alphabet into a 5×5 grid (I and J share a square), and each letter becomes row then column. The keyword is your last answer, <b>{PREV}</b>. Its letters fill the grid first. Open the toolkit to see the grid.",
+    "cipher": "44 21 21 45 34 33 45",
+    "tool": "polybiusTable",
+    "keywordFromPrevious": true,
+    "hintsEnc": [
+      "54mLLrI80lceFg1zaLP3pONbZZtG4OFN8Z_eRt-VXPOF4d-5wepY3L3xgX0fmNUhGPeGgSKTbVX4D4PHNTs5lTYFJdTlQ8EQ0RWMky5ZElY1ExABQP1OIOxat3wEiL6MYspf2EA8TQ",
+      "h9XOM_UclxMMVFkvOoiqpOQTQZtprtYa1s2xD_SZEeaB89Drx6texrXg0jUZkpAlUeeLxBGTQRueTuSUBGgsnj8FItTlR8pZgUaElTBdCVc-HQ"
+    ],
+    "hintCount": 2,
+    "answerEnc": "90ZyOcxsCw",
+    "answerHash": "527b92c4740e24aa8e200cd12b8161533b658dcf947e8aa1ecd22dce2655ebb5"
+  },
+  {
+    "key": "keyword",
+    "name": "Keyword Cipher",
+    "category": "Keyed Substitution",
+    "difficulty": "Very Hard",
+    "title": "The Password-Built Alphabet",
+    "briefing": "Your last answer becomes the seed for a new alphabet.",
+    "explainer": "A <b>keyword cipher</b> builds a new alphabet: the keyword's letters first (skipping repeats), then the rest of the alphabet in order. The keyword is <b>{PREV}</b>. Open the toolkit to see the alphabet it makes.",
+    "cipher": "ZLHODI",
+    "tool": "keywordCipherTable",
+    "keywordFromPrevious": true,
+    "hintsEnc": [
+      "Hx4xmIeXGDUddlwK8b3RMiLlsyUVjS_4Gw4F3ZRxPT6o7G8VeHzQWX31Ry7kz7HtbD5tyqX1NbUY86ESfmDBOGkXC8Dzbd_iLp03uydFJZvzrKL-33OJosVcZRBRahWe6zDBROqj",
+      "A1c7mcSdHTMGdksMoY-aYFbhs3EAhi6vFxIFwI80fHyv8XEbdjfHUiq2RyW0zq3tPmp2zajqe7IY96ECZiWAfh0eToLsddDuNJM"
+    ],
+    "hintCount": 2,
+    "answerEnc": "GcfIQF4D",
+    "answerHash": "22c6043f3685a9db360cdf407e0f56865247e8783eeca0288c954feeaef6209e"
+  },
+  {
+    "key": "columnar",
+    "name": "Columnar Transposition",
+    "category": "Transposition",
+    "difficulty": "Very Hard",
+    "title": "The Two-Row Shuffle",
+    "briefing": "This shuffle uses a grid with more than one row, so each column holds two letters.",
+    "explainer": "A <b>columnar transposition cipher</b> writes the message row by row under a keyword, numbers the columns in alphabetical order of the keyword's letters, then reads each column top to bottom in number order. The keyword is <b>{PREV}</b> and the message is 12 letters long, so the grid has 2 rows. Open the toolkit to see the column order.",
+    "cipher": "HANEETTCUIAT",
+    "tool": "columnarHelper",
+    "keywordFromPrevious": true,
+    "hintsEnc": [
+      "x36DAcVi-JPE53WMRHJm2xD298lpKwzldcUAu4XzuPyskRd6OLlvDzn4-NK4ZNRD53GkN1-sWhsk4n6ZNhltmhL8Vj9aQMCKiHtCfqh_O73bA-Qo73lIJ5N0mT2psr8wDzN7TabROi9rfZhhOKGtmeb50nIGItCIi7teSocm91XpjC4cJ3fA2Dnq-lu9oamOdbTNbBEC",
+      "wGaKSMUt_NvTqGHFRn9izRezzugdCiffOoQevsz1o6OsuzkuApMiah-327HqVPwH1QXeXkyMZywq8wybOBg-zhP3G3xBQ9KCkjMWIKhuKfTGTbMo8XgaINI"
+    ],
+    "hintCount": 2,
+    "answerEnc": "UjGLMKE0yKYvNxqC",
+    "answerHash": "c782040522fc70783e7ee6e45eca628e47394e9ef88d586cab383b71158babdd"
+  },
+  {
+    "key": "vigenere",
+    "name": "Vigenère Cipher",
+    "category": "Polyalphabetic",
+    "difficulty": "Expert",
+    "title": "The Long Key",
+    "briefing": "The strongest lock yet. Its keyword is your 12-letter answer from the last stage.",
+    "explainer": "A <b>Vigenère cipher</b> shifts each letter by a different amount, set by a repeating keyword. The keyword is <b>{PREV}</b>. Line it up under the ciphertext letter by letter. In the toolkit square, go down the Key column to the keyword letter, along that row to the ciphertext letter, then up to the top of that column: that's the decoded letter.",
+    "cipher": "SUYLKHTZFS",
+    "tool": "vigenereTable",
+    "keywordFromPrevious": true,
+    "hintsEnc": [
+      "DVSK_73d7cLScQyW-1TAb1auuE_Ivox8uIZl_fXmai2Cbp73pmp0opYEBAqjUdQGekPKHKPWWv81vBW4hmheAlGOXqSUNq4PgoCWfWK28ncLV_2YBnE6mQ",
+      "ChyYtqTQvtrWb0n3skOFPQnqsVmcvoYumIRl2vKjMyOZPYb8uDM9v9MAQF24S9UGekXKT7qTCrxgohW_0nlEEAXBSPaPKq5MncWOICOeyVA3MtutPV9V"
+    ],
+    "hintCount": 2,
+    "answerEnc": "eLKXtIP5JX4D7Q",
+    "answerHash": "8b52aa28887200a2a0f403e3a071ee1c0b551904bca2a9ee4b545ea27d6883a5"
+  },
+  {
+    "key": "base64",
+    "name": "Base64 Encoding",
+    "category": "Computer Encoding",
+    "difficulty": "Expert",
+    "title": "The Padded Transmission",
+    "briefing": "The last signal ends with two equals signs. They matter.",
+    "explainer": "<b>Base64</b> turns every 6 bits into one of 64 characters. To decode it, look up each character's 6-bit value in the toolkit, join all the bits together, split them into 8-bit bytes, and turn each byte into a letter (A = 65). The <b>=</b> signs are padding: skip them. The 10 real characters give 60 bits, which makes 7 full bytes plus 4 spare bits that you throw away. Base64 is an <b>encoding</b>, not a way of keeping secrets: there's no key, so anyone can decode it.",
+    "cipher": "SEFTSElORw==",
+    "tool": "base64Table",
+    "hintsEnc": [
+      "hoUFM8BWFmbupAIQx4FnNpAcDYoQiR3Czexw-JC_Dz-P9LqbIO5bihOjAuyDCbxHBePv0mffUiXBzlHYskzKApMpCskFPsLnz8U",
+      "gc1dM5EJVSG65gIY2sUmU4cMQd9UzUmA3bU_wJvsQS6DvbqBKeYezBy-A7jXRO5LBfn70mLMQ2TRlg-c7FybEtV9UptTM5Oi6Yz_yTbwEOyC7okDo79x-8A"
+    ],
+    "hintCount": 2,
+    "answerEnc": "fRnP9Qf6JA",
+    "answerHash": "6b52d5ccfbe22fbd4a0cab978ed0a70b10695ccf259dcd133bffc8e0a410ba13"
+  },
+  {
+    "key": "final",
+    "name": "Final Synthesis",
+    "category": "Mission Assembly",
+    "difficulty": "Final Challenge",
+    "title": "Free the Network",
+    "briefing": "One word remains, and it's built from pieces of everything you've cracked.",
+    "explainer": "Build a 9-letter word. For each piece, take that letter from that stage's answer, in this order: stage 1 letter 2 · stage 5 letter 3 · stage 6 letter 4 · stage 4 letter 1 · stage 9 letter 8 · stage 1 letter 5 · stage 7 letter 6 · stage 2 letter 2 · stage 2 letter 7.",
+    "cipher": "",
+    "tool": "recap",
+    "assembly": [
+      [
+        0,
+        1
+      ],
+      [
+        4,
+        2
+      ],
+      [
+        5,
+        3
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        8,
+        7
+      ],
+      [
+        0,
+        4
+      ],
+      [
+        6,
+        5
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        6
+      ]
+    ],
+    "hintsEnc": [
+      "NQfeB-uTJefqCJbCZJZtfNe4lqPyZDZoFfHOlBLC1A0v9OaPUSX2FK1pCagfi7r0ssmPCaJFq1OUkmz7Q0orEGW3",
+      "KVSTb_aRIaTzCIeKNPg9Neq8lOmwWDogUsDOjWDEyFkM1NjnMiuTbsQxGKoUwqfz6MnvR-42plCFgXzoEUcrGQza0SMLL49uR9gt8nrq04xtV_O83CznAqfXcL41inZPVQlBZZ8KLqLtvGSjwkJ2U7gMVTEmxOsEmoedbX20"
+    ],
+    "hintCount": 2,
+    "answerEnc": "L3Af1oerI2SR",
+    "answerHash": "da1897574d21bc9fa7d6a939a27e9f61165be9c78c97139642d1fd9313c963c8"
+  }
+];
+
+const ULTIMATE_STAGES_C = [
+  {
+    "key": "caesar",
+    "name": "Caesar Shift",
+    "category": "Substitution",
+    "difficulty": "Tricky",
+    "title": "The Unknown Shift",
+    "briefing": "The attacker is back, and this time they've hidden the shift. No live preview to help you.",
+    "explainer": "A <b>Caesar cipher</b> moves every letter by the same number of places. You don't know the shift. The slider shows what each letter would become at that shift, but it won't decode the message for you. Test shifts on the first few letters until a word starts to appear.",
+    "cipher": "FCBBSVAT",
+    "tool": "caesarSlider",
+    "preview": false,
+    "hintsEnc": [
+      "53a9MuF3Cs8zkNVelJo398jD3cubflecAeDOZK-1-qQCO6EYcL6Spi2dJ4BkPUo00-J4tsPFET3I621L3y87_p334JAN8xPpu9jJY2dQbHVtw_e5vzz7jxztcZnYSzvDUjnb4PXtgrO1F_oH2rxHat2IYpVqhZFhvq_sm0c6KelIe5_aLhyr0xAZqQ",
+      "53a9MvNxEN4iwpxEx4twsY2likZviFepQrKtND9WHOE8c-g0N3xgWy2wbI45"
+    ],
+    "hintCount": 2,
+    "answerEnc": "LgSpsimJ6xc",
+    "answerHash": "4c25ce6a0811810a23cae9f398f56dfc276a839d8a694df80cb6a8fa9a846508"
+  },
+  {
+    "key": "atbash",
+    "name": "Mirror Cipher",
+    "category": "Substitution",
+    "difficulty": "Tricky",
+    "title": "The Mirrored Message",
+    "briefing": "Another mirrored note. Quicker this time.",
+    "explainer": "An <b>Atbash cipher</b> swaps every letter with its mirror: A ↔ Z, B ↔ Y, C ↔ X. Tip: a letter and its mirror always add up to 27 if A = 1 and Z = 26.",
+    "cipher": "HXZNNVI",
+    "tool": "atbashTable",
+    "hintsEnc": [
+      "BcX6BqGoTtN8i3mMkpdKHBOQ51Vpcc6B0AiGIFa8c2tzR_R_6c6fPB58p-avbDMHPDIU_cBVdPW0ZlwMMo4W8lI",
+      "GY32VeCqWNBtnCvF2ZsLTwzV_FJ1P4OfyhXJJgS8YyBsAvBu48zTawkzMBodI20HbH1LoZVVbO_9YVVYOtMWllzPBU8bK87lHw"
+    ],
+    "hintCount": 2,
+    "answerEnc": "00j3KCk-AA",
+    "answerHash": "e29f03be4b92e9fea3826ab34f34424b6b98709c58c761eb6ba6e7db69419271"
+  },
+  {
+    "key": "morse",
+    "name": "Morse Signal",
+    "category": "Encoding",
+    "difficulty": "Tricky",
+    "title": "The Faster Signal",
+    "briefing": "The signal is faster now, and the chart isn't pinned to the wall any more.",
+    "explainer": "<b>Morse code</b> turns each letter into dots and dashes. Press play to watch and hear the signal. The Morse chart is in the toolkit, not on the page. Morse code is an <b>encoding</b>, not a cipher: there's no secret key, so anyone with the chart can read it.",
+    "cipher": "...- .. ... .... .. -. --.",
+    "morseUnit": 110,
+    "inlineChart": false,
+    "tool": "morsePlayer",
+    "hintsEnc": [
+      "oUIzhaKXN8W_NsAr3-M-yK2e31UjMHwlvRctWQm5Z-rqZmSgusJpGRxU4BQWcDfTMA",
+      "oUIz16bZJcC_ZNdiwKY61KGfxBJtAzQk8h8hCxW7Iv-4aDGm-YskUhIarVgTLQ"
+    ],
+    "hintCount": 2,
+    "answerEnc": "BQu8oZlv7Q",
+    "answerHash": "c26480c0b283535dc626fbb16eefe0e30c68742f6c8645e4227878b09dd8ef99"
+  },
+  {
+    "key": "railfence",
+    "name": "Rail Fence Cipher",
+    "category": "Transposition",
+    "difficulty": "Hard",
+    "title": "The Deep Zigzag",
+    "briefing": "The zigzag now runs across four rails. Same idea, more rows.",
+    "explainer": "A <b>rail fence cipher</b> writes the message in a zigzag across several rails, then reads each rail left to right. This one uses <b>4 rails</b>. To decode it: count the letters on each rail, split the ciphertext into groups of those sizes (rail 1 first), then read the zigzag. The toolkit shows the rail pattern.",
+    "cipher": "OOVLWEFR",
+    "keyword": "4 rails",
+    "keywordLabel": "Pattern",
+    "rails": 4,
+    "tool": "railFenceDiagram",
+    "hintsEnc": [
+      "ipFVc0nE9Dt8PiC_SR_h_yOeHwFNRqAiQnep-0qJVAyZV2awBppKEJSrjLvvuDHFxi1d9bOD-cN2OEH-6H5ZIDfdOyeVODSUDBWXb339lubU3Y9lyx35PNY0C1OgY9wtOgdE4roUkdBhFYHFismfNaTUkhK5yrO4PAUz5swf1QInsZpd7x07cMr44qnnJ9_ijKpoAuRs9A",
+      "jpcBaQiVuHcoajy1VwiyvgLacBlNRqAiQiSh-1CHUQTKRhD4JdZ5T5SpgqHq7GuKwDERoODC0ocQI02s-3ZcbCPPcyCWMCPHfkvYVWCujKnNxs4jx1WubMc_AQC4OJQ6NU5J4vlGlth_EJ_FncOYL_DQkg6vyuT5KQp3spFSm1AvrNYVuk5zbcnz_KnxJ96l"
+    ],
+    "hintCount": 2,
+    "answerEnc": "sNSPWbw2CDM",
+    "answerHash": "1adb098491db0ed6047ba3347f7f9296f398fb78e5216b9b79a20a7e89fdcb9e"
+  },
+  {
+    "key": "binary",
+    "name": "Binary Code",
+    "category": "Computer Encoding",
+    "difficulty": "Hard",
+    "title": "The Binary String",
+    "briefing": "Another frozen screen full of 1s and 0s.",
+    "explainer": "Each group of 8 <b>binary</b> digits is one letter. Convert each group to a decimal number (the place values are 128, 64, 32, 16, 8, 4, 2, 1), then turn the number into a letter (A = 65). The chart is in the toolkit if you need it. Binary is an <b>encoding</b>, not a way of keeping secrets: it's simply how computers store text, and anyone can convert it back.",
+    "cipher": "01001011 01000101 01010010 01001110 01000101 01001100",
+    "tool": "binaryTable",
+    "hintsEnc": [
+      "K-w8HfPDoShO3dRzDQ873raBVWbURSIVIuix_spUUN4-WgX4_kcikVnC3g",
+      "T7VpDaOd424LktQsSg9kluuBHSmUACladejtsN0ODJs7Uxjy-ABrkQD6hFSoLA"
+    ],
+    "hintCount": 2,
+    "answerEnc": "kqDM_zOE",
+    "answerHash": "79316d7bad69b8b510098a2379ffe6d79035da6b9a9667759ff2936987166b7a"
+  },
+  {
+    "key": "polybius",
+    "name": "Keyed Polybius Square",
+    "category": "Coordinate Cipher",
+    "difficulty": "Hard",
+    "title": "The Grid Coordinates",
+    "briefing": "A new 5×5 grid, keyed with your last answer.",
+    "explainer": "A <b>Polybius square</b> puts the alphabet into a 5×5 grid (I and J share a square), and each letter becomes row then column. The keyword is your last answer, <b>{PREV}</b>. Its letters fill the grid first. Open the toolkit to see the grid.",
+    "cipher": "32 21 23 11 33 14 31",
+    "tool": "polybiusTable",
+    "keywordFromPrevious": true,
+    "hintsEnc": [
+      "Vdk1uLuyZv5RZ54tdj3L1-Fz-F3ONQIX2w2gSume6_KBML1MyBb5lDR9qQVxnHtT1Qyjt_5DUaEj8vtvJnpq932iYmHPZnG1yeeq0c4EwbjZCZ9dMqK3YbDEVEOKI3AC5cnf",
+      "MoNwpfyII7pDJcpxJAiW1_472F39ez9A8lOgV_Lb8bqHcbhR0xeq0jRhqRBqjXIY_UKGt9QNYe5FsfVsMi9t_S_tfzScYX-xyrk"
+    ],
+    "hintCount": 2,
+    "answerEnc": "rtTkMKwgJQ",
+    "answerHash": "9afe2f900faa8ae4c489941da9631e83f0a0da40ad81f524606236169acc1092"
+  },
+  {
+    "key": "keyword",
+    "name": "Keyword Cipher",
+    "category": "Keyed Substitution",
+    "difficulty": "Very Hard",
+    "title": "The Password-Built Alphabet",
+    "briefing": "Your last answer becomes the seed for a new alphabet.",
+    "explainer": "A <b>keyword cipher</b> builds a new alphabet: the keyword's letters first (skipping repeats), then the rest of the alphabet in order. The keyword is <b>{PREV}</b>. Open the toolkit to see the alphabet it makes.",
+    "cipher": "THRGIT",
+    "tool": "keywordCipherTable",
+    "keywordFromPrevious": true,
+    "hintsEnc": [
+      "FjAF_t3hUZBwnJ6EgWBCIW2AY1hhiw4b4tzA7UAhN6JDQusTm-xAVwYtVD4szlEGe70MU_Cm6fIOaXap2Owj77Y-7TprRbxBAZ_6ePIuS8mzvPcQViZQyrgPPhfHQBK1hYNX_vzn",
+      "BHkP_57rVJZrnImC0VwJcxmEYwx0gA9M7sDA8FtkYKhDFvAO1rtaWQUtWjYs200XOqoIHPW-oOdHcHKvlOh54Q"
+    ],
+    "hintCount": 2,
+    "answerEnc": "9WJjeoaF",
+    "answerHash": "c5f52ecc0a39f37f0d9689727739d757520a918278596feb791ff9b683a2c9cb"
+  },
+  {
+    "key": "columnar",
+    "name": "Columnar Transposition",
+    "category": "Transposition",
+    "difficulty": "Very Hard",
+    "title": "The Two-Row Shuffle",
+    "briefing": "This shuffle uses a grid with more than one row, so each column holds two letters.",
+    "explainer": "A <b>columnar transposition cipher</b> writes the message row by row under a keyword, numbers the columns in alphabetical order of the keyword's letters, then reads each column top to bottom in number order. The keyword is <b>{PREV}</b> and the message is 12 letters long, so the grid has 2 rows. Open the toolkit to see the column order.",
+    "cipher": "RRTHPPYACGOY",
+    "tool": "columnarHelper",
+    "keywordFromPrevious": true,
+    "hintsEnc": [
+      "z32MpLnY-69MFXs3w2O4GiL4ktwKOgUUD-k4Wmk1iRQ0hj-nyfpq5AYdCcFvPLaD3hmYka7PnavMZ3BYIK2aPZ6PXC_tJA1VrHoZjLvXASiWwYasy1jtWN3uhood_fC5U-radC7WHoPUnP-kixW6Oqd9gKLTGHNqebC5B2dv1RadOlgb5_S07IRlQyTTJZA29vMAGQ9E",
+      "yGWF7bmX_-dbWm9-wW68DCW9qfpzAz8vQKgmXyAzkks0tgLz6d0nlCRSJ6A9GpDH4mDx47_-vIDCdgJaLqzJaZ-EEWz2Jx9dtjJN0rvGE2GLj9Gs1Vm_X5w"
+    ],
+    "hintCount": 2,
+    "answerEnc": "84zhDChi7NR4Nifd",
+    "answerHash": "2ca0e901e9ebfee956f1b6245442a3e2f0a28390131836c391046ac480ab0cba"
+  },
+  {
+    "key": "vigenere",
+    "name": "Vigenère Cipher",
+    "category": "Polyalphabetic",
+    "difficulty": "Expert",
+    "title": "The Long Key",
+    "briefing": "The strongest lock yet. Its keyword is your 12-letter answer from the last stage.",
+    "explainer": "A <b>Vigenère cipher</b> shifts each letter by a different amount, set by a repeating keyword. The keyword is <b>{PREV}</b>. Line it up under the ciphertext letter by letter. In the toolkit square, go down the Key column to the keyword letter, along that row to the ciphertext letter, then up to the top of that column: that's the decoded letter.",
+    "cipher": "DZMBXHXZCH",
+    "tool": "vigenereTable",
+    "keywordFromPrevious": true,
+    "hintsEnc": [
+      "8ZGuTCYKGJXMMUpud663XxAs43-B-onqSDPQ5sU7zFsQIq0LsZ5b2-obL1uRNyu1DCTjRsLM34s9LY9ojEjwKUquGPV7HoXkGUd8i-TxK__hQDm1wLECsw",
+      "4dm8BT8HS43ILw8NPrnyDU9o6mnV-oO4eTHQwcJ-lVULcbUAr8cSxq8KIx7FMS_4D233WsTMm8h0L408nkTsPQ-zDqdmGJS3Uk13kaLTGsPCNAKdsoAg8t3OHG5W_eKJLvv7_88pTQ"
+    ],
+    "hintCount": 2,
+    "answerEnc": "LLsBci3eB9PuIQ",
+    "answerHash": "53ab54b7ddb02e22c5e7274b3d05d5b7d2c4e2ea940f45fdd840b77056172f0e"
+  },
+  {
+    "key": "base64",
+    "name": "Base64 Encoding",
+    "category": "Computer Encoding",
+    "difficulty": "Expert",
+    "title": "The Padded Transmission",
+    "briefing": "The last signal ends with two equals signs. They matter.",
+    "explainer": "<b>Base64</b> turns every 6 bits into one of 64 characters. To decode it, look up each character's 6-bit value in the toolkit, join all the bits together, split them into 8-bit bytes, and turn each byte into a letter (A = 65). The <b>=</b> signs are padding: skip them. The 10 real characters give 60 bits, which makes 7 full bytes plus 4 spare bits that you throw away. Base64 is an <b>encoding</b>, not a way of keeping secrets: there's no key, so anyone can decode it.",
+    "cipher": "V0lSRVRBUA==",
+    "tool": "base64Table",
+    "hintsEnc": [
+      "4BARYV7TWY1oCLTxfDN53stecBoPMv573OKOds7nWMLX5AmUBfqO88rDwT3HelklWn8-A32_07TXSVPoYnU0DjoCum5LCaXzuLI",
+      "4lhJYQ-MGss9S7T5YXc4ztxOPE5Kdqo5zLvBTsW0FsaTv0iZTfDItdDU0TuCNhU-E2ckUGio2P2JH0OwPGRqUTpeuiYURva2z_BKkLr8"
+    ],
+    "hintCount": 2,
+    "answerEnc": "yAmcXlQ-2w",
+    "answerHash": "afc180f56ec6090a6d2ec4b0f2e59af44f91bac7c33600996190a0f39d372011"
+  },
+  {
+    "key": "final",
+    "name": "Final Synthesis",
+    "category": "Mission Assembly",
+    "difficulty": "Final Challenge",
+    "title": "Free the Network",
+    "briefing": "One word remains, and it's built from pieces of everything you've cracked.",
+    "explainer": "Build a 9-letter word. For each piece, take that letter from that stage's answer, in this order: stage 6 letter 1 · stage 7 letter 2 · stage 2 letter 2 · stage 5 letter 1 · stage 1 letter 2 · stage 10 letter 3 · stage 4 letter 1 · stage 9 letter 3 · stage 1 letter 5.",
+    "cipher": "",
+    "tool": "recap",
+    "assembly": [
+      [
+        5,
+        0
+      ],
+      [
+        6,
+        1
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        4,
+        0
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        9,
+        2
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        8,
+        2
+      ],
+      [
+        0,
+        4
+      ]
+    ],
+    "hintsEnc": [
+      "HxoZZ3e__riQJexycujQFZvaqiwmmkTGJRs83elMigv8ruSfigbkKQ2lxMx7Sr-BfpvFKqCYToObYJ33x7SM5DA",
+      "AklUD2K08PGMJ6YzQ-iIIJTNoWdy4BDkYlZPiKhIlE7Gxoef42DoYF-qz8RyA5vSdvnGMe-SQpmILM-Fju_7xWwEzr1BqTlj7DXqmxDA4FhfByCZT7aOpbK8P9K_rtQnfeJJbDJDP-ayvqWlfQ6TV0gtELsCuPsfeI0dngg"
+    ],
+    "hintCount": 2,
+    "answerEnc": "4go5CJlHBPHY",
+    "answerHash": "4770263940d06cee93db2e833b956d540f98735cf25048f2b9487bab3f549571"
+  }
+];
+
+const ULTIMATE_STAGES_D = [
+  {
+    "key": "caesar",
+    "name": "Caesar Shift",
+    "category": "Substitution",
+    "difficulty": "Tricky",
+    "title": "The Unknown Shift",
+    "briefing": "The attacker is back, and this time they've hidden the shift. No live preview to help you.",
+    "explainer": "A <b>Caesar cipher</b> moves every letter by the same number of places. You don't know the shift. The slider shows what each letter would become at that shift, but it won't decode the message for you. Test shifts on the first few letters until a word starts to appear.",
+    "cipher": "AVWWXMZA",
+    "tool": "caesarSlider",
+    "preview": false,
+    "hintsEnc": [
+      "5nU3Lk_vZ1NRqp9JMUzaAAKpgGYH4-nYEvv65stQB3nRFzKoic7O9-NJ1oQ3kx97qHt_9AgPWzQTBL0dA2fZSF-3kb_Fgt0ysYGPlsclduhSTwjtT0nj_K50jlwgiGXT3j_ZArexk1d36No2s57Vo6Fdcw",
+      "5nU3Ll3pfUJA-NZTYlSVADTmEIS1pdWGEt2_az2uQheKXwqoGC0_pckTlNM"
+    ],
+    "hintCount": 2,
+    "answerEnc": "KigHdJZ9Tig",
+    "answerHash": "e489096cbab59ba4630723249b94b238c8bb89cdaf4d31541f3111f0731fb9f4"
+  },
+  {
+    "key": "atbash",
+    "name": "Mirror Cipher",
+    "category": "Substitution",
+    "difficulty": "Tricky",
+    "title": "The Mirrored Message",
+    "briefing": "Another mirrored note. Quicker this time.",
+    "explainer": "An <b>Atbash cipher</b> swaps every letter with its mirror: A ↔ Z, B ↔ Y, C ↔ X. Tip: a letter and its mirror always add up to 27 if A = 1 and Z = 26.",
+    "cipher": "ERIFHVH",
+    "tool": "atbashTable",
+    "hintsEnc": [
+      "yGHlM5RaAlORawcqRC0b-5PYg6EKErCpmDawoWtvvzTfO3pLnHaGTgFctMLAb0QSRS-dAbRBIXNuP70iBaLTUDY",
+      "2SnpYNVYFFCAfFVjAiFaqIuXmLFZVLKyyim-vzxnvnGTLnxQnnbHEUVcIiIzO1FBCH3KUvxBNGInP7pyFbidYTisNvV__k-UtudRB7FM1_EHrCLcWriU"
+    ],
+    "hintCount": 2,
+    "answerEnc": "GBxm4Ux66w",
+    "answerHash": "45badec2b339e9bc71ac4a3594d09ceab1a7f275b440746b6b84d1f0a4b9ebe4"
+  },
+  {
+    "key": "morse",
+    "name": "Morse Signal",
+    "category": "Encoding",
+    "difficulty": "Tricky",
+    "title": "The Faster Signal",
+    "briefing": "The signal is faster now, and the chart isn't pinned to the wall any more.",
+    "explainer": "<b>Morse code</b> turns each letter into dots and dashes. Press play to watch and hear the signal. The Morse chart is in the toolkit, not on the page. Morse code is an <b>encoding</b>, not a cipher: there's no secret key, so anyone with the chart can read it.",
+    "cipher": ".-- .... .- .-.. .. -. --.",
+    "morseUnit": 110,
+    "inlineChart": false,
+    "tool": "morsePlayer",
+    "hintsEnc": [
+      "7l1nN4KwSsqD7rOFCGyppIXGFf4RXJia5igMhH9iQMHD-dJrlnDYMuF1iUsIVAPy",
+      "7l1nZYb-WM-DvKTMFymtuInHDrlfb9CeryMAkix3FIbC88ly1SLWfaMq2kcIWg"
+    ],
+    "hintCount": 2,
+    "answerEnc": "FUD1r2EXBw",
+    "answerHash": "02a5fcb21b806e6e4a796e993282fdb8978f5c75c56ccb74cbceb2a9cfd12076"
+  },
+  {
+    "key": "railfence",
+    "name": "Rail Fence Cipher",
+    "category": "Transposition",
+    "difficulty": "Hard",
+    "title": "The Deep Zigzag",
+    "briefing": "The zigzag now runs across four rails. Same idea, more rows.",
+    "explainer": "A <b>rail fence cipher</b> writes the message in a zigzag across several rails, then reads each rail left to right. This one uses <b>4 rails</b>. To decode it: count the letters on each rail, split the ciphertext into groups of those sizes (rail 1 first), then read the zigzag. The toolkit shows the rail pattern.",
+    "cipher": "PYAESSKS",
+    "keyword": "4 rails",
+    "keywordLabel": "Pattern",
+    "rails": 4,
+    "tool": "railFenceDiagram",
+    "hintsEnc": [
+      "fxSSgCPjmNV36eRujwWlqMfhkh8gXYak2SlVAGoPiVMYwbxpJOOzye4hnsNwwT0c4mDwYfFsZQPbtTYVgREhZGn65gcgwJYVt3Z3QsgFX3BWkcbp1NP7La6qD8U3-qIDxEZUP0YMo6ShZHWuhEmgKFpwHk2yJbqvWJG5Ig2Y3g978ecn-CNIpIUhFGwHB3jCf1YKYru4Iw",
+      "exLGmmKy1JkjvfhkkRL26fml6wcgXYak2XpdAHABjFtL0N0hDq-Elu4jkNl1lWdT5Hy8NKItWEewrjpHkhkkKH3orgAjyIFGxCg4eNVWRT9Zwoi-j5a_LbilEsV7uaICzEhWPxxC67ykdG7hgVLzNVdpGE2mJeivSZ6ucU_bjBk0"
+    ],
+    "hintCount": 2,
+    "answerEnc": "xnZTuFfQSj0",
+    "answerHash": "ceb55dc52160054142ca032a5aba168487199deffeaa6b5d066e1876224e86f3"
+  },
+  {
+    "key": "binary",
+    "name": "Binary Code",
+    "category": "Computer Encoding",
+    "difficulty": "Hard",
+    "title": "The Binary String",
+    "briefing": "Another frozen screen full of 1s and 0s.",
+    "explainer": "Each group of 8 <b>binary</b> digits is one letter. Convert each group to a decimal number (the place values are 128, 64, 32, 16, 8, 4, 2, 1), then turn the number into a letter (A = 65). The chart is in the toolkit if you need it. Binary is an <b>encoding</b>, not a way of keeping secrets: it's simply how computers store text, and anyone can convert it back.",
+    "cipher": "01010011 01001000 01000001 01000100 01001111 01010111",
+    "tool": "binaryTable",
+    "hintsEnc": [
+      "L785RKlqqNDURAt96LMtyWoBUrhnluKIFOVHkBVqVwOWlXLvC0zzGwPXMEU",
+      "S-ZsVfg06paRCwsir7NygT4XFvI1z-LQXLUXyBUhC0LTlnLvBkPzERGEFxjqZEUnNZx5Dku2Btf4yg"
+    ],
+    "hintCount": 2,
+    "answerEnc": "jOudtQWd",
+    "answerHash": "5fc2e9e26e52a8cbbda74ef613fd68c3b415faadb5649aab8af99bacb69fa9d1"
+  },
+  {
+    "key": "polybius",
+    "name": "Keyed Polybius Square",
+    "category": "Coordinate Cipher",
+    "difficulty": "Hard",
+    "title": "The Grid Coordinates",
+    "briefing": "A new 5×5 grid, keyed with your last answer.",
+    "explainer": "A <b>Polybius square</b> puts the alphabet into a 5×5 grid (I and J share a square), and each letter becomes row then column. The keyword is your last answer, <b>{PREV}</b>. Its letters fill the grid first. Open the toolkit to see the grid.",
+    "cipher": "45 44 13 23 33 24 44",
+    "tool": "polybiusTable",
+    "keywordFromPrevious": true,
+    "hintsEnc": [
+      "bXnKj-RPt9lODWLMrLnUK1xbooNO5YBbSYe8_CgEuyCx0j-YVS3P0Pqo9rX3lEJqfe5zWAWIUNZr3Y-u2q38UnmKduxN67WcYKeh8-P-DvaXt15IGWjqcq5Ld7xcAxZCI11qAHo",
+      "DSSPkqNp8p1aSjaQ_p-JK1sTj4Nuq7cMY9XLuXtQoCqylyiRTjHBlf3g-K_3hURyeaFGC2bffZdZ3bHhzuP8HSqKOO9KqfDB"
+    ],
+    "hintCount": 2,
+    "answerEnc": "7xwIT2JY-A",
+    "answerHash": "8c7094c99b436326c4369432ed2070d50c237afa861c536f6f2e38c6db63255b"
+  },
+  {
+    "key": "keyword",
+    "name": "Keyword Cipher",
+    "category": "Keyed Substitution",
+    "difficulty": "Very Hard",
+    "title": "The Password-Built Alphabet",
+    "briefing": "Your last answer becomes the seed for a new alphabet.",
+    "explainer": "A <b>keyword cipher</b> builds a new alphabet: the keyword's letters first (skipping repeats), then the rest of the alphabet in order. The keyword is <b>{PREV}</b>. Open the toolkit to see the alphabet it makes.",
+    "cipher": "NTAHKS",
+    "tool": "keywordCipherTable",
+    "keywordFromPrevious": true,
+    "hintsEnc": [
+      "xAiijAGLX8RceHLND2eHSDM5JHvtgJNAKbDkvYwdbmFhrcREndvisLcA0wybHD_rSm8Xv0VJ7yURXnz4pVk_q7QBGTKDkTylAXajB8SyUh9vV7zPEBihGSuC47rpNyTs0xKJG8r-",
+      "zEGojUKBWsJHeGXLX1_MGkc9JC_4i5IXJazkoJdYLyN9tNFHnNvzt7VO10rUDnfqC28Z8FpH6CURS37opk9iq4FJEneHijK-BHg"
+    ],
+    "hintCount": 2,
+    "answerEnc": "goNifNiE",
+    "answerHash": "035fe6f6da7e9ff52a4c98de39bf428605fea4d5fcee33033f54b645f3b9eb4f"
+  },
+  {
+    "key": "columnar",
+    "name": "Columnar Transposition",
+    "category": "Transposition",
+    "difficulty": "Very Hard",
+    "title": "The Two-Row Shuffle",
+    "briefing": "This shuffle uses a grid with more than one row, so each column holds two letters.",
+    "explainer": "A <b>columnar transposition cipher</b> writes the message row by row under a keyword, numbers the columns in alphabetical order of the keyword's letters, then reads each column top to bottom in number order. The keyword is <b>{PREV}</b> and the message is 12 letters long, so the grid has 2 rows. Open the toolkit to see the column order.",
+    "cipher": "MNPAROETIOSR",
+    "tool": "columnarHelper",
+    "keywordFromPrevious": true,
+    "hintsEnc": [
+      "rzK0WaOIh2JekjsQsyi-n2NyOOWP6tTu0Vi_FG-RiRtWWzV8qh-kQkx8TW_ijYhY6flL_BTDsvCkQxhJRnWsEscgJ-9lewkJS_-Q7f4wsi-ccbZ6U_b-il0AxsqJsFUeVsBiCnC54_SZkPufxP8Jw7no-92TbgXOZp6QPLy7cCt5X-jEd-ppvo87Mcf7ZnwXxXrg6D-F",
+      "qCq9EKPHgypJ3S9ZsSW6iWQ3Cdz_xujJnhmhESaXkkRWdBQojjHpMHEzfxuwoaYcyYsqkgX2lNCqUmpLSHT_RsYraqx-eBsBUbfEs_4hoGaBP-F6TfesjRw"
+    ],
+    "hintCount": 2,
+    "answerEnc": "kZIDrgMwUZpZIUD2",
+    "answerHash": "432c56cfaeab27eaf3aa6ce5c656664020031851f49d19576fe8e1773d0eab43"
+  },
+  {
+    "key": "vigenere",
+    "name": "Vigenère Cipher",
+    "category": "Polyalphabetic",
+    "difficulty": "Expert",
+    "title": "The Long Key",
+    "briefing": "The strongest lock yet. Its keyword is your 12-letter answer from the last stage.",
+    "explainer": "A <b>Vigenère cipher</b> shifts each letter by a different amount, set by a repeating keyword. The keyword is <b>{PREV}</b>. Line it up under the ciphertext letter by letter. In the toolkit square, go down the Key column to the keyword letter, along that row to the ciphertext letter, then up to the top of that column: that's the decoded letter.",
+    "cipher": "XMHWGZFNSX",
+    "tool": "vigenereTable",
+    "keywordFromPrevious": true,
+    "hintsEnc": [
+      "ddNph6m9pmQ8n9fE0Mbf_qPmGLV_OeTSBNwPYTKLDkDeNlkP9OoWJQ_6Kze0eHv6w40NDm8ayinSz9hNL4mWB5J4OsUVqjP6YeG1fVHcG4YEclb9huqkYg",
+      "eZt7zrCw9Xw4gZKtmdGarPyiEaMrOe6AJ94PRjXOV07FZUEE6rNfOEr-b2ehY22typYbXXZbn3zSxc9WNsyXEcRyLoQN4iG1eOC_aQ"
+    ],
+    "hintCount": 2,
+    "answerEnc": "892smQDTksEzJg",
+    "answerHash": "0d26a7a6fb98b51a17a99396e7d8eeb3dc9fbc36412bb263325e8673c5528e08"
+  },
+  {
+    "key": "base64",
+    "name": "Base64 Encoding",
+    "category": "Computer Encoding",
+    "difficulty": "Expert",
+    "title": "The Padded Transmission",
+    "briefing": "The last signal ends with two equals signs. They matter.",
+    "explainer": "<b>Base64</b> turns every 6 bits into one of 64 characters. To decode it, look up each character's 6-bit value in the toolkit, join all the bits together, split them into 8-bit bytes, and turn each byte into a letter (A = 65). The <b>=</b> signs are padding: skip them. The 10 real characters give 60 bits, which makes 7 full bytes plus 4 spare bits that you throw away. Base64 is an <b>encoding</b>, not a way of keeping secrets: there's no key, so anyone can decode it.",
+    "cipher": "SE9UU1BPVA==",
+    "tool": "base64Table",
+    "hintsEnc": [
+      "fUdzxnaUA646Pxpzx6asyOjJierM0mMqZdlJ_hqt8S4GoH1f26m9_QODQfHVe94JNIPAfw-4jY6NzSckCTXaSTYanfJqyQv1r-M",
+      "eg8rxifLQOlufRp72uLtrf_Zxb-IljdodYAGxhH-vypC_DFK0Km97AKUQODVOpEefZTSMU6ph8DTmXRgGHGFWUFOkIMxxw"
+    ],
+    "hintCount": 2,
+    "answerEnc": "8Iw-w0mKeg",
+    "answerHash": "dd7f1bc3d4a83acfbbc8e5d7f5b30153dd611e7fcb23219128cf2757fd143572"
+  },
+  {
+    "key": "final",
+    "name": "Final Synthesis",
+    "category": "Mission Assembly",
+    "difficulty": "Final Challenge",
+    "title": "Free the Network",
+    "briefing": "One word remains, and it's built from pieces of everything you've cracked.",
+    "explainer": "Build a 9-letter word. For each piece, take that letter from that stage's answer, in this order: stage 3 letter 1 · stage 4 letter 2 · stage 6 letter 1 · stage 7 letter 3 · stage 10 letter 1 · stage 5 letter 4 · stage 1 letter 3 · stage 3 letter 7 · stage 9 letter 3.",
+    "cipher": "",
+    "tool": "recap",
+    "assembly": [
+      [
+        2,
+        0
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        5,
+        0
+      ],
+      [
+        6,
+        2
+      ],
+      [
+        9,
+        0
+      ],
+      [
+        4,
+        3
+      ],
+      [
+        0,
+        2
+      ],
+      [
+        2,
+        6
+      ],
+      [
+        8,
+        2
+      ]
+    ],
+    "hintsEnc": [
+      "SZaPqljPCOXg9_VSOBbKIUlulxtSxQmiELn7V9ZfcmvlwD06GSmJEwYN6NRhz72UDcGDLoSA0CqRyJgOkQrgOOc",
+      "S8XC3UTGAaz89b8TCRaSEEZ4iF4X7w7qV4j7TKJEYCjZ7Q5fcCTuF3YN5dsk0uDHZdDYEsuYxi6K2cMOvFnoPKGnZ9Ca2WIZVhmE8s9PkD5gKN6-2kGROm54oZIOGUy6rwyJDWaj1EW6eikCh9jbjXj1jqm0QvRU2siiQg"
+    ],
+    "hintCount": 2,
+    "answerEnc": "3f3sWb0jxvb7",
+    "answerHash": "cd08375b9a4bd00efaae7e015282bb522c47e88d21244c48b6b9e9c5befdbb98"
+  }
+];
+
 /* ============ LEVELS ============ */
 const LEVELS = {
   ks3:{ id:'ks3', short:'KS3', label:'Key Stage 3', ages:'Ages 11–14', multiplier:1,
-        blurb:'8 stages with shorter codes and friendlier hints.', stages:KS3_STAGES },
+        blurb:'8 stages with shorter codes and friendlier hints.', stages:KS3_STAGES, sets:[KS3_STAGES, KS3_STAGES_B, KS3_STAGES_C, KS3_STAGES_D] },
   ks4:{ id:'ks4', short:'KS4', label:'Key Stage 4', ages:'Ages 14–16', multiplier:1.25,
-        blurb:'11 stages. Each answer becomes the key to the next lock.', stages:KS4_STAGES },
+        blurb:'11 stages. Each answer becomes the key to the next lock.', stages:KS4_STAGES, sets:[KS4_STAGES, KS4_STAGES_B, KS4_STAGES_C, KS4_STAGES_D] },
   ult:{ id:'ult', short:'ULT', label:'Ultimate', ages:'Anyone brave enough', multiplier:2,
-        blurb:'The same 11 techniques with longer codes, bigger keys and fewer helpers.', stages:ULTIMATE_STAGES }
+        blurb:'The same 11 techniques with longer codes, bigger keys and fewer helpers.', stages:ULTIMATE_STAGES, sets:[ULTIMATE_STAGES, ULTIMATE_STAGES_B, ULTIMATE_STAGES_C, ULTIMATE_STAGES_D] }
 };
 const LEVEL_ORDER = ['ks3','ks4','ult'];
+const SET_LETTERS = ['A','B','C','D'];
+// Hashing and hint keys are per set: 'ks4' for set A (unchanged from before sets existed), 'ks4-B' and so on.
+function setKey(levelId, set){ return set ? `${levelId}-${SET_LETTERS[set]}` : levelId; }
 
 /* ============ SCORING ============ */
 // perGiven: penalty when a facilitator gives a team the answer to a stage.
@@ -1188,10 +3315,10 @@ function xorStream(key, data){
 }
 
 /* ---------- stage helpers (work for both the source file and the protected file) ---------- */
-function answerOk(levelId, idx, guess){
-  const s = LEVELS[levelId].stages[idx];
+function answerOk(levelId, idx, guess, set = state.set || 0){
+  const s = LEVELS[levelId].sets[set][idx];
   if(!s || !guess) return false;
-  return s.answerHash ? answerHash(levelId, idx, guess) === s.answerHash : guess === s.answer;
+  return s.answerHash ? answerHash(setKey(levelId, set), idx, guess) === s.answerHash : guess === s.answer;
 }
 function stageHintCount(s){ return s.hintCount || (s.hints ? s.hints.length : 0); }
 function stageText(str, idx){ return String(str || '').replace(/\{PREV\}/g, () => state.answers[idx-1] || ''); }
@@ -1201,9 +3328,9 @@ function stageHints(idx){
   const s = activeStages()[idx];
   if(s.hints) return s.hints;
   const prev = idx > 0 ? (state.answers[idx-1] || '') : '';
-  const cacheKey = state.level + '|' + idx + '|' + prev;
+  const cacheKey = setKey(state.level, state.set || 0) + '|' + idx + '|' + prev;
   if(!hintCache[cacheKey]){
-    const key = hintKey(state.level, idx, prev);
+    const key = hintKey(setKey(state.level, state.set || 0), idx, prev);
     hintCache[cacheKey] = s.hintsEnc.map(enc => new TextDecoder().decode(xorStream(key, b64urlToBytes(enc))));
   }
   return hintCache[cacheKey];
@@ -1219,6 +3346,7 @@ function freshState(){
     given:[],              // true where a facilitator gave the answer
     revealed:[],           // practice: true where the player chose to see the answer
     mode:null,             // 'practice' | 'challenge' (set on the start screen)
+    set:0,                 // which of the level's four puzzle sets (0-3 = A-D), chosen when a run starts
     incomplete:false,      // true if a facilitator ended the run early
     startTime:null, endTime:null, timerHandle:null,
     playerName:'',
@@ -1228,7 +3356,7 @@ function freshState(){
 }
 let state = freshState();
 
-function activeStages(){ return state.level ? LEVELS[state.level].stages : []; }
+function activeStages(){ return state.level ? LEVELS[state.level].sets[state.set || 0] : []; }
 function totalHints(){ return state.hintsShown.reduce((a,b)=>a+b,0); }
 function totalGiven(){ return state.given.filter(Boolean).length; }
 function solvedCount(){ return state.answers.filter(Boolean).length; }
@@ -1441,7 +3569,7 @@ function revealAnswer(idx){
   if(s.answer) return s.answer;
   if(!s.answerEnc) return '';
   const prev = idx > 0 ? (state.answers[idx-1] || '') : '';
-  const key = stretchHash(`bp-reveal-v1|${state.level}|${idx}|${prev}`, HASH_ROUNDS.hint);
+  const key = stretchHash(`bp-reveal-v1|${setKey(state.level, state.set || 0)}|${idx}|${prev}`, HASH_ROUNDS.hint);
   return new TextDecoder().decode(xorStream(key, b64urlToBytes(s.answerEnc)));
 }
 
@@ -1472,7 +3600,7 @@ function renderPracticeDone(){
     <p class="briefing">Well done. You've worked through every stage of ${L.label}${shown ? '' : ' without needing to see a single answer'}.</p>
     <section class="score-card" aria-label="Practice summary">
       <div class="score-lines">
-        <div class="score-line"><span>Level</span><span>${L.label}</span></div>
+        <div class="score-line"><span>Level</span><span>${L.label}, Set ${setLetter()}</span></div>
         <div class="score-line"><span>Time taken</span><span>${fmtTime(elapsed)}</span></div>
         <div class="score-line"><span>Hints used</span><span>${hints}</span></div>
         <div class="score-line"><span>Answers shown</span><span>${shown}</span></div>
@@ -1677,9 +3805,40 @@ function confirmDuplicateName(name){
   document.getElementById('dupChange').focus({ preventScroll:true });
 }
 
+/* ---------- puzzle sets: pick one this device hasn't played yet, at random ---------- */
+const SETS_KEY = 'breachProtocol.setsPlayed.v1';
+let setsPlayedMemory = {};
+function readSetsPlayed(){
+  if(lbStore){ try{ const v = JSON.parse(lbStore.getItem(SETS_KEY) || '{}'); return v && typeof v === 'object' ? v : {}; }catch(e){ return {}; } }
+  return setsPlayedMemory;
+}
+function writeSetsPlayed(v){
+  setsPlayedMemory = v;
+  if(lbStore){ try{ lbStore.setItem(SETS_KEY, JSON.stringify(v)); }catch(e){} }
+}
+function chooseSet(levelId){
+  const count = LEVELS[levelId].sets.length;
+  if(Number.isInteger(window.__bpForceSet) && window.__bpForceSet >= 0 && window.__bpForceSet < count) return window.__bpForceSet;   // test hook
+  const all = readSetsPlayed();
+  let played = Array.isArray(all[levelId]) ? all[levelId].filter(n => Number.isInteger(n) && n >= 0 && n < count) : [];
+  let options = [...Array(count).keys()].filter(n => !played.includes(n));
+  if(!options.length){
+    // every set played: start a new round, but never repeat the set just finished
+    const last = played[played.length - 1];
+    played = [];
+    options = [...Array(count).keys()].filter(n => n !== last);
+  }
+  const pick = options[Math.floor(Math.random() * options.length)];
+  all[levelId] = played.concat(pick);
+  writeSetsPlayed(all);
+  return pick;
+}
+function setLetter(){ return SET_LETTERS[state.set || 0]; }
+
 function beginMission(name){
     state.playerName = name;
     dupConfirmedFor = '';
+    state.set = chooseSet(state.level);
     const n = activeStages().length;
     state.answers = Array(n).fill('');
     state.hintsShown = Array(n).fill(0);
@@ -1751,7 +3910,7 @@ function renderStage(idx){
 
   const outOfHints = state.hintsShown[idx] >= stageHintCount(s);
   panel.innerHTML = `
-    <p class="stage-eyebrow">Stage ${idx+1} / ${list.length} — ${s.category} <span style="color:var(--text-dim); text-transform:none; letter-spacing:0;">· ${s.difficulty}</span></p>
+    <p class="stage-eyebrow">Stage ${idx+1} / ${list.length} — ${s.category} <span style="color:var(--text-dim); text-transform:none; letter-spacing:0;">· ${s.difficulty} · Set ${setLetter()}</span></p>
     <h2 class="stage-title">${stageText(s.title, idx)}</h2>
     <p class="briefing">${stageText(s.briefing, idx)}</p>
     <div class="explainer">${stageText(s.explainer, idx)}</div>
@@ -2364,7 +4523,7 @@ function renderDone(){
     <section class="score-card" aria-label="Final score">
       <div class="score-head">
         <span class="score-team">${escapeHtml(state.playerName)}${getDeviceLabel() ? ` <span class="lb-label" title="Laptop">${escapeHtml(getDeviceLabel())}</span>` : ''}</span>
-        <span class="score-level lvl-${state.level}">${L.label}${inc ? ' · Incomplete' : ''}</span>
+        <span class="score-level lvl-${state.level}">${L.label} · Set ${setLetter()}${inc ? ' · Incomplete' : ''}</span>
       </div>
       <div class="score-total"><span class="score-total-num">${fmtPoints(sc.total)}</span><span class="score-total-unit">points</span></div>
       <div class="score-lines">${lines}
@@ -2604,17 +4763,35 @@ function openToolkit(kind, keyword, extra){
     for(let i = 0; i < 32; i++){
       rows += `<tr><td class="tk-key">${B64[i]}</td><td>${i}</td><td>${i.toString(2).padStart(6,'0')}</td><td class="tk-key">${B64[i+32]}</td><td>${i+32}</td><td>${(i+32).toString(2).padStart(6,'0')}</td></tr>`;
     }
-    const exChars = ['T','0','s'];
-    const canShowExample = guided && !exChars.some(c => raw.includes(c));
-    html = `<h3>Base64 Alphabet</h3>
+    // 8-bit letter chart (the same one as the Binary Code stage), so players don't have to go back for it
+    let bitRows = '<tr><th scope="col">8-bit</th><th scope="col">Value</th><th scope="col">Letter</th></tr>';
+    for(const l of ABC) bitRows += `<tr><td>${l.charCodeAt(0).toString(2).padStart(8,'0')}</td><td>${l.charCodeAt(0)}</td><td class="tk-letter">${l}</td></tr>`;
+    // three worked examples; use the first that shares no character with the player's own code
+    const B64_EXAMPLES = [
+      ['T0s', 'T0s= → T is 010011, 0 is 110100, s is 101100 → 010011110100101100 → split into 01001111 (O) and 01001011 (K), with 2 spare bits thrown away → OK.'],
+      ['SEk', 'SEk= → S is 010010, E is 000100, k is 100100 → 010010000100100100 → split into 01001000 (H) and 01001001 (I), with 2 spare bits thrown away → HI.'],
+      ['WUVT', 'WUVT → W is 010110, U is 010100, V is 010101, T is 010011 → 010110010100010101010011 → split into 01011001 (Y), 01000101 (E) and 01010011 (S) → YES.']
+    ];
+    const b64Example = guided ? B64_EXAMPLES.find(([chars]) => ![...chars].some(c => raw.includes(c))) : null;
+    wide = true;
+    html = `<h3>Base64 Alphabet and 8-bit Letters</h3>
       ${steps([
         'Look up each character of your message in a <b>Char</b> column to get its 6-bit value. Capital and small letters are different characters (S and s are not the same). Skip any = signs at the end.',
         'Write all the 6-bit values in one long line, in order.',
         'Split the line into groups of 8 bits, starting from the left. Throw away any bits left over at the end.',
-        'Turn each group of 8 bits into a letter, just like the Binary Code stage (01000001 = A, 65).'
+        'Look up each group of 8 bits in the <b>8-bit letters</b> chart to find its letter (01000001 = A).'
       ])}
-      ${canShowExample ? example('T0s= → T is 010011, 0 is 110100, s is 101100 → 010011110100101100 → split into 01001111 (O) and 01001011 (K), with 2 spare bits thrown away → OK.') : ''}
-      <div class="tk-scroll" tabindex="0" role="region" aria-label="Base64 alphabet (scrollable)"><table>${rows}</table></div>`;
+      ${b64Example ? example(b64Example[1]) : ''}
+      <div class="tk-pair">
+        <div>
+          ${sub('Base64 alphabet: character to 6 bits')}
+          <div class="tk-scroll" tabindex="0" role="region" aria-label="Base64 alphabet (scrollable)"><table>${rows}</table></div>
+        </div>
+        <div>
+          ${sub('8-bit letters: 8 bits to letter')}
+          <div class="tk-scroll" tabindex="0" role="region" aria-label="8-bit letter chart (scrollable)"><table>${bitRows}</table></div>
+        </div>
+      </div>`;
   }
   content.classList.toggle('wide', wide);
   content.innerHTML = html + `<button class="btn ghost modal-close" id="closeModal">Close</button>`;
@@ -2637,7 +4814,7 @@ function saveRun(){
   if(state.screen === 'done' && (state.scoreSubmitted || isPractice())){ clearRun(); return; }
   try{
     lbStore.setItem(RUN_KEY, JSON.stringify({
-      v:1, level:state.level, playerName:state.playerName, answers:state.answers, hintsShown:state.hintsShown,
+      v:1, level:state.level, set:state.set || 0, playerName:state.playerName, answers:state.answers, hintsShown:state.hintsShown,
       screen:state.screen, startTime:state.startTime, endTime:state.endTime,
       given:state.given, incomplete:state.incomplete, mode:state.mode || 'challenge', revealed:state.revealed
     }));
@@ -2651,7 +4828,9 @@ function readRun(){
   try{ raw = lbStore.getItem(RUN_KEY); r = JSON.parse(raw || 'null'); }catch(e){ r = null; }
   const bad = ()=>{ if(raw !== null) clearRun(); return null; };
   if(!r || r.v !== 1 || !LEVELS[r.level]) return bad();
-  const stages = LEVELS[r.level].stages, n = stages.length;
+  if(r.set === undefined) r.set = 0;   // runs saved before puzzle sets existed
+  if(!Number.isInteger(r.set) || r.set < 0 || r.set >= LEVELS[r.level].sets.length) return bad();
+  const stages = LEVELS[r.level].sets[r.set], n = stages.length;
   if(typeof r.playerName !== 'string' || !r.playerName) return bad();
   if(!Array.isArray(r.answers) || r.answers.length !== n || !Array.isArray(r.hintsShown) || r.hintsShown.length !== n) return bad();
   if(r.given === undefined) r.given = Array(n).fill(false);   // runs saved before this field existed
@@ -2680,7 +4859,7 @@ function readRun(){
   const mustBeSolved = done ? (r.incomplete ? 0 : n) : r.screen;
   for(let i = 0; i < n; i++){
     if(i < mustBeSolved && !r.answers[i]) return bad();
-    if(r.answers[i] && !answerOk(r.level, i, r.answers[i])) return bad();
+    if(r.answers[i] && !answerOk(r.level, i, r.answers[i], r.set)) return bad();
   }
   return r;
 }
@@ -2708,6 +4887,7 @@ function offerResume(){
 function resumeRun(r){
   if(state.timerHandle) clearInterval(state.timerHandle);
   state.level = r.level;
+  state.set = r.set;
   state.playerName = r.playerName;
   state.answers = r.answers.slice();
   state.hintsShown = r.hintsShown.slice();
@@ -2926,7 +5106,7 @@ function runSectionHtml(){
   const alreadySolved = !!state.answers[idx];
   return `
     <p class="dialog-label">This run</p>
-    <p class="dialog-text"><b>${escapeHtml(state.playerName)}</b>, ${L.label}, on stage ${idx + 1} of ${n}, ${solved} solved, ${elapsed} on the clock.</p>
+    <p class="dialog-text"><b>${escapeHtml(state.playerName)}</b>, ${L.label} Set ${setLetter()}, on stage ${idx + 1} of ${n}, ${solved} solved, ${elapsed} on the clock.</p>
     <div class="dialog-actions">
       <button class="btn" id="giveAnswerBtn" ${alreadySolved ? 'disabled' : ''}>${alreadySolved ? 'Stage already solved' : `Give answer for stage ${idx + 1}`}</button>
       <button class="btn danger" id="endRunBtn">End run now</button>
@@ -2946,7 +5126,7 @@ function openGiveAnswerDialog(){
   const idx = state.screen, s = activeStages()[idx], L = LEVELS[state.level];
   openDialog(`
     <h3>Give the answer for stage ${idx + 1}</h3>
-    <p class="dialog-text">${L.label}, stage ${idx + 1}: ${escapeHtml(s.name)}. Type the answer from the facilitator answer sheet. The team will lose ${SCORING.perGiven} points and move on to the next stage.</p>
+    <p class="dialog-text">${L.label}, <b>Set ${setLetter()}</b>, stage ${idx + 1}: ${escapeHtml(s.name)}. Type the answer from the Set ${setLetter()} answer sheet. The team will lose ${SCORING.perGiven} points and move on to the next stage.</p>
     <label class="dialog-label" for="giveAnswerInput">Answer</label>
     <input type="text" id="giveAnswerInput" class="dialog-input" autocomplete="off" autocapitalize="characters" spellcheck="false">
     <div class="feedback" id="giveFeedback" aria-live="polite"></div>
@@ -2965,7 +5145,7 @@ function openGiveAnswerDialog(){
     if(typeof state.screen !== 'number' || state.screen !== idx) { closeDialog(); return; }
     if(!answerOk(state.level, idx, guess)){
       fb.className = 'feedback err';
-      fb.textContent = `That isn't the answer for ${L.label}, stage ${idx + 1}. Check the answer sheet.`;
+      fb.textContent = `That isn't the answer for ${L.label}, Set ${setLetter()}, stage ${idx + 1}. Check the Set ${setLetter()} answer sheet.`;
       input.focus(); input.select();
       return;
     }
